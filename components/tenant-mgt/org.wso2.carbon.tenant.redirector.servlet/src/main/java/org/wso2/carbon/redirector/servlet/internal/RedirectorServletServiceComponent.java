@@ -1,30 +1,11 @@
-/*
-*  Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-*  WSO2 Inc. licenses this file to you under the Apache License,
-*  Version 2.0 (the "License"); you may not use this file except
-*  in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
 package org.wso2.carbon.redirector.servlet.internal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.framework.BundleContext;
+import org.wso2.carbon.redirector.servlet.util.Util;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.activation.service.ActivationService;
-import org.wso2.carbon.redirector.servlet.util.Util;
 
 /**
  * @scr.component name="org.wso2.carbon.redirector.servlet"
@@ -35,12 +16,9 @@ import org.wso2.carbon.redirector.servlet.util.Util;
  * @scr.reference name="user.realmservice.default" interface="org.wso2.carbon.user.core.service.RealmService"
  * cardinality="1..1" policy="dynamic" bind="setRealmService"
  * unbind="unsetRealmService"
- * @scr.reference name="activation.service" interface="org.wso2.carbon.activation.service.ActivationService"
- * cardinality="0..1" policy="dynamic" bind="setActivationService"
- * unbind="unsetActivationService"
  */
 public class RedirectorServletServiceComponent {
-     private static Log log = LogFactory.getLog(RedirectorServletServiceComponent.class);
+    private static Log log = LogFactory.getLog(RedirectorServletServiceComponent.class);
 
     protected void activate(ComponentContext context) {
         try {
@@ -70,11 +48,4 @@ public class RedirectorServletServiceComponent {
         Util.setRealmService(null);
     }
 
-    protected void setActivationService(ActivationService activationService) {
-        Util.setActivationService(activationService);
-    }
-
-    protected void unsetActivationService(ActivationService activationService) {
-        Util.setActivationService(null);
-    }
 }
