@@ -87,5 +87,9 @@
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.stratos.common</artifactId>
+        </dependency>
     </dependencies>
 </project>
