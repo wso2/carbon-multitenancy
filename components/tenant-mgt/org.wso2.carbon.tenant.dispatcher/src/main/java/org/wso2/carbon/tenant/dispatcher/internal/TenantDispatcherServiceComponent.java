@@ -35,6 +35,9 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.core.multitenancy.MultitenantDispatcher;
 import org.wso2.carbon.core.multitenancy.MultitenantMessageReceiver;
+import org.wso2.carbon.tenant.dispatcher.TenantActiveCheckDispatcher;
+import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -49,16 +52,21 @@ import java.util.List;
  *                cardinality="1..1" policy="dynamic"
  *                bind="setConfigurationContext"
  *                unbind="unsetConfigurationContext"
+ * @scr.reference name="user.realmservice.default"
+ *                interface="org.wso2.carbon.user.core.service.RealmService"
+ *                cardinality="1..1" policy="dynamic" bind="setRealmService"
+ *                unbind="unsetRealmService"
  */
 public class TenantDispatcherServiceComponent {
     private Log log = LogFactory.getLog(TenantDispatcherServiceComponent.class);
 
     private ConfigurationContext configCtx;
-
+    private static RealmService realmService;
     protected void activate(ComponentContext ctxt) {
         try {
             deployMultitenantService(configCtx.getAxisConfiguration());
             addDispatchers(configCtx.getAxisConfiguration());
+            TenantActiveCheckDispatcher.startCacheCleaner();
         } catch (Throwable e) {
             log.error("Failed to activate the TenantDispatcherServiceComponent", e);
         }
@@ -76,9 +84,9 @@ public class TenantDispatcherServiceComponent {
         multitenantSvcGroup.addParameter(CarbonConstants.HIDDEN_SERVICE_PARAM_NAME, "true");
         multitenantSvcGroup.addService(service);
         axisCfg.addServiceGroup(multitenantSvcGroup);
-		if(log.isDebugEnabled()){
-			log.debug("Deployed " + MultitenantConstants.MULTITENANT_DISPATCHER_SERVICE);
-		}
+        if(log.isDebugEnabled()){
+            log.debug("Deployed " + MultitenantConstants.MULTITENANT_DISPATCHER_SERVICE);
+        }
     }
 
     /**
@@ -122,12 +130,13 @@ public class TenantDispatcherServiceComponent {
                 }
             }
         }
-		if (log.isDebugEnabled()) {
-			log.info("Added multitenant dispatchers");
-		}
+        if (log.isDebugEnabled()) {
+            log.info("Added multitenant dispatchers");
+        }
     }
 
     protected void deactivate(ComponentContext ctxt) {
+        TenantActiveCheckDispatcher.stopCacheCleaner();
         if (log.isDebugEnabled()) {
             log.debug("Deactivated TenantDispatcherServiceComponent");
         }
@@ -139,5 +148,21 @@ public class TenantDispatcherServiceComponent {
 
     protected void unsetConfigurationContext(ConfigurationContextService configCtx) {
         this.configCtx = null;
+    }
+
+    protected void setRealmService(RealmService realmService) {
+        TenantDispatcherServiceComponent.realmService = realmService;
+    }
+
+    protected void unsetRealmService(RealmService realmService) {
+        setRealmService(null);
+    }
+
+    public static RealmService getRealmService() {
+        return realmService;
+    }
+
+    public static TenantManager getTenantManager() {
+        return realmService.getTenantManager();
     }
 }
