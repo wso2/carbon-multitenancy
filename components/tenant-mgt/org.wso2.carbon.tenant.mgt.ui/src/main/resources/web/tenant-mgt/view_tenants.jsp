@@ -157,7 +157,15 @@
             }
         %>
 
-        <h2><fmt:message key="tenants.list"/></h2>
+        <%
+            int noOfTenants = 0;
+            TenantInfoBean[] tenantBeans = client.retrieveTenants();
+            if (tenantBeans != null) {
+                noOfTenants = client.retrieveTenants().length;
+            }
+        %>
+
+        <h2><fmt:message key="tenants.list"/> (<fmt:message key="number.of.tenants"/> : <%=noOfTenants %>)</h2>
         <br/>
         <carbon:paginator pageNumber="<%=pageNumber%>" numberOfPages="<%=numberOfPages%>"
                           noOfPageLinksToDisplay="<%=noOfPageLinksToDisplay%>"
