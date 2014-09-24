@@ -33,7 +33,7 @@ public class StatisticsInHandler extends AbstractHandler{
         SystemStatistics systemStatistics = Util.getSystemStatisticsUtil().getSystemStatistics(messageContext);
 
         int tenantId = MultitenantConstants.INVALID_TENANT_ID;
-        tenantId = CarbonContext.getCurrentContext().getTenantId();
+        tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
 
         if(tenantId == MultitenantConstants.INVALID_TENANT_ID ||
                 tenantId == MultitenantConstants.SUPER_TENANT_ID) {

@@ -18,7 +18,7 @@ public class UsageStatsAxis2ConfigurationContextObserver extends AbstractAxis2Co
     public void createdConfigurationContext(ConfigurationContext configContext) {
 
         AxisConfiguration axisConfiguration = configContext.getAxisConfiguration();
-        int tenantId = PrivilegedCarbonContext.getCurrentContext().getTenantId(false);
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(false);
         try {
             axisConfiguration.engageModule("metering");
         } catch (AxisFault axisFault) {

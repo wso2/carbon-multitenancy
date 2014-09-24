@@ -69,12 +69,12 @@ public class UsageAgentServiceComponent {
     protected void activate(ComponentContext context) {
         try {
             PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getCurrentContext().setTenantId(
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
                     MultitenantConstants.SUPER_TENANT_ID);
-            PrivilegedCarbonContext.getCurrentContext().getTenantDomain(true);
-            PrivilegedCarbonContext.getCurrentContext().setUsername(
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(
                     CarbonConstants.REGISTRY_SYSTEM_USERNAME);
-            PrivilegedCarbonContext.getCurrentContext().setUserRealm(
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUserRealm(
                     Util.getRealmService().getBootstrapRealm());
             
             // initialize listeners
