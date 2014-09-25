@@ -53,8 +53,7 @@ public class WebAppRequestListener extends CarbonTomcatValve {
 
     public void invoke(Request request, Response response, CompositeValve compositeValve) {
         String requestURI = request.getRequestURI();
-        String tenantDomainName = CarbonContext.getCurrentContext().
-                                  getTenantDomain();
+        String tenantDomainName = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         String urlContext = getContext(requestURI);
         if (tenantDomainName != null && urlContext != null) {
             try {

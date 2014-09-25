@@ -146,7 +146,7 @@ public class ThrottlingAgent {
     public void updateThrottlingCacheForTenant() throws Exception {
         // TODO: Need to refactor this and updater task
 
-        int tenantId = CarbonContext.getCurrentContext().getTenantId();
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
 
         String tenantValidationInfoResourcePath =
                 StratosConstants.TENANT_USER_VALIDATION_STORE_PATH +
