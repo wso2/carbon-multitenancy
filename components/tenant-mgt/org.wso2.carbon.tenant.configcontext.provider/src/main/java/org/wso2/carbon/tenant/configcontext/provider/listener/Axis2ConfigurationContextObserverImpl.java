@@ -26,19 +26,24 @@ import org.wso2.carbon.tenant.configcontext.provider.store.TenantConfigurationCo
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-public class Axis2ConfigurationContextObserverImpl extends AbstractAxis2ConfigurationContextObserver{
+public class Axis2ConfigurationContextObserverImpl extends
+		AbstractAxis2ConfigurationContextObserver {
 
-    private static Log log = LogFactory.getLog(Axis2ConfigurationContextObserverImpl.class);
-    
+	private static Log log = LogFactory
+			.getLog(Axis2ConfigurationContextObserverImpl.class);
+
 	@Override
 	public void terminatingConfigurationContext(ConfigurationContext configCtx) {
-		//Remove the configuration context for the map when tenant unload.
-        int tenantID = MultitenantUtils.getTenantId(configCtx);
-        ConfigurationContext clientContext = TenantConfigurationContextStore.getInstance().getTenantConfigurationContextMap().get(tenantID);
-        
-        //cleanup contexts
-        clientContext.cleanupContexts();
-        TenantConfigurationContextStore.getInstance().getTenantConfigurationContextMap().remove(tenantID);
-		log.info("Configuration Context for Tenant ID: "+tenantID+" is removed");
+		// Remove the configuration context for the map when tenant unload.
+		int tenantID = MultitenantUtils.getTenantId(configCtx);
+		ConfigurationContext clientContext = TenantConfigurationContextStore
+				.getInstance().getTenantConfigurationContextMap().get(tenantID);
+
+		// cleanup contexts
+		clientContext.cleanupContexts();
+		TenantConfigurationContextStore.getInstance()
+				.getTenantConfigurationContextMap().remove(tenantID);
+		log.info("Configuration Context for Tenant ID: " + tenantID
+				+ " is removed");
 	}
 }

@@ -28,16 +28,20 @@ public class Axis2ConfigurationContextActivator implements BundleActivator {
 
 	private Axis2ConfigurationContextObserverImpl axis2ConfigurationContextObserverImpl = new Axis2ConfigurationContextObserverImpl();
 	private TenantConfigurationContextProvider contextProvider = new TenantConfigurationContextProvider();
-	
+
 	@Override
-	public void start(BundleContext context){
-		context.registerService(Axis2ConfigurationContextObserver.class.getName(), axis2ConfigurationContextObserverImpl, null);
-		context.registerService(TenantConfigurationContextProvider.class.getName(), contextProvider, null);
-		
+	public void start(BundleContext context) {
+		context.registerService(
+				Axis2ConfigurationContextObserver.class.getName(),
+				axis2ConfigurationContextObserverImpl, null);
+		context.registerService(
+				TenantConfigurationContextProvider.class.getName(),
+				contextProvider, null);
+
 	}
 
 	@Override
-	public void stop(BundleContext context){
+	public void stop(BundleContext context) {
 	}
 
 }
