@@ -40,10 +40,12 @@ public class Axis2ConfigurationContextObserverImpl extends
 				.getInstance().getTenantConfigurationContextMap().get(tenantID);
 
 		// cleanup contexts
-		clientContext.cleanupContexts();
-		TenantConfigurationContextStore.getInstance()
-				.getTenantConfigurationContextMap().remove(tenantID);
-		log.info("Configuration Context for Tenant ID: " + tenantID
-				+ " is removed");
+		if(clientContext != null){
+			clientContext.cleanupContexts();
+			TenantConfigurationContextStore.getInstance()
+					.getTenantConfigurationContextMap().remove(tenantID);
+			log.info("Configuration Context for Tenant ID: " + tenantID
+					+ " is removed");
+		}
 	}
 }
