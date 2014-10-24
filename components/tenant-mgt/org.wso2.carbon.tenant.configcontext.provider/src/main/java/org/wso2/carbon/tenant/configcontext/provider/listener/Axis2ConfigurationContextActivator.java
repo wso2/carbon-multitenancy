@@ -19,6 +19,8 @@
 
 package org.wso2.carbon.tenant.configcontext.provider.listener;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.wso2.carbon.tenant.configcontext.provider.TenantConfigurationContextProvider;
@@ -28,15 +30,24 @@ public class Axis2ConfigurationContextActivator implements BundleActivator {
 
 	private Axis2ConfigurationContextObserverImpl axis2ConfigurationContextObserverImpl = new Axis2ConfigurationContextObserverImpl();
 	private TenantConfigurationContextProvider contextProvider = new TenantConfigurationContextProvider();
+	private static Log log = LogFactory
+			.getLog(Axis2ConfigurationContextActivator.class);
 
 	@Override
 	public void start(BundleContext context) {
-		context.registerService(
-				Axis2ConfigurationContextObserver.class.getName(),
-				axis2ConfigurationContextObserverImpl, null);
-		context.registerService(
-				TenantConfigurationContextProvider.class.getName(),
-				contextProvider, null);
+		try {
+			context.registerService(
+					Axis2ConfigurationContextObserver.class.getName(),
+					axis2ConfigurationContextObserverImpl, null);
+			context.registerService(
+					TenantConfigurationContextProvider.class.getName(),
+					contextProvider, null);
+			log.debug("tenant configuration context bundle is activated");
+		} catch (Throwable e) {
+			log.error(
+					"Failed to activate tenant configuration context bundle ",
+					e);
+		}
 
 	}
 
