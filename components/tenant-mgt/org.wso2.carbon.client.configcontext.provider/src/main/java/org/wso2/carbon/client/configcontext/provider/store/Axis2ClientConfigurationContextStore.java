@@ -17,25 +17,25 @@
  *
  */
 
-package org.wso2.carbon.tenant.configcontext.provider.store;
+package org.wso2.carbon.client.configcontext.provider.store;
 
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.axis2.context.ConfigurationContext;
 
-public final class TenantConfigurationContextStore {
+public final class Axis2ClientConfigurationContextStore {
 
-	private static volatile TenantConfigurationContextStore tenantConfigContextStore;
+	private static volatile Axis2ClientConfigurationContextStore tenantConfigContextStore;
 	private ConcurrentHashMap<Integer, ConfigurationContext> tenantConfigurationContextMap = new ConcurrentHashMap<Integer, ConfigurationContext>();
 
-	private TenantConfigurationContextStore() {
+	private Axis2ClientConfigurationContextStore() {
 	}
 
-	public static TenantConfigurationContextStore getInstance() {
+	public static Axis2ClientConfigurationContextStore getInstance() {
 		if (tenantConfigContextStore == null) {
-			synchronized (TenantConfigurationContextStore.class) {
+			synchronized (Axis2ClientConfigurationContextStore.class) {
 				if (tenantConfigContextStore == null) {
-					tenantConfigContextStore = new TenantConfigurationContextStore();
+					tenantConfigContextStore = new Axis2ClientConfigurationContextStore();
 				}
 			}
 		}

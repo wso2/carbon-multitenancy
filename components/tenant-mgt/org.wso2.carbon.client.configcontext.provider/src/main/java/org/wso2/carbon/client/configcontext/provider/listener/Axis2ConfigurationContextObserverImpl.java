@@ -17,12 +17,12 @@
  *
  */
 
-package org.wso2.carbon.tenant.configcontext.provider.listener;
+package org.wso2.carbon.client.configcontext.provider.listener;
 
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.tenant.configcontext.provider.store.TenantConfigurationContextStore;
+import org.wso2.carbon.client.configcontext.provider.store.Axis2ClientConfigurationContextStore;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -36,13 +36,13 @@ public class Axis2ConfigurationContextObserverImpl extends
 	public void terminatingConfigurationContext(ConfigurationContext configCtx) {
 		// Remove the configuration context for the map when tenant unload.
 		int tenantID = MultitenantUtils.getTenantId(configCtx);
-		ConfigurationContext clientContext = TenantConfigurationContextStore
+		ConfigurationContext clientContext = Axis2ClientConfigurationContextStore
 				.getInstance().getTenantConfigurationContextMap().get(tenantID);
 
 		// cleanup contexts
 		if(clientContext != null){
 			clientContext.cleanupContexts();
-			TenantConfigurationContextStore.getInstance()
+			Axis2ClientConfigurationContextStore.getInstance()
 					.getTenantConfigurationContextMap().remove(tenantID);
 			log.info("Configuration Context for Tenant ID: " + tenantID
 					+ " is removed");

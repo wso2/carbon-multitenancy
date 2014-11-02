@@ -17,7 +17,7 @@
  *
  */
 
-package org.wso2.carbon.tenant.configcontext.provider;
+package org.wso2.carbon.client.configcontext.provider;
 
 import java.rmi.RemoteException;
 import java.security.AccessController;
@@ -28,14 +28,14 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.client.configcontext.provider.store.Axis2ClientConfigurationContextStore;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.tenant.configcontext.provider.store.TenantConfigurationContextStore;
 
-public class TenantConfigurationContextProvider {
+public class Axis2ClientConfigContextProviderImpl implements Axis2ClientConfigContextProvider{
 
-    private static Log log = LogFactory.getLog(TenantConfigurationContextProvider.class);
+    private static Log log = LogFactory.getLog(Axis2ClientConfigContextProviderImpl.class);
 	private static final String CONFIG_LOCATION = "repository/deployment/client";
-
+	
 	/**
 	 * Returns the Configuration Context for the specified tenant ID,
 	 * Create a Configuration Context if not already created, and return it. 
@@ -45,14 +45,14 @@ public class TenantConfigurationContextProvider {
 	 * @return
 	 * @throws RemoteException
 	 */
-	public ConfigurationContext getTenantConfigurationContext()
+	public ConfigurationContext getConfigurationContext()
 			throws RemoteException {
 		ConfigurationContext configurationContext = null;
 		int tenantID = CarbonContext.getThreadLocalCarbonContext().getTenantId();
 
-		if (TenantConfigurationContextStore.getInstance()
+		if (Axis2ClientConfigurationContextStore.getInstance()
 				.getTenantConfigurationContextMap().containsKey(tenantID)) {
-			configurationContext = TenantConfigurationContextStore.getInstance()
+			configurationContext = Axis2ClientConfigurationContextStore.getInstance()
 					.getTenantConfigurationContextMap().get(tenantID);
 			log.debug("Configuration context for the Tenant: "+tenantID+ " already exists.");
 		} else {
@@ -70,10 +70,11 @@ public class TenantConfigurationContextProvider {
 			} catch (PrivilegedActionException e) {
 				throw (RemoteException) e.getException();
 			}
-			TenantConfigurationContextStore.getInstance()
+			Axis2ClientConfigurationContextStore.getInstance()
 					.getTenantConfigurationContextMap()
 					.put(tenantID, configurationContext);
 		}
 		return configurationContext;
 	}
+
 }

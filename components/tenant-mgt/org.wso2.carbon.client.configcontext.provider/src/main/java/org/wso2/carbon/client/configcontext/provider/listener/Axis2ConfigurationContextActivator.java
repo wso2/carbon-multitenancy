@@ -17,41 +17,37 @@
  *
  */
 
-package org.wso2.carbon.tenant.configcontext.provider.listener;
+package org.wso2.carbon.client.configcontext.provider.listener;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.wso2.carbon.tenant.configcontext.provider.TenantConfigurationContextProvider;
+import org.wso2.carbon.client.configcontext.provider.Axis2ClientConfigContextProvider;
+import org.wso2.carbon.client.configcontext.provider.Axis2ClientConfigContextProviderImpl;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 
 public class Axis2ConfigurationContextActivator implements BundleActivator {
 
 	private Axis2ConfigurationContextObserverImpl axis2ConfigurationContextObserverImpl = new Axis2ConfigurationContextObserverImpl();
-	private TenantConfigurationContextProvider contextProvider = new TenantConfigurationContextProvider();
+	private Axis2ClientConfigContextProvider contextProvider = new Axis2ClientConfigContextProviderImpl();
 	private static Log log = LogFactory
 			.getLog(Axis2ConfigurationContextActivator.class);
 
-	@Override
 	public void start(BundleContext context) {
 		try {
 			context.registerService(
 					Axis2ConfigurationContextObserver.class.getName(),
 					axis2ConfigurationContextObserverImpl, null);
 			context.registerService(
-					TenantConfigurationContextProvider.class.getName(),
+					Axis2ClientConfigContextProvider.class.getName(),
 					contextProvider, null);
 			log.debug("tenant configuration context bundle is activated");
 		} catch (Throwable e) {
-			log.error(
-					"Failed to activate tenant configuration context bundle ",
-					e);
+			log.error("Failed to activate tenant configuration context bundle ",e);
 		}
-
 	}
 
-	@Override
 	public void stop(BundleContext context) {
 	}
 

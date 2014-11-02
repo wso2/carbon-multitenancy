@@ -1,9 +1,9 @@
 <serviceGroup>
-	<service name="TenantConfigurationContextProvider">
+	<service name="Axis2ClientConfigurationContextProvider">
 	    <description>
 		This service provides client configuration context.
 	    </description>
-	    <parameter name="ServiceClass" locked="true">org.wso2.carbon.tenant.configcontext.provider.TenantConfigurationContextProvider</parameter>
+	    <parameter name="ServiceClass" locked="true">org.wso2.carbon.client.configcontext.provider.Axis2ClientConfigContextProviderImpl</parameter>
 	    <messageReceivers>
 		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only" class="org.apache.axis2.rpc.receivers.RPCInOnlyMessageReceiver" />
 		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-out" class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" />
