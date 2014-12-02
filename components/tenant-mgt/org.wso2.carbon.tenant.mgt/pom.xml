@@ -51,7 +51,7 @@
                         </Private-Package>
                         <Import-Package>
                             org.wso2.carbon.stratos.common.*,
-                            org.wso2.carbon.registry.core.*;version=1.0.1,
+                            org.wso2.carbon.registry.core.*;version="${carbon.kernel.package.import.version.range}",
                             !javax.xml.namespace,
                             org.wso2.carbon.captcha.mgt.*, 
                             javax.xml.namespace; version=0.0.0,
