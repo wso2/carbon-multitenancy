@@ -315,6 +315,7 @@ public class TenantMgtUtil {
 
             claimsMap.put(UserCoreConstants.ClaimTypeURIs.GIVEN_NAME, tenant.getAdminFirstName());
             claimsMap.put(UserCoreConstants.ClaimTypeURIs.SURNAME, tenant.getAdminLastName());
+            claimsMap.put(UserCoreConstants.ClaimTypeURIs.EMAIL_ADDRESS, tenant.getEmail());
 
             // can be extended to store other user information.
             UserStoreManager userStoreManager =
