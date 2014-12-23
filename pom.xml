@@ -1230,8 +1230,8 @@
         <gitblit.version>1.2.0.wso2v1</gitblit.version>
 
         <!-- Carbon kernel version-->
-        <carbon.kernel.version>4.3.0-SNAPSHOT</carbon.kernel.version>
-        <carbon.kernel.imp.pkg.version>[4.3.0.SNAPSHOT, 4.4.0)</carbon.kernel.imp.pkg.version>
+        <carbon.kernel.version>4.3.0</carbon.kernel.version>
+        <carbon.kernel.imp.pkg.version>[4.3.0, 4.4.0)</carbon.kernel.imp.pkg.version>
         <carbon.kernel.registry.imp.pkg.version>[1.0.1, 2.0.0)</carbon.kernel.registry.imp.pkg.version>
 
         <!-- Carbon platform version comes here-->
