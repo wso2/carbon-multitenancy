@@ -497,7 +497,8 @@ public class TenantMgtUtil {
      */
     public static void deleteProductSpecificTenantData(String dataSourceName, String tableName, int tenantId) {
         try {
-            TenantDataDeletionUtil.deleteProductSpecificTenantData(((DataSource) InitialContext.doLookup(dataSourceName)).getConnection(), tableName, tenantId);
+            TenantDataDeletionUtil.deleteProductSpecificTenantData(((DataSource) InitialContext.doLookup(dataSourceName)).
+                    getConnection(), tableName, tenantId);
         } catch (Exception e) {
             throw new RuntimeException("Error in looking up data source: " + e.getMessage(), e);
         }
