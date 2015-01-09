@@ -34,13 +34,12 @@ public class TenantDataDeletionUtil {
 
     public static final Log log = LogFactory.getLog(TenantDataDeletionUtil.class);
 
-    public static void deleteProductSpecificTenantData(Connection conn, String tableName, int tenantId)
-    {
+    public static void deleteProductSpecificTenantData(Connection conn, String tableName, int tenantId) {
         try {
             conn.setAutoCommit(false);
-            String deleteUserPermissionSql = "DELETE FROM "+tableName+" WHERE TENANT_ID = ?";
+            String deleteUserPermissionSql = "DELETE FROM " + tableName + " WHERE TENANT_ID = ?";
             executeDeleteQuery(conn, deleteUserPermissionSql, tenantId);
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

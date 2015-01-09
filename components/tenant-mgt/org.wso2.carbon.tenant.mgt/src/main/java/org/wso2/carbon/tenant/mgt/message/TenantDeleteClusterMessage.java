@@ -31,47 +31,48 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 
 /**
- * Tenant delete cluster message use to send to all worker nodes and delete the Cache 
- * 
- *
+ * Tenant delete cluster message use to send to all worker nodes and delete the Cache
  */
 public class TenantDeleteClusterMessage extends ClusteringMessage {
 
-	private static final long serialVersionUID = -5348082601467389829L;
-	private int tenantId;
+    private static final long serialVersionUID = -5348082601467389829L;
+    private int tenantId;
     private transient static final Log log = LogFactory.getLog(TenantDeleteClusterMessage.class);
     private final static boolean IS_DELETE_PERSISTANCE_STORAGE = false;
-    
-	/**
-	 * Overloaded constructor to pass the tenant id
-	 * @param tenantId
-	 */
-	public TenantDeleteClusterMessage(int tenantId){
-		this.tenantId = tenantId;
-	}
-	
-	/**
-	 * Get Response
-	 * @return ClusteringCommand
-	 */
-	@Override
-	public ClusteringCommand getResponse() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-	/**
-	 * Deleting cache data in JDBCTenantManager
-	 * @param arg0 - ConfigurationContext
-	 */
-	@Override
-	public void execute(ConfigurationContext arg0) throws ClusteringFault {
-		TenantManager tenantManager = TenantMgtServiceComponent
-				.getTenantManager();
-		try {
-			tenantManager.deleteTenant(tenantId, IS_DELETE_PERSISTANCE_STORAGE);
-		} catch (UserStoreException e) {
-			log.error("Error occured while deleting cache : " + e.getMessage());
-		}
-	}
+
+    /**
+     * Overloaded constructor to pass the tenant id
+     *
+     * @param tenantId
+     */
+    public TenantDeleteClusterMessage(int tenantId) {
+        this.tenantId = tenantId;
+    }
+
+    /**
+     * Get Response
+     *
+     * @return ClusteringCommand
+     */
+    @Override
+    public ClusteringCommand getResponse() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /**
+     * Deleting cache data in JDBCTenantManager
+     *
+     * @param arg0 - ConfigurationContext
+     */
+    @Override
+    public void execute(ConfigurationContext arg0) throws ClusteringFault {
+        TenantManager tenantManager = TenantMgtServiceComponent
+                .getTenantManager();
+        try {
+            tenantManager.deleteTenant(tenantId, IS_DELETE_PERSISTANCE_STORAGE);
+        } catch (UserStoreException e) {
+            log.error("Error occured while deleting cache : " + e.getMessage());
+        }
+    }
 }
