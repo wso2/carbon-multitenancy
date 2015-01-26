@@ -20,7 +20,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
-        <groupId>org.wso2.carbon</groupId>
+        <groupId>org.wso2.carbon.multitenancy</groupId>
         <artifactId>tenant-mgt-feature</artifactId>
         <version>4.3.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
@@ -36,11 +36,11 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.multitenancy</groupId>
             <artifactId>org.wso2.carbon.tenant.redirector.servlet.ui</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.multitenancy</groupId>
             <artifactId>org.wso2.carbon.tenant.sso.redirector.ui</artifactId>
         </dependency>
        <!-- <dependency>
@@ -48,24 +48,24 @@
             <artifactId>org.wso2.carbon.google.analytics.ui</artifactId>
         </dependency>-->
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.multitenancy</groupId>
             <artifactId>org.wso2.carbon.tenant.mgt.stub</artifactId>
         </dependency>
         <!--  Tenant Mgmt  -->
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.multitenancy</groupId>
             <artifactId>org.wso2.carbon.tenant.mgt.ui</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.multitenancy</groupId>
             <artifactId>org.wso2.carbon.tenant.common.stub</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.multitenancy</groupId>
             <artifactId>org.wso2.carbon.tenant.theme.mgt.ui</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.multitenancy</groupId>
             <artifactId>org.wso2.carbon.tenant.theme.mgt.stub</artifactId>
         </dependency>
 
@@ -93,17 +93,17 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.tenant.redirector.servlet.ui</bundleDef>
+                                <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.redirector.servlet.ui</bundleDef>
                                 <bundleDef>
-                                    org.wso2.carbon:org.wso2.carbon.tenant.redirector.servlet.stub:${wso2carbon.version}
+                                    org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.redirector.servlet.stub:${wso2carbon.version}
                                 </bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.tenant.sso.redirector.ui</bundleDef>
+                                <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.sso.redirector.ui</bundleDef>
                                 <!--<bundleDef>org.wso2.carbon:org.wso2.carbon.google.analytics.ui</bundleDef>-->
 
                                 <!-- Tenant Mgmt-->
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.tenant.mgt.ui</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.tenant.common.stub</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.tenant.mgt.stub</bundleDef>
+                                <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.mgt.ui</bundleDef>
+                                <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.common.stub</bundleDef>
+                                <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.mgt.stub</bundleDef>
                                 <!-- Tenant Mgmt End-->
 
                             </bundles>
