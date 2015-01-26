@@ -20,7 +20,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
-        <groupId>org.wso2.carbon</groupId>
+        <groupId>org.wso2.carbon.multitenancy</groupId>
         <artifactId>tenant-mgt-feature</artifactId>
         <version>4.3.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
@@ -36,16 +36,16 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.multitenancy</groupId>
             <artifactId>org.wso2.carbon.tenant.common</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.multitenancy</groupId>
             <artifactId>org.wso2.carbon.tenant.dispatcher</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.multitenancy</groupId>
             <artifactId>org.wso2.carbon.tenant.redirector.servlet</artifactId>
         </dependency>
         <dependency>
@@ -73,15 +73,15 @@
             <artifactId>kaptcha</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.multitenancy</groupId>
             <artifactId>org.wso2.carbon.tenant.keystore.mgt</artifactId>
         </dependency>
         <!--dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.multitenancy</groupId>
             <artifactId>org.wso2.carbon.tenant.activation</artifactId>
         </dependency-->
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.multitenancy</groupId>
             <artifactId>org.wso2.carbon.tenant.mgt.core</artifactId>
         </dependency>
         <dependency>
@@ -89,7 +89,7 @@
             <artifactId>org.wso2.carbon.captcha.mgt</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.multitenancy</groupId>
             <artifactId>org.wso2.carbon.tenant.theme.mgt</artifactId>
         </dependency>
         <dependency>
@@ -162,10 +162,10 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.tenant.common:${carbon.platform.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.tenant.redirector.servlet</bundleDef>
+                                <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.common:${carbon.platform.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.redirector.servlet</bundleDef>
                                 <!--<bundleDef>org.wso2.carbon:org.wso2.carbon.sample.installer:2.2.1</bundleDef>-->
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.tenant.dispatcher</bundleDef>
+                                <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.dispatcher</bundleDef>
                                 <!--bundleDef>org.wso2.carbon:org.wso2.carbon.tenant.activation</bundleDef-->
                                 <!--<bundleDef>org.wso2.carbon:org.wso2.carbon.throttling.agent</bundleDef>-->
                                 <!--<bundleDef>org.wso2.carbon:org.wso2.carbon.throttling.agent.stub</bundleDef>-->
@@ -179,13 +179,13 @@
 
                                 <!-- Tenant Mgmt -->
                                 <bundleDef>org.json.wso2:json</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.tenant.mgt:${carbon.platform.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.mgt:${carbon.platform.version}</bundleDef>
                                 <bundleDef>kaptcha.wso2:kaptcha</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.tenant.keystore.mgt</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.tenant.mgt.core:${carbon.platform.version}
+                                <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.keystore.mgt</bundleDef>
+                                <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.mgt.core:${carbon.platform.version}
                                 </bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.captcha.mgt</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.tenant.theme.mgt:${carbon.platform.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.theme.mgt:${carbon.platform.version}</bundleDef>
                                 <!-- End Tenant Mgmt -->
 
                             </bundles>
