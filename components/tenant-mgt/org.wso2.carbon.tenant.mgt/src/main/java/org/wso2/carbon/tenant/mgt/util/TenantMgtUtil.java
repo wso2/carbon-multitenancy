@@ -15,6 +15,9 @@
  */
 package org.wso2.carbon.tenant.mgt.util;
 
+import org.apache.axis2.clustering.ClusteringAgent;
+import org.apache.axis2.clustering.ClusteringFault;
+import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,6 +34,7 @@ import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
 import org.wso2.carbon.stratos.common.util.ClaimsMgtUtil;
 import org.wso2.carbon.stratos.common.util.CommonUtil;
 import org.wso2.carbon.tenant.mgt.internal.TenantMgtServiceComponent;
+import org.wso2.carbon.tenant.mgt.message.TenantDeleteClusterMessage;
 import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.api.TenantMgtConfiguration;
 import org.wso2.carbon.user.core.UserCoreConstants;
@@ -43,6 +47,8 @@ import org.wso2.carbon.user.core.tenant.Tenant;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import javax.naming.InitialContext;
+import javax.sql.DataSource;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -92,6 +98,22 @@ public class TenantMgtUtil {
         for (TenantMgtListener tenantMgtListener :
                 TenantMgtServiceComponent.getTenantMgtListeners()) {
             tenantMgtListener.onTenantCreate(tenantInfo);
+        }
+    }
+
+    /**
+     * Triggers pre tenant delete for TenantMgtListener
+     *
+     * @param tenantId int
+     * @throws StratosException , trigger failed
+     */
+    public static void triggerPreTenantDelete(int tenantId)
+            throws StratosException {
+        for (TenantMgtListener tenantMgtListener : TenantMgtServiceComponent
+                .getTenantMgtListeners()) {
+            log.debug("Executing OnPreDelete on Listener Impl Class Name : "
+                      + tenantMgtListener.getClass().getName());
+            tenantMgtListener.onPreDelete(tenantId);
         }
     }
 
@@ -444,5 +466,42 @@ public class TenantMgtUtil {
         dataSource.setMaxWait(Integer.parseInt(realmConfig.getRealmProperty(JDBCRealmConstants.MAX_WAIT)));
 
         TenantUMDataDeletionUtil.deleteTenantUMData(tenantId, dataSource.getConnection());
+    }
+
+    /**
+     * Broadcast TenantDeleteClusterMessage to all worker nodes
+     *
+     * @param tenantId
+     * @throws Exception
+     */
+    public static void deleteWorkernodesTenant(int tenantId) throws Exception {
+        TenantDeleteClusterMessage clustermessage = new TenantDeleteClusterMessage(
+                tenantId);
+        ConfigurationContext configContext = TenantMgtServiceComponent.getConfigurationContext();
+        ClusteringAgent agent = configContext.getAxisConfiguration()
+                .getClusteringAgent();
+        try {
+            agent.sendMessage(clustermessage, true);
+        } catch (ClusteringFault e) {
+            log.error("Error occurred while broadcasting TenantDeleteClusterMessage : " + e.getMessage());
+        }
+
+    }
+
+
+    /**
+     * Delete tenant data specific to product from database.
+     *
+     * @param dataSourceName
+     * @param tableName
+     * @param tenantId
+     */
+    public static void deleteProductSpecificTenantData(String dataSourceName, String tableName, int tenantId) {
+        try {
+            TenantDataDeletionUtil.deleteProductSpecificTenantData(((DataSource) InitialContext.doLookup(dataSourceName)).
+                    getConnection(), tableName, tenantId);
+        } catch (Exception e) {
+            throw new RuntimeException("Error in looking up data source: " + e.getMessage(), e);
+        }
     }
 }
