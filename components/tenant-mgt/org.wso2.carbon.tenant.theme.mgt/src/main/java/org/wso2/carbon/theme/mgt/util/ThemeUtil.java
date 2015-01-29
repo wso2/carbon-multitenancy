@@ -17,6 +17,7 @@ package org.wso2.carbon.theme.mgt.util;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -46,12 +47,14 @@ public class ThemeUtil {
     private static final String CURRENT_THEME_KEY = "current-theme";
     private static final String THEME_PATH = "/repository/theme";
     private static final String THEME_ADMIN_PATH = THEME_PATH + "/admin";
+    private static final String RELOAD_THEMES = "ReloadThemeOnServerRestart";
 
     public static synchronized void setRegistryService(RegistryService service) {
         if (registryService == null) {
             registryService = service;
         }
     }
+
     public static RegistryService getRegistryService() {
         return registryService;
     }
@@ -172,8 +175,23 @@ public class ThemeUtil {
                 .separator + "resources" + File.separator + "allthemes";
         // we are always making this accessible from anyware
         File themeRootFile = new File(themeRootFileName);
-        ThemeUtil.transferAllThemesToRegistry(themeRootFile, systemRegistry, StratosConstants.ALL_THEMES_PATH);
-
+        File[] themeDirs = themeRootFile.listFiles();
+        if (themeDirs == null) {
+            return;
+        }
+        List<File> themes = Arrays.asList(themeDirs);
+        // don't restore themes to registry if explicitly defined it with RELOAD_THEMES configuration, otherwise reload
+        String proxyContextPath = ServerConfiguration.getInstance().getFirstProperty(RELOAD_THEMES);
+        boolean reloadThemes = proxyContextPath == null || !proxyContextPath.equalsIgnoreCase("false");
+        for (File themeDir : themes) {
+            String themeDirName = themeDir.getName();
+            String fileRegistryPath = StratosConstants.ALL_THEMES_PATH + RegistryConstants.PATH_SEPARATOR + themeDirName;
+            Collection newCollection = systemRegistry.newCollection();
+            systemRegistry.put(fileRegistryPath, newCollection);
+            if (reloadThemes || !systemRegistry.resourceExists(fileRegistryPath)) {
+                ThemeUtil.transferAllThemesToRegistry(themeDir, systemRegistry, fileRegistryPath);
+            }
+        }
         CommonUtil.setAnonAuthorization(RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH + StratosConstants.ALL_THEMES_PATH,
                 systemRegistry.getUserRealm());
     }
