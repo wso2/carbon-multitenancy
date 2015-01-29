@@ -47,7 +47,7 @@
                 <artifactId>org.wso2.carbon.tenant.theme.mgt</artifactId>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon.multitenancy</groupId>
+                <groupId>org.wso2.carbon.commons</groupId>
                 <artifactId>org.wso2.carbon.tenant.common</artifactId>
             </dependency>
         </dependencies>
@@ -101,7 +101,7 @@
                             <!--bundles>
                             </bundles-->
                             <importBundles>
-                                 <importBundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.common</importBundleDef>
+                                 <importBundleDef>org.wso2.carbon.commons:org.wso2.carbon.tenant.common</importBundleDef>
                                  <importBundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.mgt.core</importBundleDef>
                                  <importBundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.theme.mgt</importBundleDef>
                                  <importBundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.keystore.mgt</importBundleDef>

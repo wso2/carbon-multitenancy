@@ -100,11 +100,11 @@
             <artifactId>org.wso2.carbon.tenant.common</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.rampart.wso2</groupId>
+            <groupId>org.apache.rampart</groupId>
             <artifactId>rampart-policy</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.rampart.wso2</groupId>
+            <groupId>org.apache.rampart</groupId>
             <artifactId>rampart-core</artifactId>
         </dependency>
     </dependencies>
