@@ -58,7 +58,7 @@
                         </Private-Package>
                         <Import-Package>
                             org.wso2.carbon.throttling.agent.stub.*;
-                            version="${carbon.platform.package.import.version.range}",
+                            version="${carbon.multitenancy.imp.pkg.version}",
                             org.wso2.carbon.stratos.common.*,
                             org.wso2.carbon.server.*,
                             org.wso2.carbon.registry.core.*;version="${carbon.kernel.registry.imp.pkg.version}",
@@ -100,7 +100,7 @@
             <artifactId>commons-logging</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.multitenancy</groupId>
+            <groupId>org.wso2.carbon.commons</groupId>
             <artifactId>org.wso2.carbon.tenant.common</artifactId>
         </dependency>
         <dependency>

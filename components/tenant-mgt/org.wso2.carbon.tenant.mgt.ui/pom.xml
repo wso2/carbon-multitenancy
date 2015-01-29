@@ -1,5 +1,3 @@
-        <version>2.2.0</version>
-	<relativePath>../../pom.xml</relativePath>
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 # Copyright (c) 2008, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
@@ -47,8 +45,8 @@
                             org.wso2.carbon.tenant.mgt.ui.*,
                         </Export-Package>
                         <Import-Package>
-                            org.wso2.carbon.tenant.mgt.stub.*; version="${carbon.platform.package.import.version.range}",
-                            org.wso2.carbon.user.mgt.stub.*;version="${carbon.platform.package.import.version.range}",
+                            org.wso2.carbon.tenant.mgt.stub.*; version="${carbon.multitenancy.imp.pkg.version}",
+                            org.wso2.carbon.user.mgt.stub.*;version="${carbon.commons.imp.pkg.version}",
                             org.apache.axis2.client.*,
                             javax.servlet;version="${imp.pkg.version.javax.servlet}",
                             javax.servlet.http;version="${imp.pkg.version.javax.servlet}",
@@ -107,9 +105,8 @@
             <artifactId>org.wso2.carbon.tenant.common.stub</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.commons</groupId>
             <artifactId>org.wso2.carbon.user.mgt.stub</artifactId>
-            <version>4.2.0</version>
         </dependency>
     </dependencies>
 </project>

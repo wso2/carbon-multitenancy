@@ -64,7 +64,7 @@
                             javax.servlet.http;version="${imp.pkg.version.javax.servlet}",
                             org.apache.lucene.*,
                             org.apache.batik.*,
-                            org.wso2.carbon.theme.mgt.stub.*; version="${carbon.platform.package.import.version.range}",
+                            org.wso2.carbon.theme.mgt.stub.*; version="${carbon.multitenancy.imp.pkg.version}",
                             *;resolution:=optional
                         </Import-Package>
                         <Carbon-Component>UIBundle</Carbon-Component>
@@ -85,7 +85,7 @@
             <artifactId>log4j</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.registry</groupId>
             <artifactId>org.wso2.carbon.registry.common</artifactId>
         </dependency>
         <dependency>

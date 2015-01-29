@@ -168,13 +168,13 @@
 
                                 <!-- Tenant Mgmt -->
                                 <bundleDef>org.json.wso2:json</bundleDef>
-                                <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.mgt:${carbon.platform.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.mgt:${project.version}</bundleDef>
                                 <bundleDef>kaptcha.wso2:kaptcha</bundleDef>
                                 <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.keystore.mgt</bundleDef>
-                                <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.mgt.core:${carbon.platform.version}
+                                <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.mgt.core:${project.version}
                                 </bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.captcha.mgt</bundleDef>
-                                <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.theme.mgt:${carbon.platform.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.theme.mgt:${project.version}</bundleDef>
                                 <!-- End Tenant Mgmt -->
 
                             </bundles>
@@ -187,9 +187,9 @@
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:${carbon.kernel.version}</importFeatureDef>
                                 <importFeatureDef>
-                                    org.wso2.carbon.identity.authenticator.saml2.sso.server:${wso2carbon.version}
+                                    org.wso2.carbon.identity.authenticator.saml2.sso.server:${carbon.identity.version}
                                 </importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.registry.core.server:${wso2carbon.version}
+                                <importFeatureDef>org.wso2.carbon.registry.core.server:${carbon.registry.version}
                                 </importFeatureDef>
                             </importFeatures>
                         </configuration>
