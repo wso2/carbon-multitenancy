@@ -123,6 +123,11 @@
                 <artifactId>org.wso2.carbon.registry.resource</artifactId>
                 <version>${carbon.platform.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.registry.common</artifactId>
+                <version>${carbon.platform.version}</version>
+            </dependency>
 
             <!-- Carbon-Commons Dependencies-->
             <dependency>
@@ -292,6 +297,11 @@
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.commons</groupId>
+                <artifactId>org.wso2.carbon.tenant.common</artifactId>
+                <version>${carbon.commons.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.commons</groupId>
                 <artifactId>org.wso2.carbon.deployment.synchronizer.server.feature</artifactId>
                 <version>${carbon.commons.version}</version>
                 <type>zip</type>
@@ -386,17 +396,17 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.rampart</groupId>
+                <groupId>org.apache.rampart.wso2</groupId>
                 <artifactId>rampart-core</artifactId>
                 <version>${rampart.wso2.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.rampart</groupId>
+                <groupId>org.apache.rampart.wso2</groupId>
                 <artifactId>rampart-policy</artifactId>
                 <version>${rampart.wso2.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.rampart</groupId>
+                <groupId>org.apache.rampart.wso2</groupId>
                 <artifactId>rampart-trust</artifactId>
                 <version>${rampart.wso2.version}</version>
             </dependency>
@@ -1147,7 +1157,7 @@
         <version.javax.servlet>3.0.0.v201112011016</version.javax.servlet>
 
         <!-- Rampart Version -->
-        <rampart.wso2.version>1.6.1-wso2v13-SNAPSHOT</rampart.wso2.version>
+        <rampart.wso2.version>1.6.1.wso2v13-SNAPSHOT</rampart.wso2.version>
 
         <slf4j.wso2.version>1.5.10.wso2v1</slf4j.wso2.version>
 
