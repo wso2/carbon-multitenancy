@@ -64,11 +64,6 @@ function addTenant(isUpdating, isPublicCloud, isEmailUser) {
             reason += validateEmpty(adminName, "Admin Name");
         }
         if (reason == "") {
-        	 if (!isEmailUser) {
-                  reason += validateIllegal(adminName, "Admin Name");
-        	 }
-        }
-        if (reason == "") {
         	  if (isEmailUser) {
         		  reason += validateEmail(adminName);
         	  } else {
