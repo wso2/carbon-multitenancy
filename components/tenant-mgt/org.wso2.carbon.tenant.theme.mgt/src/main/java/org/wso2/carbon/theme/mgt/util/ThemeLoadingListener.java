@@ -74,4 +74,9 @@ public class ThemeLoadingListener implements TenantMgtListener {
         // doing nothing
         
     }
+
+	@Override
+	public void onPreDelete(int tenantId) throws StratosException {
+		//Implement this method to delete product specific data
+	}
 }
