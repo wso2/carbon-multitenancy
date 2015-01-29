@@ -29,14 +29,13 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.tenant.common.server.feature</artifactId>
     <packaging>pom</packaging>
-    <version>4.3.0-SNAPSHOT</version>
     <name>WSO2 Tenant Common Core Feature</name>
     <url>http://wso2.org</url>
     <description>This feature contains the core bundles required for Back-end servlet functionality</description>
 
     <dependencies>
         <dependency>
-            <groupId>org.wso2.carbon.multitenancy</groupId>
+            <groupId>org.wso2.carbon.commons</groupId>
             <artifactId>org.wso2.carbon.tenant.common</artifactId>
         </dependency>
 
@@ -49,7 +48,7 @@
             <artifactId>org.wso2.carbon.tenant.redirector.servlet</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.commons</groupId>
             <artifactId>org.wso2.carbon.throttling.agent.stub</artifactId>
         </dependency>
         <dependency>
@@ -58,7 +57,7 @@
         </dependency>
 
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.commons</groupId>
             <artifactId>org.wso2.carbon.application.upload</artifactId>
         </dependency>
 
@@ -162,20 +161,10 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.common:${carbon.platform.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.commons:org.wso2.carbon.tenant.common</bundleDef>
                                 <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.redirector.servlet</bundleDef>
                                 <!--<bundleDef>org.wso2.carbon:org.wso2.carbon.sample.installer:2.2.1</bundleDef>-->
                                 <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.dispatcher</bundleDef>
-                                <!--bundleDef>org.wso2.carbon:org.wso2.carbon.tenant.activation</bundleDef-->
-                                <!--<bundleDef>org.wso2.carbon:org.wso2.carbon.throttling.agent</bundleDef>-->
-                                <!--<bundleDef>org.wso2.carbon:org.wso2.carbon.throttling.agent.stub</bundleDef>-->
-                                <!--<bundleDef>org.wso2.carbon:org.wso2.carbon.usage.agent</bundleDef>-->
-                                <!--<bundleDef>org.wso2.carbon:org.wso2.carbon.stratos.landing.page.deployer</bundleDef>-->
-                                <!--bundleDef>org.quartz-scheduler.wso2:quartz</bundleDef-->
-                                <!--<bundleDef>org.wso2.carbon:org.wso2.carbon.tenant.activity</bundleDef>-->
-                                <!--bundleDef>org.wso2.carbon:org.wso2.carbon.task</bundleDef-->
-                                <!--bundleDef>org.apache.synapse:synapse-tasks</bundleDef-->
-
 
                                 <!-- Tenant Mgmt -->
                                 <bundleDef>org.json.wso2:json</bundleDef>
@@ -193,7 +182,7 @@
                                 <importBundleDef>org.apache.rampart.wso2:rampart-policy</importBundleDef>
                                 <importBundleDef>org.apache.rampart.wso2:rampart-core</importBundleDef>
                                 <importBundleDef>org.apache.rampart.wso2:rampart-trust</importBundleDef>
-                                <importBundleDef>org.wso2.carbon:org.wso2.carbon.application.upload</importBundleDef>
+                                <importBundleDef>org.wso2.carbon.commons:org.wso2.carbon.application.upload</importBundleDef>
                             </importBundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:${carbon.kernel.version}</importFeatureDef>

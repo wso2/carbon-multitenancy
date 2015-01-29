@@ -86,11 +86,7 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.registry.common.ui</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.registry.resource.ui</artifactId>
+            <artifactId>org.wso2.carbon.registry.common</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>

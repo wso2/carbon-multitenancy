@@ -96,7 +96,7 @@
             <artifactId>org.wso2.carbon.captcha.mgt</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.multitenancy</groupId>
+            <groupId>org.wso2.carbon.commons</groupId>
             <artifactId>org.wso2.carbon.tenant.common</artifactId>
         </dependency>
         <dependency>

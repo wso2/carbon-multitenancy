@@ -64,7 +64,7 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.throttling.agent</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.throttling.agent.stub</bundleDef>
+                                <bundleDef>org.wso2.carbon.commons:org.wso2.carbon.throttling.agent.stub</bundleDef>
                             </bundles>
                         </configuration>
                     </execution>
