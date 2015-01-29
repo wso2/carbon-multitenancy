@@ -48,6 +48,7 @@ public class TenantPersistor {
     private static final String ILLEGAL_CHARACTERS_FOR_PATH = ".*[~!#$;%^*()+={}\\[\\]\\|\\\\<>].*";
 
     private static CloudServicesDescConfig cloudServicesDesc = null;
+    private static final String ADD_ADMIN_TRUE = "true";
         
 
     /**
@@ -97,6 +98,8 @@ public class TenantPersistor {
                 builder.getRealmConfigForTenantToPersist(realmConfig, tenantMgtConfiguration,
                         tenant, -1);
         tenant.setRealmConfig(realmConfigToPersist);
+        // Make AddAdmin true since user creation should happen even AddAdmin false
+        realmService.getBootstrapRealm().getRealmConfiguration().setAddAdmin(ADD_ADMIN_TRUE);
         tenantId = addTenant(tenant);
         tenant.setId(tenantId);
 
@@ -115,7 +118,7 @@ public class TenantPersistor {
             storeDomainValidationFlagToRegistry(tenant);
         }
 
-        updateTenantAdminPassword(tenant);
+        addTenantAdminUser(tenant);
         return tenantId;
     }
 
@@ -184,33 +187,21 @@ public class TenantPersistor {
     }
 
     /**
-     * Sets the password for the tenant
+     * Add tenant admin user. When get the User Realm from Realm Service it create the admin user
      * 
      * @param tenant - the tenant
      * @throws Exception - UserStoreException
      */
-    private void updateTenantAdminPassword(Tenant tenant) throws Exception {
+    private void addTenantAdminUser(Tenant tenant) throws Exception {
         RealmService realmService = TenantMgtCoreServiceComponent.getRealmService();
-        UserRealm userRealm;
         try {
-            userRealm = (UserRealm) realmService.getTenantUserRealm(tenant.getId());
+            realmService.getTenantManager().getTenant(tenant.getId()).getRealmConfig().
+                    setAdminPassword(tenant.getAdminPassword());
+            //Here when get the user realm it create admin user and group.
+            realmService.getTenantUserRealm(tenant.getId());
         } catch (UserStoreException e) {
             String msg = "Error in creating Realm for tenant: " + tenant.getDomain();
-            throw new Exception(msg, e);
-        }
-        try {
-            UserStoreManager userStoreManager = userRealm.getUserStoreManager();
-            if (!userStoreManager.isReadOnly()) {
-                userStoreManager.updateCredentialByAdmin(tenant.getAdminName(),
-                                                         tenant.getAdminPassword());
-                if (log.isDebugEnabled()) {
-                    log.debug("Successfully set the password for the tenant.");
-                }
-            }
-        } catch (UserStoreException e) {
-            String msg = "Error in changing the tenant admin password for tenant domain: " +
-                                 tenant.getDomain() + ".";
-            log.error(msg, e);
+            log.error(msg);
             throw new Exception(msg, e);
         }
     }
