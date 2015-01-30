@@ -198,16 +198,4 @@
             </plugin>
         </plugins>
     </build>
-
-  <!--  <properties>
-        <json.patch.version.200-wso2v1>2.0.0.wso2v1</json.patch.version.200-wso2v1>
-        <kaptcha.patch.version.230-wso2v1>2.3.0.wso2v1</kaptcha.patch.version.230-wso2v1>
-        <carbon.version>4.3.0-SNAPSHOT</carbon.version>
-        <carbon.platform.version>4.3.0-SNAPSHOT</carbon.platform.version>
-        <stratos.version>4.3.0-SNAPSHOT</stratos.version>
-        <stratos.keystore.version>4.3.0-SNAPSHOT</stratos.keystore.version>
-        <stratos.activation.version>4.3.0-SNAPSHOT</stratos.activation.version>
-        <rampart.wso2.version>1.6.1.wso2v12</rampart.wso2.version>
-    </properties>-->
-
 </project>
