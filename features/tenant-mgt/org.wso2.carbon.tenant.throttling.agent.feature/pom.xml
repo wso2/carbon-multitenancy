@@ -38,8 +38,13 @@
             <groupId>org.wso2.carbon.multitenancy</groupId>
             <artifactId>org.wso2.carbon.tenant.throttling.agent</artifactId>
         </dependency>
+         <dependency>
+            <groupId>org.wso2.carbon.commons</groupId>
+            <artifactId>org.wso2.carbon.tenant.throttling.agent.stub</artifactId>
+        </dependency>
 
     </dependencies>
+
     <build>
         <plugins>
             <plugin>
