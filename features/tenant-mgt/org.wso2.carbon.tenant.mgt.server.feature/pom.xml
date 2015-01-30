@@ -71,7 +71,7 @@
                             <bundles>
                                 <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.mgt.core</bundleDef>
                                 <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.mgt</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.email.verification</bundleDef>
+                                <bundleDef>org.wso2.carbon.commons:org.wso2.carbon.email.verification</bundleDef>
                             </bundles>
                             <importFeatures>
                                <importFeatureDef>org.wso2.carbon.core.server:${carbon.kernel.version}</importFeatureDef>
