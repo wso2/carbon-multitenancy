@@ -95,7 +95,7 @@
                             <bundles>
                                 <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.redirector.servlet.ui</bundleDef>
                                 <bundleDef>
-                                    org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.redirector.servlet.stub:${project.version}
+                                    org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.redirector.servlet.stub:${carbon.multitenancy.version}
                                 </bundleDef>
                                 <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.sso.redirector.ui</bundleDef>
                                 <!--<bundleDef>org.wso2.carbon:org.wso2.carbon.google.analytics.ui</bundleDef>-->
