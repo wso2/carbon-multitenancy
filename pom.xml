@@ -25,6 +25,13 @@
         <module>features/tenant-mgt</module>
     </modules>
 
+    <scm>
+        <url>https://github.com/wso2/carbon-multitenancy.git</url>
+        <developerConnection>scm:git:https://github.com/wso2/carbon-multitenancy.git</developerConnection>
+        <connection>scm:git:https://github.com/wso2/carbon-multitenancy.git</connection>
+        <tag>HEAD</tag>
+    </scm>
+
 
     <dependencyManagement>
         <dependencies>
@@ -766,6 +773,19 @@
                     <target>1.6</target>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <configuration>
+                    <preparationGoals>clean install</preparationGoals>
+                    <!-- There sub modules with different versions -->
+                    <!--<autoVersionSubmodules>true</autoVersionSubmodules>-->
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+            </plugin>
         </plugins>
         <pluginManagement>
             <plugins>
@@ -1029,6 +1049,8 @@
         <org.eclipse.osgi.version>3.7.0.v20110613</org.eclipse.osgi.version>
         <version.equinox.osgi.services>3.3.100.v20120522-1822</version.equinox.osgi.services>
         <libthrift.wso2.version>0.7.wso2v1</libthrift.wso2.version>
+
+        <project.scm.id>my-scm-server</project.scm.id>
     </properties>
 
     <repositories>
