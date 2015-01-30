@@ -45,6 +45,16 @@
              <artifactId>org.wso2.carbon.user.mgt.stub</artifactId>
              <version>${carbon.commons.version}</version>
          </dependency>
+	<dependency>
+            <groupId>org.wso2.carbon.commons</groupId>
+            <artifactId>org.wso2.carbon.email.verification</artifactId>
+            <version>${carbon.commons.version}</version>
+        </dependency>
+	<dependency>
+           <groupId>org.wso2.carbon.commons</groupId>
+           <artifactId>org.wso2.carbon.um.ws.api</artifactId>
+           <version>${carbon.commons.version}</version>
+        </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.core</artifactId>
