@@ -145,12 +145,12 @@
                 <version>${axiom.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon</groupId>
+                <groupId>org.wso2.carbon.registry</groupId>
                 <artifactId>org.wso2.carbon.registry.resource</artifactId>
                 <version>${carbon.registry.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon</groupId>
+                <groupId>org.wso2.carbon.registry</groupId>
                 <artifactId>org.wso2.carbon.registry.common</artifactId>
                 <version>${carbon.registry.version}</version>
             </dependency>
@@ -475,7 +475,7 @@
             </dependency>
 
             <dependency>
-                <groupId>org.wso2.carbon</groupId>
+                <groupId>org.wso2.carbon.identity</groupId>
                 <artifactId>org.wso2.carbon.security.mgt</artifactId>
                 <version>${carbon.identity.version}</version>
             </dependency>
@@ -928,11 +928,11 @@
         <carbon.commons.imp.pkg.version>[4.3.0, 4.4.0)</carbon.commons.imp.pkg.version>
 
         <!-- Carbon Registry version-->
-        <carbon.registry.version>4.3.0-SNAPSHOT</carbon.registry.version>
+        <carbon.registry.version>4.3.0</carbon.registry.version>
         <carbon.registry.imp.pkg.version>[4.3.0, 4.4.0)</carbon.registry.imp.pkg.version>
 
         <!-- Carbon Identity version-->
-        <carbon.identity.version>4.3.0-SNAPSHOT</carbon.identity.version>
+        <carbon.identity.version>4.3.0</carbon.identity.version>
         <carbon.identity.imp.pkg.version>[4.3.0, 4.4.0)</carbon.identity.imp.pkg.version>
 
         <!-- Carbon Multi-tenancy version-->
@@ -986,7 +986,7 @@
         <version.javax.servlet>3.0.0.v201112011016</version.javax.servlet>
 
         <!-- Rampart Version -->
-        <rampart.wso2.version>1.6.1.wso2v13-SNAPSHOT</rampart.wso2.version>
+        <rampart.wso2.version>1.6.1.wso2v13</rampart.wso2.version>
 
         <slf4j.wso2.version>1.5.10.wso2v1</slf4j.wso2.version>
 
