@@ -40,7 +40,7 @@
         </dependency>
          <dependency>
             <groupId>org.wso2.carbon.commons</groupId>
-            <artifactId>org.wso2.carbon.tenant.throttling.agent.stub</artifactId>
+            <artifactId>org.wso2.carbon.throttling.agent.stub</artifactId>
         </dependency>
 
     </dependencies>
