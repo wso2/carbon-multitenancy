@@ -15,8 +15,18 @@
 ~ specific language governing permissions and limitations
 ~ under the License.
 -->
+<%@page import="org.wso2.carbon.user.mgt.ui.UserAdminClient" %>
 <%@ page import="org.wso2.carbon.stratos.common.util.CommonUtil" %>
 <%@ page import="org.wso2.carbon.tenant.mgt.stub.beans.xsd.TenantInfoBean" %>
+<%@ page import="org.wso2.carbon.user.mgt.stub.types.carbon.UserStoreInfo" %>
+<%@ page import="org.wso2.carbon.user.mgt.stub.types.carbon.UserRealmInfo" %>
+<%@page import="org.wso2.carbon.ui.CarbonUIUtil" %>
+<%@ page import="org.wso2.carbon.user.mgt.ui.UserAdminUIConstants" %>
+<%@ page import="java.text.MessageFormat" %>
+<%@ page import="java.util.ResourceBundle" %>
+<%@page import="org.wso2.carbon.utils.ServerConstants" %>
+<%@page import="org.wso2.carbon.CarbonConstants" %>
+<%@page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@ page import="org.wso2.carbon.tenant.mgt.ui.utils.TenantMgtUtil" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="org.wso2.carbon.base.ServerConfiguration" %>
@@ -28,7 +38,43 @@
         resourceBundle="org.wso2.carbon.tenant.mgt.ui.i18n.JSResources"
         request="<%=request%>"/>
 <%
-    String domainName = request.getParameter("domain");
+    UserStoreInfo userStoreInfo = null;
+    UserRealmInfo userRealmInfo = null;
+
+    String BUNDLE = "org.wso2.carbon.userstore.ui.i18n.Resources";
+    ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
+
+    try {
+        userRealmInfo = (UserRealmInfo) session.getAttribute(UserAdminUIConstants.USER_STORE_INFO);
+        if (userRealmInfo == null) {
+            String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
+            String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
+            ConfigurationContext configContext =
+                    (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
+            UserAdminClient client = new UserAdminClient(cookie, backendServerURL, configContext);
+            userRealmInfo = client.getUserRealmInfo();
+            session.setAttribute(UserAdminUIConstants.USER_STORE_INFO, userRealmInfo);
+        }
+
+        userStoreInfo = userRealmInfo.getPrimaryUserStoreInfo();
+
+    } catch (Exception e) {
+        String message = MessageFormat.format(resourceBundle.getString("error.while.loading.user.store.info"),
+                                              e.getMessage());
+%>
+<script type="text/javascript">
+    jQuery(document).ready(function () {
+        CARBON.showErrorDialog('<%=message%>', function () {
+            location.href = "add_tenant.jsp";
+        });
+    });
+</script>
+<%
+    }
+%>
+<%
+
+String domainName = request.getParameter("domain");
     String firstname = "";
     String lastname = "";
     String admin = "";
@@ -105,6 +151,7 @@
 <div id="activityReason" style="display: none;"></div>
 <form id="addTenantForm" action="submit_tenant_ajaxprocessor.jsp" method="post">
     <input type="hidden" name="isUpdating" id="isUpdating" value="false">
+    <input name="userNameRegex" id="userNameRegex" type="hidden" value="<%=userStoreInfo.getUserNameRegEx()%>"/>
     <table class="styledLeft">
         <thead>
         <tr>

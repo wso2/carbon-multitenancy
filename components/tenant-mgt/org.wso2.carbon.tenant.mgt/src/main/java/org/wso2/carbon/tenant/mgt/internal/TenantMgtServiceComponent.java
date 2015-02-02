@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.neethi.Policy;
 import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -57,6 +58,11 @@ import java.util.List;
  *                cardinality="1..1" policy="dynamic"
  *                bind="setConfigurationContextService"
  *                unbind="unsetConfigurationContextService"
+ * @scr.reference name="server.configuration"
+ *                interface="org.wso2.carbon.base.api.ServerConfigurationService"
+ *                cardinality="1..1" policy="dynamic"
+ *                bind="setServerConfigurationService"
+ *                unbind="unsetServerConfigurationService"
  * @scr.reference name="org.wso2.carbon.tenant.mgt.listener.service"
  *                interface="org.wso2.carbon.stratos.common.listeners.TenantMgtListener"
  *                cardinality="0..n" policy="dynamic"
@@ -77,6 +83,8 @@ public class TenantMgtServiceComponent {
     private static RegistryService registryService;
 
     private static ConfigurationContextService configurationContextService;
+
+    private static ServerConfigurationService serverConfigurationService;
 
     private static List<TenantMgtListener> tenantMgtListeners = new ArrayList<TenantMgtListener>();
     private static TenantBillingService billingService = null;
@@ -144,6 +152,16 @@ public class TenantMgtServiceComponent {
         setConfigurationContextService(null);
     }
 
+    protected void setServerConfigurationService(ServerConfigurationService serverConfigurationService) {
+        log.debug("Receiving ServerConfiguration Service");
+        TenantMgtServiceComponent.serverConfigurationService = serverConfigurationService;
+    }
+
+    protected void unsetServerConfigurationService(ServerConfigurationService serverConfigurationService) {
+        log.debug("Unsetting ServerConfiguration Service");
+        setServerConfigurationService(null);
+    }
+
     public static void addTenantMgtListener(TenantMgtListener tenantMgtListener) {
         tenantMgtListeners.add(tenantMgtListener);
         sortTenantMgtListeners();
@@ -175,6 +193,10 @@ public class TenantMgtServiceComponent {
             return null;
         }
         return configurationContextService.getServerConfigContext();
+    }
+
+    public static ServerConfigurationService getServerConfigurationService() {
+        return serverConfigurationService;
     }
 
     public static RegistryService getRegistryService() {

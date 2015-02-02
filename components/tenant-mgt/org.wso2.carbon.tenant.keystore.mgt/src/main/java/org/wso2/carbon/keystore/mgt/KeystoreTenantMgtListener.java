@@ -82,4 +82,9 @@ public class KeystoreTenantMgtListener implements TenantMgtListener {
                                          String newPlan) throws StratosException {
         // It is not required to implement this method for keystore mgt. 
     }
+
+	@Override
+	public void onPreDelete(int tenantId) throws StratosException {
+		//Implement this method to delete product specific data
+	}
 }
