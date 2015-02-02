@@ -15,14 +15,12 @@
  ~ limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
         <groupId>org.wso2.carbon.multitenancy</groupId>
         <artifactId>tenant-mgt-feature</artifactId>
-        <version>4.3.0-SNAPSHOT</version>
+        <version>4.3.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -198,16 +196,4 @@
             </plugin>
         </plugins>
     </build>
-
-  <!--  <properties>
-        <json.patch.version.200-wso2v1>2.0.0.wso2v1</json.patch.version.200-wso2v1>
-        <kaptcha.patch.version.230-wso2v1>2.3.0.wso2v1</kaptcha.patch.version.230-wso2v1>
-        <carbon.version>4.3.0-SNAPSHOT</carbon.version>
-        <carbon.platform.version>4.3.0-SNAPSHOT</carbon.platform.version>
-        <stratos.version>4.3.0-SNAPSHOT</stratos.version>
-        <stratos.keystore.version>4.3.0-SNAPSHOT</stratos.keystore.version>
-        <stratos.activation.version>4.3.0-SNAPSHOT</stratos.activation.version>
-        <rampart.wso2.version>1.6.1.wso2v12</rampart.wso2.version>
-    </properties>-->
-
 </project>
