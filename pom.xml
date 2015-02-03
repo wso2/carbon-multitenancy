@@ -922,7 +922,7 @@
         <carbon.kernel.registry.imp.pkg.version>[1.0.1, 2.0.0)</carbon.kernel.registry.imp.pkg.version>
 
         <!-- Carbon Commons version-->
-        <carbon.commons.version>4.3.3</carbon.commons.version>
+        <carbon.commons.version>4.3.4</carbon.commons.version>
         <carbon.commons.imp.pkg.version>[4.3.0, 4.4.0)</carbon.commons.imp.pkg.version>
 
         <!-- Carbon Registry version-->
@@ -930,12 +930,12 @@
         <carbon.registry.imp.pkg.version>[4.3.0, 4.4.0)</carbon.registry.imp.pkg.version>
 
         <!-- Carbon Identity version-->
-        <carbon.identity.version>4.3.1</carbon.identity.version>
+        <carbon.identity.version>4.3.2</carbon.identity.version>
         <carbon.identity.imp.pkg.version>[4.3.0, 4.4.0)</carbon.identity.imp.pkg.version>
 
         <!-- Carbon Multi-tenancy version-->
         <carbon.multitenancy.version>4.3.3-SNAPSHOT</carbon.multitenancy.version>
-        <carbon.multitenancy.exp.pkg.version>4.3.2</carbon.multitenancy.exp.pkg.version>
+        <carbon.multitenancy.exp.pkg.version>4.3.3</carbon.multitenancy.exp.pkg.version>
         <carbon.multitenancy.imp.pkg.version>[4.3.0, 4.4.0)</carbon.multitenancy.imp.pkg.version>
 
         <previous.version>4.2.0</previous.version>
