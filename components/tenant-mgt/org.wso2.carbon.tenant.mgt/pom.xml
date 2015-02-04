@@ -64,6 +64,7 @@
                             org.wso2.carbon.tenant.mgt.realm.*,
                             org.wso2.carbon.tenant.mgt.services.*,
                             org.wso2.carbon.tenant.mgt.util.*,
+                            org.wso2.carbon.tenant.mgt.message.*,
                         </Export-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
