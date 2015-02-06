@@ -935,7 +935,7 @@
 
         <!-- Carbon Multi-tenancy version-->
         <carbon.multitenancy.version>4.3.4-SNAPSHOT</carbon.multitenancy.version>
-        <carbon.multitenancy.exp.pkg.version>4.3.3</carbon.multitenancy.exp.pkg.version>
+        <carbon.multitenancy.exp.pkg.version>4.3.4</carbon.multitenancy.exp.pkg.version>
         <carbon.multitenancy.imp.pkg.version>[4.3.0, 4.4.0)</carbon.multitenancy.imp.pkg.version>
 
         <previous.version>4.2.0</previous.version>
