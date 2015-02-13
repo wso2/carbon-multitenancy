@@ -37,5 +37,9 @@
             <DisplayName>Tenants</DisplayName>
             <ResourceId>/permission/protected/manage/modify/tenants</ResourceId>
         </ManagementPermission>
+        <ManagementPermission>
+            <DisplayName>List</DisplayName>
+            <ResourceId>/permission/protected/manage/monitor/tenants/list</ResourceId>
+        </ManagementPermission>
    </ManagementPermissions>
 </component>
