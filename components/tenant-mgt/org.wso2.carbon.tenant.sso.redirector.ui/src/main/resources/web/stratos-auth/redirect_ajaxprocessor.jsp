@@ -27,6 +27,8 @@
 <%@ page
         import="org.wso2.carbon.identity.authenticator.saml2.sso.common.builders.LogoutRequestBuilder" %>
 <%@ page
+	import="org.wso2.carbon.ui.CarbonSecuredHttpContext" %>
+<%@ page
         import="org.wso2.carbon.identity.authenticator.saml2.sso.common.Util" %>
 <%@ page import="org.wso2.carbon.registry.core.utils.UUIDGenerator" %>
 <%@ page import="org.wso2.carbon.utils.multitenancy.MultitenantConstants" %>
@@ -94,22 +96,37 @@
     String encodedReq = null;
     String relayState = "";
     String domain = null;
-    if (request.getParameter(SAML2SSOAuthenticatorConstants.LOG_OUT_REQ) != null) {
+    String url = null;
+    if (request.getParameter(SAML2SSOAuthenticatorConstants.LOG_OUT_REQ) != null &&
+		session.getAttribute(CarbonSecuredHttpContext.LOGGED_USER) != null) {
         LogoutRequestBuilder logoutRequestBuilder = new LogoutRequestBuilder();
-        LogoutRequest logoutReq = logoutRequestBuilder.buildLogoutRequest((String) request.getAttribute(
-                SAML2SSOAuthenticatorConstants.LOGGED_IN_USER), SAML2SSOAuthenticatorConstants.LOGOUT_USER,
+        LogoutRequest logoutReq = logoutRequestBuilder.buildLogoutRequest(SAML2SSOAuthenticatorConstants.LOGGED_IN_USER, SAML2SSOAuthenticatorConstants.LOGOUT_USER,
                 (String)request.getSession().getAttribute(SAML2SSOAuthenticatorConstants.IDP_SESSION_INDEX));
         encodedReq = Util.encode(Util.marshall(logoutReq));
         relayState = UUIDGenerator.generateUUID();
+        url = Util.getIdentityProviderSLOServiceURL();
+        if (url == null) {
+            url = Util.getIdentityProviderSSOServiceURL();
+        }
     } else {
+		boolean isPassive = false;
+        if(request.getParameter(SAML2SSOAuthenticatorConstants.LOG_OUT_REQ) != null &&
+                request.getSession().getAttribute(CarbonSecuredHttpContext.LOGGED_USER) == null){
+            isPassive = true;
+        }
         AuthenticationRequestBuilder authnReqGenerator = new AuthenticationRequestBuilder();
         AuthenticatorsConfiguration authenticatorsConfiguration = AuthenticatorsConfiguration.getInstance();
         AuthenticatorsConfiguration.AuthenticatorConfig authenticatorConfig =
                 authenticatorsConfiguration.getAuthenticatorConfig(SAML2SSOAuthenticatorConstants.AUTHENTICATOR_NAME); 
-        AuthnRequest authRequest = authnReqGenerator.buildAuthenticationRequest(null,authenticatorConfig.getParameters().get(SAML2SSOAuthenticatorConstants.NAMEID_POLICY_FORMAT));
+        AuthnRequest authRequest = authnReqGenerator.buildAuthenticationRequest(null,authenticatorConfig.getParameters().get(SAML2SSOAuthenticatorConstants.NAMEID_POLICY_FORMAT), isPassive);
         encodedReq = Util.encode(Util.marshall(authRequest));
         relayState = UUIDGenerator.generateUUID();
+	if(request.getParameter(SAML2SSOAuthenticatorConstants.LOG_OUT_REQ) != null &&
+                request.getSession().getAttribute(CarbonSecuredHttpContext.LOGGED_USER) == null){
+            relayState += "-logout";
+        }
         domain = (String) request.getAttribute(MultitenantConstants.TENANT_DOMAIN);
+        url = Util.getIdentityProviderSSOServiceURL();
     }
     // add the relay state to Session Manager
     SSOSessionManager.addAuthnRequest(relayState);
@@ -163,13 +180,13 @@
 
 
 		
-<form method="post" action="<%=Util.getIdentityProviderSSOServiceURL()%>" class="redirectForm">
+<form method="post" action="<%=url%>" class="redirectForm">
     <input type="hidden"
               name="<%=SAML2SSOAuthenticatorConstants.HTTP_POST_PARAM_SAML2_AUTH_REQ%>"
               value="<%= encodedReq %>"/>
         <input type="hidden" name="RelayState" value="<%= relayState %>"/>
         <input type="hidden" name="<%= MultitenantConstants.TENANT_DOMAIN %>"
-               value="<%= domain %>"/>
+               value="carbon.super"/>
         <input type="hidden" name="<%= MultitenantConstants.SSO_AUTH_SESSION_ID %>" value="<%= session.getId() %>"/>
         
 </form>
