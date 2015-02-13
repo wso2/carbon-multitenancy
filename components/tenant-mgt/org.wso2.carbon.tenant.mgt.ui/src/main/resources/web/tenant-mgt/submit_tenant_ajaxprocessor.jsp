@@ -73,7 +73,7 @@
         }
 
     } catch (Exception e) {
-        CarbonUIMessage uiMsg = new CarbonUIMessage(CarbonUIMessage.ERROR, e.getMessage(), e);
+        CarbonUIMessage uiMsg = new CarbonUIMessage(e.getMessage(),CarbonUIMessage.ERROR, e, false);
         request.setAttribute(CarbonUIMessage.ID, uiMsg);
              %>
             <jsp:forward page="../admin/error.jsp"/>
