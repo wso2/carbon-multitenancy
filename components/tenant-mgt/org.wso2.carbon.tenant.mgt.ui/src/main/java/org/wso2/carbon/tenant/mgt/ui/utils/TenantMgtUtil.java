@@ -21,6 +21,7 @@ package org.wso2.carbon.tenant.mgt.ui.utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.tenant.mgt.stub.TenantMgtAdminServiceExceptionException;
 import org.wso2.carbon.tenant.mgt.stub.beans.xsd.TenantInfoBean;
 import org.wso2.carbon.tenant.mgt.ui.clients.TenantServiceClient;
 
@@ -65,7 +66,10 @@ public class TenantMgtUtil {
             
             TenantServiceClient serviceClient = new TenantServiceClient(config, session);
             serviceClient.addTenant(tenantInfoBean);
-            
+        } catch (TenantMgtAdminServiceExceptionException e){
+            String msg = e.getFaultMessage().getTenantMgtAdminServiceException().getMessage();
+            log.error(msg,e);
+            throw new Exception(msg,e);
         } catch (Exception e) {
             String msg = "Failed to add tenant config. tenant-domain: "
                     + tenantInfoBean.getTenantDomain() + ", " + "tenant-admin: "
