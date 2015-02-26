@@ -1043,7 +1043,6 @@
         <wss4j.version>1.5.11.wso2v9</wss4j.version>
 
         <com.google.code.gson.version>2.2.4</com.google.code.gson.version>
-        <orbit.version.json>1.0.0.wso2v1</orbit.version.json>
         <org.eclipse.osgi.version>3.7.0.v20110613</org.eclipse.osgi.version>
         <version.equinox.osgi.services>3.3.100.v20120522-1822</version.equinox.osgi.services>
         <libthrift.wso2.version>0.7.wso2v1</libthrift.wso2.version>
