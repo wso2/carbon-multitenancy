@@ -193,17 +193,12 @@ public class TenantPersistor {
      * @throws Exception - UserStoreException
      */
     private void addTenantAdminUser(Tenant tenant) throws Exception {
+
         RealmService realmService = TenantMgtCoreServiceComponent.getRealmService();
-        try {
-            realmService.getTenantManager().getTenant(tenant.getId()).getRealmConfig().
-                    setAdminPassword(tenant.getAdminPassword());
-            //Here when get the user realm it create admin user and group.
-            realmService.getTenantUserRealm(tenant.getId());
-        } catch (UserStoreException e) {
-            String msg = "Error in creating Realm for tenant: " + tenant.getDomain();
-            log.error(msg);
-            throw new Exception(msg, e);
-        }
+        realmService.getTenantManager().getTenant(tenant.getId()).getRealmConfig().
+                setAdminPassword(tenant.getAdminPassword());
+        //Here when get the user realm it create admin user and group.
+        realmService.getTenantUserRealm(tenant.getId());
     }
 
     /**
