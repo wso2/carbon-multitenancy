@@ -14,14 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
-        <groupId>org.wso2.carbon</groupId>
+        <groupId>org.wso2.carbon.multitenancy</groupId>
         <artifactId>tenant-mgt-parent</artifactId>
-        <version>4.3.0-SNAPSHOT</version>
+        <version>4.3.5-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -45,7 +43,8 @@
                             org.wso2.carbon.tenant.mgt.ui.*,
                         </Export-Package>
                         <Import-Package>
-                            org.wso2.carbon.tenant.mgt.stub.*; version="${carbon.platform.package.import.version.range}",
+                            org.wso2.carbon.tenant.mgt.stub.*; version="${carbon.multitenancy.imp.pkg.version}",
+                            org.wso2.carbon.user.mgt.stub.*;version="${carbon.commons.imp.pkg.version}",
                             org.apache.axis2.client.*,
                             javax.servlet;version="${imp.pkg.version.javax.servlet}",
                             javax.servlet.http;version="${imp.pkg.version.javax.servlet}",
@@ -62,10 +61,6 @@
     </build>
 
     <dependencies>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.registry.common.ui</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.core</artifactId>
@@ -90,14 +85,13 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.ui</artifactId>
-            <version>${carbon.platform.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.multitenancy</groupId>
             <artifactId>org.wso2.carbon.tenant.mgt.stub</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.commons</groupId>
             <artifactId>org.wso2.carbon.tenant.common</artifactId>
         </dependency>
         <dependency>
@@ -105,8 +99,12 @@
             <artifactId>json</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.multitenancy</groupId>
             <artifactId>org.wso2.carbon.tenant.common.stub</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.commons</groupId>
+            <artifactId>org.wso2.carbon.user.mgt.stub</artifactId>
         </dependency>
     </dependencies>
 </project>

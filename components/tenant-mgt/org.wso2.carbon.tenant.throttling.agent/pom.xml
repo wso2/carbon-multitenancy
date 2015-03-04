@@ -13,20 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
-        <groupId>org.wso2.carbon</groupId>
+        <groupId>org.wso2.carbon.multitenancy</groupId>
         <artifactId>tenant-mgt-parent</artifactId>
-        <version>4.3.0-SNAPSHOT</version>
+        <version>4.3.5-SNAPSHOT</version>
 	<relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.wso2.carbon</groupId>
     <artifactId>org.wso2.carbon.tenant.throttling.agent</artifactId>
-    <version>4.3.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
     <name>WSO2 Tenant - Throttling Agent</name>
 
@@ -60,10 +56,10 @@
                         </Private-Package>
                         <Import-Package>
                             org.wso2.carbon.throttling.agent.stub.*;
-                            version="${carbon.platform.package.import.version.range}",
+                            version="${carbon.multitenancy.imp.pkg.version}",
                             org.wso2.carbon.stratos.common.*,
                             org.wso2.carbon.server.*,
-                            org.wso2.carbon.registry.core.*;version=1.0.1,
+                            org.wso2.carbon.registry.core.*;version="${carbon.kernel.registry.imp.pkg.version}",
                             org.wso2.carbon.registry.resource.*,
                             !javax.xml.namespace,
                             javax.xml.namespace; version=0.0.0,
@@ -102,19 +98,15 @@
             <artifactId>commons-logging</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.registry.extensions</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.registry.resource</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.commons</groupId>
             <artifactId>org.wso2.carbon.tenant.common</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.authenticator.proxy</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.commons</groupId>
 			<artifactId>org.wso2.carbon.throttling.agent.stub</artifactId>
         </dependency>
         <dependency>

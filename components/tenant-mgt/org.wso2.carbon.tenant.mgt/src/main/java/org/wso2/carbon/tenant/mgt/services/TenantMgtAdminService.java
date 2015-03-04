@@ -17,6 +17,7 @@ package org.wso2.carbon.tenant.mgt.services;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
@@ -69,9 +70,15 @@ public class TenantMgtAdminService extends AbstractAdmin {
         int tenantId = persistor.persistTenant(tenant, false, tenantInfoBean.getSuccessKey(),
                                 tenantInfoBean.getOriginatedService(),false);
         tenantInfoBean.setTenantId(tenantId);
-        
+
+        PrivilegedCarbonContext.startTenantFlow();
+
+        PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        carbonContext.setTenantDomain(tenantDomain);
+        carbonContext.setTenantId(tenantId);
         TenantMgtUtil.addClaimsToUserStoreManager(tenant);
-        
+
+        PrivilegedCarbonContext.endTenantFlow();
         notifyTenantAddition(tenantInfoBean);
         //adding the subscription entry
         /*try {
@@ -98,6 +105,22 @@ public class TenantMgtAdminService extends AbstractAdmin {
         //Notify tenant addition
         try {
             TenantMgtUtil.triggerAddTenant(tenantInfoBean);
+        } catch (StratosException e) {
+            String msg = "Error in notifying tenant addition.";
+            log.error(msg, e);
+            throw new Exception(msg, e);
+        }
+    }
+
+    /**
+     * Notifying Tenant deletion listeners
+     *
+     * @param tenantId
+     * @throws Exception
+     */
+    private void notifyTenantDeletion(int tenantId) throws Exception {
+        try {
+            TenantMgtUtil.triggerPreTenantDelete(tenantId);
         } catch (StratosException e) {
             String msg = "Error in notifying tenant addition.";
             log.error(msg, e);
@@ -511,23 +534,41 @@ public class TenantMgtAdminService extends AbstractAdmin {
     /**
      * Delete a specific tenant
      *
-     * @param tenantDomain The domain name of the tennat that needs to be deleted
+     * @param tenantDomain The domain name of the tenant that needs to be deleted
      */
-    public void deleteTenant(String tenantDomain) throws Exception {
-        TenantManager tenantManager = TenantMgtCoreServiceComponent.getTenantManager();
-        int tenantId = tenantManager.getTenantId(tenantDomain);
-        try {
-            TenantMgtServiceComponent.getBillingService().deleteBillingData(tenantId);
-            TenantMgtUtil.deleteTenantRegistryData(tenantId);
-            TenantMgtUtil.deleteTenantUMData(tenantId);
-            tenantManager.deleteTenant(tenantId);
-            log.info("Deleted tenant with domain: " + tenantDomain + " and tenant id: " + tenantId + 
-                     " from the system.");
-        } catch (Exception e) {
-            String msg = "Error deleting tenant with domain: " + tenantDomain + " and tenant id: " +
-                    tenantId + ".";
-            log.error(msg, e);
-            throw new Exception(msg, e);
+    public void deleteTenant(String tenantDomain) throws StratosException, org.wso2.carbon.user.api.UserStoreException {
+        TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
+        if (tenantManager != null) {
+            int tenantId = tenantManager.getTenantId(tenantDomain);
+            try {
+                log.info("Starting Tenant Deletion process...");
+
+                notifyTenantDeletion(tenantId);
+                TenantMgtUtil.deleteWorkernodesTenant(tenantId);
+
+                String tenantDelete = TenantMgtServiceComponent.getServerConfigurationService().getFirstProperty("TenantDelete");
+
+                if ((tenantDelete == null)
+                    && (tenantDelete.equals("true"))) {
+                    log.info("Tenant Delete Flag is True");
+                    if (TenantMgtServiceComponent.getBillingService() != null) {
+                        TenantMgtServiceComponent.getBillingService().deleteBillingData(tenantId);
+                    }
+                    TenantMgtUtil.deleteTenantRegistryData(tenantId);
+                    TenantMgtUtil.deleteTenantUMData(tenantId);
+                    tenantManager.deleteTenant(tenantId);
+                    log.info("Deleted tenant with domain: " + tenantDomain + " and tenant id: " + tenantId +
+                             " from the system.");
+                } else {
+                    log.info("Tenant Delete Flag is false");
+                }
+            } catch (Exception e) {
+                String msg = "Error deleting tenant with domain: " + tenantDomain + " and tenant id: " +
+                             tenantId + ".";
+                log.error(msg, e);
+                throw new StratosException(msg, e);
+            }
         }
+
     }
 }

@@ -51,7 +51,7 @@
         </operation>
         <operation name="retrieveTenants">
             <parameter name="superTenantService" locked="true">true</parameter>
-            <parameter name="AuthorizationAction" locked="true">/permission/protected/manage/monitor/tenants</parameter>
+            <parameter name="AuthorizationAction" locked="true">/permission/protected/manage/monitor/tenants/list</parameter>
         </operation>
         <operation name="retrievePaginatedTenants">
             <parameter name="superTenantService" locked="true">true</parameter>

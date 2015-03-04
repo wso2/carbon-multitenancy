@@ -27,6 +27,9 @@ function addTenant(isUpdating, isPublicCloud, isEmailUser) {
             if (adminPassword.value != adminPasswordRepeat.value) {
                 reason += jsi18n["password.mismatched"];
             }
+            if (adminPassword.value.length < 6) {
+                reason += jsi18n["password.length"];
+            }
         }
     }
     else {
@@ -62,11 +65,6 @@ function addTenant(isUpdating, isPublicCloud, isEmailUser) {
         }
         if (reason == "") {
             reason += validateEmpty(adminName, "Admin Name");
-        }
-        if (reason == "") {
-        	 if (!isEmailUser) {
-                  reason += validateIllegal(adminName, "Admin Name");
-        	 }
         }
         if (reason == "") {
         	  if (isEmailUser) {

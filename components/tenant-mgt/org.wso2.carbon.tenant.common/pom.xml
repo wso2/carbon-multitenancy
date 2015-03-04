@@ -17,7 +17,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
-        <groupId>org.wso2.carbon</groupId>
+        <groupId>org.wso2.carbon.multitenancy</groupId>
         <artifactId>tenant-mgt-parent</artifactId>
         <version>4.3.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
@@ -48,7 +48,7 @@
                             org.wso2.carbon.stratos.common.*,
                         </Export-Package>
                         <Import-Package>
-                            org.wso2.carbon.registry.core.*;version=1.0.1,
+                            org.wso2.carbon.registry.core.*;version="${carbon.kernel.registry.imp.pkg.version}",
                             org.wso2.carbon.user.core.*,
                             javax.servlet;version="${imp.pkg.version.javax.servlet}",
                             javax.servlet.http;version="${imp.pkg.version.javax.servlet}",
@@ -71,7 +71,7 @@
             <artifactId>org.wso2.carbon.user.core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.commons</groupId>
             <artifactId>org.wso2.carbon.user.mgt</artifactId>
         </dependency>
         <dependency>
@@ -80,7 +80,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.commons</groupId>
             <artifactId>org.wso2.carbon.databridge.commons</artifactId>
         </dependency>
         <dependency>

@@ -15,14 +15,12 @@
  ~ limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
-        <groupId>org.wso2.carbon</groupId>
+        <groupId>org.wso2.carbon.multitenancy</groupId>
         <artifactId>tenant-mgt-feature</artifactId>
-        <version>4.3.0-SNAPSHOT</version>
+        <version>4.3.5-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -35,11 +33,16 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.multitenancy</groupId>
             <artifactId>org.wso2.carbon.tenant.throttling.agent</artifactId>
+        </dependency>
+         <dependency>
+            <groupId>org.wso2.carbon.commons</groupId>
+            <artifactId>org.wso2.carbon.throttling.agent.stub</artifactId>
         </dependency>
 
     </dependencies>
+
     <build>
         <plugins>
             <plugin>
@@ -63,8 +66,8 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.tenant.throttling.agent</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.throttling.agent.stub</bundleDef>
+                                <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.throttling.agent:${carbon.multitenancy.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.commons:org.wso2.carbon.throttling.agent.stub:${carbon.commons.version}</bundleDef>
                             </bundles>
                         </configuration>
                     </execution>
