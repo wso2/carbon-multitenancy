@@ -122,7 +122,6 @@
                                     <includes>
                                         <include>conf/cloud-services-desc.xml</include>
                                         <include>conf/multitenancy-packages.xml</include>
-                                        <include>conf/identity.xml</include>
                                         <include>conf/tenant-mgt.xml</include>
                                         <include>conf/stratos.xml</include>
                                         <include>conf/eula.xml</include>
