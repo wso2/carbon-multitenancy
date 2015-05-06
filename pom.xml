@@ -638,7 +638,7 @@
                 <version>${carbon.commons.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon</groupId>
+                <groupId>org.wso2.carbon.identity</groupId>
                 <artifactId>org.wso2.carbon.captcha.mgt</artifactId>
                 <version>${previous.version}</version>
             </dependency>
@@ -938,7 +938,7 @@
         <carbon.multitenancy.exp.pkg.version>${carbon.multitenancy.version}</carbon.multitenancy.exp.pkg.version>
         <carbon.multitenancy.imp.pkg.version>[4.4.0, 4.5.0)</carbon.multitenancy.imp.pkg.version>
 
-        <previous.version>4.2.0</previous.version>
+        <previous.version>4.4.0</previous.version>
         <version.jettison>1.3.4</version.jettison>
 
         <carbon.p2.plugin.version>1.5.4</carbon.p2.plugin.version>

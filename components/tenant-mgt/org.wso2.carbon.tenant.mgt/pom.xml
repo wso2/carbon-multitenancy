@@ -91,7 +91,7 @@
             <artifactId>org.wso2.carbon.um.ws.api</artifactId>
         </dependency>
         <dependency>
-           <groupId>org.wso2.carbon</groupId>
+           <groupId>org.wso2.carbon.identity</groupId>
             <artifactId>org.wso2.carbon.captcha.mgt</artifactId>
         </dependency>
         <dependency>
