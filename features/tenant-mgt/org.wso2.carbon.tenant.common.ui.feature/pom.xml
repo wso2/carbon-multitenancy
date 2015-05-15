@@ -56,10 +56,6 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.multitenancy</groupId>
-            <artifactId>org.wso2.carbon.tenant.common.stub</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.multitenancy</groupId>
             <artifactId>org.wso2.carbon.tenant.theme.mgt.ui</artifactId>
         </dependency>
         <dependency>
@@ -100,15 +96,14 @@
 
                                 <!-- Tenant Mgmt-->
                                 <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.mgt.ui</bundleDef>
-                                <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.common.stub</bundleDef>
                                 <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.mgt.stub</bundleDef>
                                 <!-- Tenant Mgmt End-->
 
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.ui:${carbon.kernel.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.registry.core.ui:${carbon.registry.version}
-                                </importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.registry.core.ui:${carbon.registry.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.tenant.mgt.common.ui:${carbon.commons.version}</importFeatureDef>
                                 <importFeatureDef>
                                     org.wso2.carbon.identity.authenticator.saml2.sso.ui:${carbon.identity.version}
                                 </importFeatureDef>
