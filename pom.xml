@@ -15,7 +15,6 @@
     <url>http://wso2.org</url>
 
     <modules>
-        <module>service-stubs/org.wso2.carbon.tenant.common.stub</module>
         <module>service-stubs/org.wso2.carbon.tenant.mgt.stub</module>
         <module>service-stubs/org.wso2.carbon.tenant.redirector.servlet.stub</module>
         <module>service-stubs/org.wso2.carbon.tenant.theme.mgt.stub</module>
@@ -322,6 +321,11 @@
             <dependency>
                 <groupId>org.wso2.carbon.commons</groupId>
                 <artifactId>org.wso2.carbon.tenant.common</artifactId>
+                <version>${carbon.commons.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.commons</groupId>
+                <artifactId>org.wso2.carbon.tenant.common.stub</artifactId>
                 <version>${carbon.commons.version}</version>
             </dependency>
             <dependency>
@@ -649,11 +653,6 @@
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.multitenancy</groupId>
-                <artifactId>org.wso2.carbon.tenant.common.stub</artifactId>
-                <version>${carbon.multitenancy.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.multitenancy</groupId>
                 <artifactId>org.wso2.carbon.tenant.activation</artifactId>
                 <version>${carbon.multitenancy.version}</version>
             </dependency>
@@ -922,7 +921,7 @@
         <carbon.kernel.registry.imp.pkg.version>[1.0.1, 2.0.0)</carbon.kernel.registry.imp.pkg.version>
 
         <!-- Carbon Commons version-->
-        <carbon.commons.version>4.4.0</carbon.commons.version>
+        <carbon.commons.version>4.4.1-SNAPSHOT</carbon.commons.version>
         <carbon.commons.imp.pkg.version>[4.4.0, 4.5.0)</carbon.commons.imp.pkg.version>
 
         <!-- Carbon Registry version-->
