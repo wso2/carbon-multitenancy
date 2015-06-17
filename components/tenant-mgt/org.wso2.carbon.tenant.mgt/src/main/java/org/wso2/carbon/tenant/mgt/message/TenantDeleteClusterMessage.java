@@ -26,9 +26,14 @@ import org.apache.axis2.clustering.ClusteringMessage;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.tenant.mgt.internal.TenantMgtServiceComponent;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.tenant.TenantManager;
+import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.FileManipulator;
+
+import java.io.File;
 
 /**
  * Tenant delete cluster message use to send to all worker nodes and delete the Cache
@@ -37,8 +42,8 @@ public class TenantDeleteClusterMessage extends ClusteringMessage {
 
     private static final long serialVersionUID = -5348082601467389829L;
     private int tenantId;
-    private transient static final Log log = LogFactory.getLog(TenantDeleteClusterMessage.class);
-    private final static boolean IS_DELETE_PERSISTANCE_STORAGE = false;
+    private transient static final Log log = LogFactory.getLog(TenantUnloadClusterMessage.class);
+    private final static boolean IS_DELETE_PERSISTENCE_STORAGE = false;
 
     /**
      * Overloaded constructor to pass the tenant id
@@ -56,7 +61,6 @@ public class TenantDeleteClusterMessage extends ClusteringMessage {
      */
     @Override
     public ClusteringCommand getResponse() {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -67,12 +71,27 @@ public class TenantDeleteClusterMessage extends ClusteringMessage {
      */
     @Override
     public void execute(ConfigurationContext arg0) throws ClusteringFault {
-        TenantManager tenantManager = TenantMgtServiceComponent
-                .getTenantManager();
         try {
-            tenantManager.deleteTenant(tenantId, IS_DELETE_PERSISTANCE_STORAGE);
-        } catch (UserStoreException e) {
-            log.error("Error occured while deleting cache : " + e.getMessage());
+            PrivilegedCarbonContext.startTenantFlow();
+            // Creating CarbonContext object for these threads.
+            PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            carbonContext.setTenantId(tenantId, true);
+
+            TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
+            try {
+                tenantManager.deleteTenant(tenantId, IS_DELETE_PERSISTENCE_STORAGE);
+                deleteTenantRepo();
+            } catch (UserStoreException e) {
+                log.error("Error occurred while deleting cache : " + e.getMessage());
+            }
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
         }
+    }
+
+    private void deleteTenantRepo(){
+        // get the deleting tenants repository url
+        String tenantRepoUrl = CarbonUtils.getCarbonTenantsDirPath() + File.separator + tenantId;
+        FileManipulator.deleteDir(tenantRepoUrl);
     }
 }

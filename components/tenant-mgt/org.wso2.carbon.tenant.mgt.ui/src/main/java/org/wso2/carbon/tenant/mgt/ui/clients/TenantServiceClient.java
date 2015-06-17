@@ -117,4 +117,8 @@ public class TenantServiceClient {
     public void deactivateTenant(String domainName) throws Exception {
         stub.deactivateTenant(domainName);
     }
+
+    public void deleteTenant(String domainName) throws Exception {
+        stub.deleteTenant(domainName);
+    }
 }

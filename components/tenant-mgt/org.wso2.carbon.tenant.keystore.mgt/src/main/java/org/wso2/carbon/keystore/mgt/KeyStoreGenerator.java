@@ -30,6 +30,7 @@ import org.wso2.carbon.keystore.mgt.util.RegistryServiceHolder;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.security.SecurityConfigException;
 import org.wso2.carbon.security.SecurityConstants;
 import org.wso2.carbon.security.keystore.KeyStoreAdmin;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -111,10 +112,10 @@ public class KeyStoreGenerator {
             throw new KeyStoreMgtException(msg, e);
         }
     }
-    
+
     /**
      * This method checks the existance of a keystore
-     * 
+     *
      * @param tenantId
      * @return
      * @throws KeyStoreMgtException
@@ -194,7 +195,7 @@ public class KeyStoreGenerator {
             KeyStoreAdmin keystoreAdmin = new KeyStoreAdmin(tenantId, govRegistry);
             keystoreAdmin.addKeyStore(outputStream.toByteArray(), keyStoreName,
                                       password, " ", "JKS", password);
-            
+
             //Create the pub. key resource
             Resource pubKeyResource = govRegistry.newResource();
             pubKeyResource.setContent(PKCertificate.getEncoded());
@@ -283,6 +284,30 @@ public class KeyStoreGenerator {
             return realmService.getTenantManager().getDomain(tenantId);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Error in getting the domain name for the tenant id: " + tenantId;
+            log.error(msg, e);
+            throw new KeyStoreMgtException(msg, e);
+        }
+    }
+
+    public void deleteKeyStore() throws KeyStoreMgtException {
+        try {
+            Resource resource = govRegistry.get(RegistryResources.SecurityManagement.TENANT_PUBKEY_RESOURCE);
+            govRegistry.removeAssociation(
+                    RegistryResources.SecurityManagement.KEY_STORES + "/" + generateKSNameFromDomainName(),
+                    RegistryResources.SecurityManagement.TENANT_PUBKEY_RESOURCE,
+                    SecurityConstants.ASSOCIATION_TENANT_KS_PUB_KEY);
+            govRegistry.delete(resource.getPath());
+            govRegistry.delete(RegistryResources.SecurityManagement.KEY_STORES + "/" + generateKSNameFromDomainName());
+
+            if(!govRegistry.resourceExists(resource.getPath())){
+                log.info("Registry public key resource delete");
+            }
+            if(!govRegistry.resourceExists(RegistryResources.SecurityManagement.KEY_STORES + "/" + generateKSNameFromDomainName())){
+                log.info("Registry public key store delete");
+            }
+
+        } catch (Exception e) {
+            String msg = "Error while instantiating a keystore";
             log.error(msg, e);
             throw new KeyStoreMgtException(msg, e);
         }

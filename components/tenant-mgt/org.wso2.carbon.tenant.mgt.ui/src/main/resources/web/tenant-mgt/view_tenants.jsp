@@ -187,7 +187,7 @@
                         <th style="padding-left:5px;text-align:left;"><fmt:message
                                 key="created.date"/></th>
                         <th style="padding-left:5px;text-align:left;"><fmt:message key="active"/></th>
-                        <th style="padding-left:5px;text-align:left;"><fmt:message key="edit"/></th>
+                        <th style="padding-left:5px;text-align:left;"><fmt:message key="actions"/></th>
                     </tr>
                     </thead>
                     <tbody>
@@ -222,7 +222,14 @@
                         </form>
                     </td>
                     <td style="padding-left:5px;padding-top:3px;text-align:left;"><a
-                            href="add_tenant.jsp?domain=<%=tenantInfo.getTenantDomain()%>">Edit</a>
+                            href="add_tenant.jsp?domain=<%=tenantInfo.getTenantDomain()%>"
+                            class="icon-link"
+                            style="background-image:url(images/edit.gif);"><fmt:message
+                            key="edit"/></a>
+                        <a href="#" onclick="deleteTenant('<%=tenantInfo.getTenantDomain()%>')"
+                           class="icon-link"
+                           style="background-image:url(images/delete.gif);"><fmt:message
+                                key="delete"/></a>
                     </td>
                 </tr>
                 <% }

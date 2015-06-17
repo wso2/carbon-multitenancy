@@ -85,6 +85,17 @@ public class KeystoreTenantMgtListener implements TenantMgtListener {
 
 	@Override
 	public void onPreDelete(int tenantId) throws StratosException {
-		//Implement this method to delete product specific data
+       // UserRegistry userRegistry = PrivilegedCarbonContext.getThreadLocalCarbonContext().getRegistry("/");
+
+        try {
+            KeyStoreGenerator ksGenerator = new KeyStoreGenerator(tenantId);
+            if (ksGenerator.isKeyStoreExists(tenantId)){
+                ksGenerator.deleteKeyStore();
+            }
+        } catch (KeyStoreMgtException e) {
+            String message = "Error when Generating the keystore";
+            log.error(message, e);
+            throw new StratosException(message, e);
+        }
 	}
 }

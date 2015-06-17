@@ -56,7 +56,7 @@ public class TenantMgtCoreServiceComponent {
         try {
             bundleContext = context.getBundleContext();
             log.debug("******* Tenant Core bundle is activated ******* ");
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error("Error occurred while activating tenant.mgt.core bundle. " + e);
         }
     }
