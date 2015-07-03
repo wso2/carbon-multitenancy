@@ -45,7 +45,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 public class TenantPersistor {
 
     private static final Log log = LogFactory.getLog(TenantPersistor.class);
-    private static final String ILLEGAL_CHARACTERS_FOR_PATH = ".*[~!#$;%^*()+={}\\[\\]\\|\\\\<>].*";
 
     private static CloudServicesDescConfig cloudServicesDesc = null;
     private static final String ADD_ADMIN_TRUE = "true";
@@ -285,13 +284,6 @@ public class TenantPersistor {
                 log.error(msg, e);
                 throw new Exception(msg, e);
             }
-        }
-        if (tenant.getAdminName().matches(TenantPersistor.ILLEGAL_CHARACTERS_FOR_PATH)) {
-            String msg = "The tenant admin ' " + tenant.getAdminName() +
-                                 " ' contains one or more illegal characters" +
-                                 " (~!@#$;%^*()+={}[]|\\<>)";
-            log.error(msg);
-            throw new Exception(msg);
         }
         if (log.isDebugEnabled()) {
             log.debug("Admin User Name has been validated.");
