@@ -128,6 +128,15 @@ function activationChanged(cbox, domain) {
     }
 }
 
+function deleteTenant(domain) {
+    function doDelete() {
+        var tenantDomain = domain;
+        location.href = 'delete_tenant.jsp?domain=' + encodeURIComponent(tenantDomain);
+    }
+
+    CARBON.showConfirmationDialog("Are you sure you want to delete the domain: '" + domain + "\' ?", doDelete, null);
+}
+
 function fillAdminValue() {
     var adminValue = $('adminValue');
     var domain = $('domain');
@@ -223,4 +232,8 @@ function activateDeactivate(domain, isActive) {
         var submitForm = document.getElementById("activateTenantForm");
         submitForm.submit();
     }
+}
+
+function forwardAfterDeletion() {
+    location.href = "../tenant-mgt/view_tenants.jsp?region=region1&item=govern_view_tenants_menu";
 }

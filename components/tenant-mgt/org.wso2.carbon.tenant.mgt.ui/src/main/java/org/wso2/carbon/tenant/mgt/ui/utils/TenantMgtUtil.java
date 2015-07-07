@@ -232,4 +232,26 @@ public class TenantMgtUtil {
         }
         return text.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
     }
+
+    /**
+     * This method is used to delete the created tenant
+     *
+     * @param request HttpServletRequest
+     * @param config  ServletConfig
+     * @param session HttpSession
+     * @throws Exception , if failed to Delete the tenant
+     */
+    public static void deleteTenant(HttpServletRequest request, ServletConfig config, HttpSession session)
+            throws Exception {
+        String tenantDomain = "";
+        try {
+            tenantDomain = request.getParameter("domain");
+            TenantServiceClient serviceClient = new TenantServiceClient(config, session);
+            serviceClient.deleteTenant(tenantDomain);
+        } catch (Exception e) {
+            String msg = "Failed to Delete the tenant:" + tenantDomain;
+            log.error(msg, e);
+            throw new Exception(msg, e);
+        }
+    }
 }

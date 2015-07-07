@@ -18,35 +18,39 @@ package org.wso2.carbon.tenant.mgt.util;
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.context.ConfigurationContext;
-import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.caching.impl.CacheManagerFactoryImpl;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.jdbc.dataaccess.JDBCDataAccessManager;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.UUIDGenerator;
+import org.wso2.carbon.registry.indexing.indexer.IndexerException;
+import org.wso2.carbon.registry.indexing.solr.SolrClient;
 import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
 import org.wso2.carbon.stratos.common.constants.StratosConstants;
 import org.wso2.carbon.stratos.common.exception.StratosException;
 import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
 import org.wso2.carbon.stratos.common.util.ClaimsMgtUtil;
 import org.wso2.carbon.stratos.common.util.CommonUtil;
+import org.wso2.carbon.tenant.mgt.core.internal.TenantMgtCoreServiceComponent;
+import org.wso2.carbon.tenant.mgt.exception.TenantManagementException;
 import org.wso2.carbon.tenant.mgt.internal.TenantMgtServiceComponent;
 import org.wso2.carbon.tenant.mgt.message.TenantDeleteClusterMessage;
-import org.wso2.carbon.user.api.RealmConfiguration;
-import org.wso2.carbon.user.api.TenantMgtConfiguration;
-import org.wso2.carbon.user.core.UserCoreConstants;
+import org.wso2.carbon.tenant.mgt.message.TenantUnloadClusterMessage;
+import org.wso2.carbon.user.api.*;
+import org.wso2.carbon.user.core.*;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.config.multitenancy.MultiTenantRealmConfigBuilder;
-import org.wso2.carbon.user.core.jdbc.JDBCRealmConstants;
 import org.wso2.carbon.user.core.tenant.Tenant;
 import org.wso2.carbon.user.core.tenant.TenantManager;
+import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import javax.cache.Caching;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 import java.util.Calendar;
@@ -416,18 +420,17 @@ public class TenantMgtUtil {
      * @param tenantDomain tenant domain
      * @param tenantManager TenantManager object
      * @param tenantId tenant Id
-     * @throws Exception UserStoreException.
+     * @throws Exception TenantManagementException.
      */
-    public static void deactivateTenant(String tenantDomain, TenantManager tenantManager,
-                                        int tenantId) throws Exception {
+    public static void deactivateTenant(String tenantDomain, TenantManager tenantManager, int tenantId)
+            throws TenantManagementException {
         try {
             tenantManager.deactivateTenant(tenantId);
-        } catch (UserStoreException e) {
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Error in deactivating tenant for tenant domain: " + tenantDomain + ".";
             log.error(msg, e);
-            throw new Exception(msg, e);
+            throw new TenantManagementException(msg, e);
         }
-
         //deactivating the subscription
         /*try {
             if (TenantMgtServiceComponent.getBillingService() != null) {
@@ -440,54 +443,99 @@ public class TenantMgtUtil {
         }*/
     }
 
-    public static void deleteTenantRegistryData(int tenantId) throws Exception {
-        // delete data from mounted config registry database
-        JDBCDataAccessManager configMgr = (JDBCDataAccessManager) TenantMgtServiceComponent.getRegistryService().
-                getConfigUserRegistry().getRegistryContext().getDataAccessManager();
-        TenantRegistryDataDeletionUtil.deleteTenantRegistryData(tenantId, configMgr.getDataSource().getConnection());
-
-        // delete data from mounted governance registry database
-        JDBCDataAccessManager govMgr = (JDBCDataAccessManager) TenantMgtServiceComponent.getRegistryService().
-                getGovernanceUserRegistry().getRegistryContext().getDataAccessManager();
-        TenantRegistryDataDeletionUtil.deleteTenantRegistryData(tenantId, govMgr.getDataSource().getConnection());
-
-    }
-
-    public static void deleteTenantUMData(int tenantId) throws Exception {
-        RealmConfiguration realmConfig = TenantMgtServiceComponent.getRealmService().
-                getBootstrapRealmConfiguration();
-        BasicDataSource dataSource = new BasicDataSource();
-        dataSource.setDriverClassName(realmConfig.getRealmProperty(JDBCRealmConstants.DRIVER_NAME));
-        dataSource.setUrl(realmConfig.getRealmProperty(JDBCRealmConstants.URL));
-        dataSource.setUsername(realmConfig.getRealmProperty(JDBCRealmConstants.USER_NAME));
-        dataSource.setPassword(realmConfig.getRealmProperty(JDBCRealmConstants.PASSWORD));
-        dataSource.setMaxActive(Integer.parseInt(realmConfig.getRealmProperty(JDBCRealmConstants.MAX_ACTIVE)));
-        dataSource.setMinIdle(Integer.parseInt(realmConfig.getRealmProperty(JDBCRealmConstants.MIN_IDLE)));
-        dataSource.setMaxWait(Integer.parseInt(realmConfig.getRealmProperty(JDBCRealmConstants.MAX_WAIT)));
-
-        TenantUMDataDeletionUtil.deleteTenantUMData(tenantId, dataSource.getConnection());
-    }
-
     /**
      * Broadcast TenantDeleteClusterMessage to all worker nodes
      *
-     * @param tenantId
+     * @param tenantId deleting tenant's tenant id
      * @throws Exception
      */
-    public static void deleteWorkernodesTenant(int tenantId) throws Exception {
-        TenantDeleteClusterMessage clustermessage = new TenantDeleteClusterMessage(
+    public static void notifyTenantDeletionInCluster(int tenantId) throws TenantManagementException {
+        TenantDeleteClusterMessage clusterMessage = new TenantDeleteClusterMessage(
                 tenantId);
         ConfigurationContext configContext = TenantMgtServiceComponent.getConfigurationContext();
         ClusteringAgent agent = configContext.getAxisConfiguration()
                 .getClusteringAgent();
         try {
-            agent.sendMessage(clustermessage, true);
+            if (agent != null) {
+                agent.sendMessage(clusterMessage, true);
+            }
         } catch (ClusteringFault e) {
             log.error("Error occurred while broadcasting TenantDeleteClusterMessage : " + e.getMessage());
+            throw new TenantManagementException(e.getMessage(),e);
         }
 
     }
 
+    /**
+     * Broadcast TenantUnloadClusterMessage to all worker nodes
+     *
+     * @param tenantId unloading tenant's tenant id
+     * @throws Exception
+     */
+    public static void notifyTenantUnloadInCluster(int tenantId) throws TenantManagementException {
+        TenantUnloadClusterMessage clusterMessage = new TenantUnloadClusterMessage(
+                tenantId);
+        ConfigurationContext configContext = TenantMgtServiceComponent.getConfigurationContext();
+        ClusteringAgent agent = configContext.getAxisConfiguration()
+                .getClusteringAgent();
+        try {
+            if (agent != null) {
+                agent.sendMessage(clusterMessage, true);
+            }
+        } catch (ClusteringFault e) {
+            log.error("Error occurred while broadcasting TenantUnloadClusterMessage : " + e.getMessage());
+            throw new TenantManagementException(e.getMessage(),e);
+        }
+
+    }
+
+    /**
+     * Delete the tenant related activities which carried in the tenant addition
+     *
+     * @param tenantManager
+     * @param tenantId tenant id of the removing tenant
+     */
+    public static void removeAllTenantRelatedData(TenantManager tenantManager, int tenantId)
+            throws TenantManagementException {
+        try {
+            Tenant tenant = (Tenant) tenantManager.getTenant(tenantId);
+            tenantManager.deleteTenant(tenantId);
+
+            deleteTenantRegistryData(tenant.getId());
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            throw new TenantManagementException(e.getMessage(), e);
+        } catch (RegistryException e) {
+            throw new TenantManagementException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * This method will delete all the tenant registry data
+     *
+     * @param tenantId deleting tenant id
+     * @throws RegistryException
+     */
+    private static void deleteTenantRegistryData(int tenantId) throws RegistryException {
+        TenantMgtCoreServiceComponent.getRegistryLoader().unloadTenantRegistry(tenantId);
+        try {
+            //Deleting the solr index of all the resources
+            //This will do a wild card search for resources having tenant id and delete the resource
+            String query = "id:*tenantId" + tenantId;
+            SolrClient.getInstance().deleteIndexByQuery(query);
+        } catch (IndexerException e) {
+            throw new RegistryException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Remove global tenant cache
+     *
+     * @param tenantDomain - Tenant domain name
+     * @throws Exception
+     */
+    public static void removeGlobalTenantCache(String tenantDomain) throws Exception {
+        ((CacheManagerFactoryImpl) Caching.getCacheManagerFactory()).removeCacheManagerMap(tenantDomain);
+    }
 
     /**
      * Delete tenant data specific to product from database.
