@@ -50,7 +50,7 @@ public class MultitenantDispatcher extends AbstractDispatcher {
         if (service == null) {
             String to = mc.getTo().getAddress();
 
-            if (!isValidPath(to, mc.getConfigurationContext().getServiceContextPath())) {
+            if (!isServiceContextPathContains(to, mc.getConfigurationContext().getServiceContextPath())) {
                 if (LoggingControl.debugLoggingAllowed && log.isDebugEnabled()) {
                     log.debug(mc.getLogIDString() +
                               " Attempted to check for Service using target endpoint URI, but the service fragment was missing");
@@ -82,7 +82,7 @@ public class MultitenantDispatcher extends AbstractDispatcher {
      * @param servicePath - Ex: 'services'
      * @return - validity status of the path
      */
-    private boolean isValidPath(String path, String servicePath) {
+    private boolean isServiceContextPathContains(String path, String servicePath) {
 
         if (path == null) {
             return false;
