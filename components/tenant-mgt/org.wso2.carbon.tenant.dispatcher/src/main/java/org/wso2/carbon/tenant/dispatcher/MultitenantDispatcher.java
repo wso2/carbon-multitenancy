@@ -53,13 +53,14 @@ public class MultitenantDispatcher extends AbstractDispatcher {
             if (!isServiceContextPathContains(to, mc.getConfigurationContext().getServiceContextPath())) {
                 if (LoggingControl.debugLoggingAllowed && log.isDebugEnabled()) {
                     log.debug(mc.getLogIDString() +
-                              " Attempted to check for Service using target endpoint URI, but the service fragment was missing");
+                              " Attempted to check for Service using target endpoint URI, but the " + mc
+                            .getConfigurationContext().getServiceContextPath() + " fragment was " +
+                              "missing");
                 }
                 return null;
             }
 
-            int tenantDelimiterIndex = to.indexOf("/t/");
-            if (tenantDelimiterIndex != -1) {
+            if (isTenantDelimiterContains(to, mc.getConfigurationContext().getServiceContextPath())) {
                 AxisConfiguration ac = mc.getConfigurationContext().getAxisConfiguration();
                 return ac.getService(MultitenantConstants.MULTITENANT_DISPATCHER_SERVICE);
             }
@@ -93,6 +94,14 @@ public class MultitenantDispatcher extends AbstractDispatcher {
             servicePath = servicePath + "/";
         }
 
+        if (!servicePath.startsWith("/")) {
+            servicePath = "/" + servicePath;
+        }
+
+        if (!path.startsWith(servicePath)) {
+            return false;
+        }
+
         int index = path.lastIndexOf(servicePath);
 
         if (-1 != index) {
@@ -103,6 +112,32 @@ public class MultitenantDispatcher extends AbstractDispatcher {
             }
         }
         return false;
+    }
+
+    /**
+     * Check given path contains servicePath + tenant delimiter as a prefix
+     *
+     * @param path        - incoming EPR
+     * @param servicePath - Ex: 'services'
+     * @return - validity status of the path
+     */
+    private boolean isTenantDelimiterContains(String path, String servicePath) {
+
+        if (!servicePath.endsWith("/")) {
+            servicePath = servicePath + "/";
+        }
+
+        if (!servicePath.startsWith("/")) {
+            servicePath = "/" + servicePath;
+        }
+
+        String tenantPrefix = servicePath + "t/";
+
+        if (!path.startsWith(tenantPrefix)) {
+            return false;
+        }
+
+        return true;
     }
 
 }
