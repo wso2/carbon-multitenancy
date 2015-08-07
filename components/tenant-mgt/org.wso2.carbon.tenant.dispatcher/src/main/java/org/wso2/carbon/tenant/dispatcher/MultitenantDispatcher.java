@@ -22,6 +22,9 @@ import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.HandlerDescription;
 import org.apache.axis2.engine.AbstractDispatcher;
 import org.apache.axis2.engine.AxisConfiguration;
+import org.apache.axis2.util.LoggingControl;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.xml.namespace.QName;
@@ -33,6 +36,7 @@ import javax.xml.namespace.QName;
  */
 public class MultitenantDispatcher extends AbstractDispatcher {
 
+    private static final Log log = LogFactory.getLog(MultitenantDispatcher.class);
     public static final String NAME = "MultitenantDispatcher";
 
     public void initDispatcher() {
@@ -46,8 +50,17 @@ public class MultitenantDispatcher extends AbstractDispatcher {
         if (service == null) {
             String to = mc.getTo().getAddress();
 
-            int tenantDelimiterIndex = to.indexOf("/t/");
-            if (tenantDelimiterIndex != -1) {
+            if (!isServiceContextPathContains(to, mc.getConfigurationContext().getServiceContextPath())) {
+                if (LoggingControl.debugLoggingAllowed && log.isDebugEnabled()) {
+                    log.debug(mc.getLogIDString() +
+                              " Attempted to check for Service using target endpoint URI, but the " + mc
+                            .getConfigurationContext().getServiceContextPath() + " fragment was " +
+                              "missing");
+                }
+                return null;
+            }
+
+            if (isTenantDelimiterContains(to, mc.getConfigurationContext().getServiceContextPath())) {
                 AxisConfiguration ac = mc.getConfigurationContext().getAxisConfiguration();
                 return ac.getService(MultitenantConstants.MULTITENANT_DISPATCHER_SERVICE);
             }
@@ -62,4 +75,69 @@ public class MultitenantDispatcher extends AbstractDispatcher {
         }
         return operation;
     }
+
+    /**
+     * Check given path contains servicePath value
+     *
+     * @param path        - incoming EPR
+     * @param servicePath - Ex: 'services'
+     * @return - validity status of the path
+     */
+    private boolean isServiceContextPathContains(String path, String servicePath) {
+
+        if (path == null) {
+            return false;
+        }
+
+        //with this chances that substring matching a different place in the URL is reduced
+        if (!servicePath.endsWith("/")) {
+            servicePath = servicePath + "/";
+        }
+
+        if (!servicePath.startsWith("/")) {
+            servicePath = "/" + servicePath;
+        }
+
+        if (!path.startsWith(servicePath)) {
+            return false;
+        }
+
+        int index = path.lastIndexOf(servicePath);
+
+        if (-1 != index) {
+            int serviceStart = index + servicePath.length();
+
+            if (path.length() > serviceStart) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check given path contains servicePath + tenant delimiter as a prefix
+     *
+     * @param path        - incoming EPR
+     * @param servicePath - Ex: 'services'
+     * @return - validity status of the path
+     */
+    private boolean isTenantDelimiterContains(String path, String servicePath) {
+
+        if (!servicePath.endsWith("/")) {
+            servicePath = servicePath + "/";
+        }
+
+        if (!servicePath.startsWith("/")) {
+            servicePath = "/" + servicePath;
+        }
+
+        String tenantPrefix = servicePath + "t/";
+
+        if (!path.startsWith(tenantPrefix)) {
+            return false;
+        }
+
+        return true;
+    }
+
 }
