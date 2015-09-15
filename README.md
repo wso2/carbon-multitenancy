@@ -6,6 +6,7 @@ Latest Released Version v4.4.3.
 * tenant-mgt
 
 The goal of multitenancy is to maximize resource sharing by allowing multiple users (tenants) to log in and use a single sever/cluster at the same time, in a tenant-isolated manner. That is, each user is given the experience of using his/her own server, rather than a shared environment. Multitenancy ensures optimal performance of the system's resources such as memory and hardware and also secures each tenant's personal data.
+
 This repository contains the features required for multitenancy functionality.
 
 ## How to Contribute
