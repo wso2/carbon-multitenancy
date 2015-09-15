@@ -21,6 +21,8 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -147,7 +149,7 @@ public class TenantMgtUtil {
     }
     
     public static void triggerTenantDeactivation(int tenantId) throws StratosException {
-        for (TenantMgtListener tenantMgtListener : 
+        for (TenantMgtListener tenantMgtListener :
                 TenantMgtServiceComponent.getTenantMgtListeners()) {
             tenantMgtListener.onTenantDeactivation(tenantId);
         }
@@ -422,6 +424,25 @@ public class TenantMgtUtil {
                                         int tenantId) throws Exception {
         try {
             tenantManager.deactivateTenant(tenantId);
+
+            //unloading the deactivated tenant in order to avoid serving requests to the tenant.
+            Map<String, ConfigurationContext> tenantConfigContexts = TenantAxisUtils.getTenantConfigurationContexts(
+                    TenantMgtServiceComponent.getConfigurationContext());
+            ConfigurationContext tenantConfigurationContext = tenantConfigContexts.get(tenantDomain);
+
+            if (tenantConfigurationContext != null && tenantConfigurationContext.getAxisConfiguration() != null) {
+                try {
+                    PrivilegedCarbonContext.startTenantFlow();
+                    PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                    carbonContext.setTenantDomain(tenantDomain);
+                    carbonContext.setTenantId(tenantId);
+
+                    TenantAxisUtils.terminateTenantConfigContext(tenantConfigurationContext);
+                } finally {
+                    PrivilegedCarbonContext.endTenantFlow();
+                }
+                tenantConfigContexts.remove(tenantDomain);
+            }
         } catch (UserStoreException e) {
             String msg = "Error in deactivating tenant for tenant domain: " + tenantDomain + ".";
             log.error(msg, e);
