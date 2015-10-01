@@ -7,7 +7,7 @@ function addTenant(isUpdating, isPublicCloud, isEmailUser) {
     var email = document.getElementById('admin-email');
     var firstname = document.getElementById('admin-firstname');
     var lastname = document.getElementById('admin-lastname');
-
+    var passwordRegex = document.getElementById('passwordRegex');
     if (isUpdating) {
 
         // only the given values will be updated, so no need to fill all the values.
@@ -27,8 +27,8 @@ function addTenant(isUpdating, isPublicCloud, isEmailUser) {
             if (adminPassword.value != adminPasswordRepeat.value) {
                 reason += jsi18n["password.mismatched"];
             }
-            if (adminPassword.value.length < 6) {
-                reason += jsi18n["password.length"];
+            if (validateString(adminPassword, passwordRegex) != "") {
+                reason += "Password policy violation. Please enter your password to follow the regex " + passwordRegex.value;
             }
         }
     }
@@ -90,8 +90,8 @@ function addTenant(isUpdating, isPublicCloud, isEmailUser) {
             if (adminPassword.value != adminPasswordRepeat.value) {
                 reason += jsi18n["password.mismatched"];
             }
-            if (adminPassword.value.length < 6) {
-                reason += jsi18n["password.length"];
+            if (validateString(adminPassword, passwordRegex) != "") {
+                reason += "Password policy violation. Please enter your password to follow the regex " + passwordRegex.value;
             }
         }
     }
@@ -223,4 +223,27 @@ function activateDeactivate(domain, isActive) {
         var submitForm = document.getElementById("activateTenantForm");
         submitForm.submit();
     }
+}
+
+function validateString(inputTag, regInput) {
+    var stringValue = inputTag.value;
+    var regString = regInput.value;
+    var reason = "";
+    if (regString != "null" && !stringValue.match(new RegExp(regString))) {
+        reason = "No conformance";
+        return reason;
+    } else if (regString != "null" && stringValue == '') {
+        return reason;
+    }
+
+    if (stringValue == '') {
+        reason = "Empty string";
+        return reason;
+    }
+
+    if (stringValue.indexOf("/") > -1) {
+        reason = "Domain";
+        return reason;
+    }
+    return reason;
 }
