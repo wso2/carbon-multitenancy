@@ -303,8 +303,6 @@ public class TenantPersistor {
      */
 
     private void validateAdminPassword(Tenant tenant) throws UserStoreException {
-        UserRealm superTenantUserRealm = TenantMgtCoreServiceComponent.getRealmService().
-                getBootstrapRealm();
         RealmConfiguration realmConfig = TenantMgtCoreServiceComponent.
                 getBootstrapRealmConfiguration();
         String userPasswordRegex = realmConfig.getUserStoreProperty(UserCoreConstants.RealmConfig.PROPERTY_JAVA_REG_EX);
