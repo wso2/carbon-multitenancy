@@ -28,7 +28,7 @@ function addTenant(isUpdating, isPublicCloud, isEmailUser) {
                 reason += jsi18n["password.mismatched"];
             }
             if (validateString(adminPassword, passwordRegex) != "") {
-                reason += "Password policy violation. Please enter your password to follow the regex " + passwordRegex.value;
+                reason += jsi18n["password.regex.violation"] + passwordRegex.value;
             }
         }
     }
@@ -91,7 +91,7 @@ function addTenant(isUpdating, isPublicCloud, isEmailUser) {
                 reason += jsi18n["password.mismatched"];
             }
             if (validateString(adminPassword, passwordRegex) != "") {
-                reason += "Password policy violation. Please enter your password to follow the regex " + passwordRegex.value;
+                reason += jsi18n["password.regex.violation"] + passwordRegex.value;
             }
         }
     }
