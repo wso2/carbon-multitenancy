@@ -27,7 +27,7 @@ function addTenant(isUpdating, isPublicCloud, isEmailUser) {
             if (adminPassword.value != adminPasswordRepeat.value) {
                 reason += jsi18n["password.mismatched"];
             }
-            if (validatePassword(adminPassword, passwordRegex) != "") {
+            if (!validatePassword(adminPassword, passwordRegex)) {
                 reason += jsi18n["password.regex.violation"] + passwordRegex.value;
             }
         }
@@ -90,7 +90,7 @@ function addTenant(isUpdating, isPublicCloud, isEmailUser) {
             if (adminPassword.value != adminPasswordRepeat.value) {
                 reason += jsi18n["password.mismatched"];
             }
-            if (validatePassword(adminPassword, passwordRegex) != "") {
+            if (!validatePassword(adminPassword, passwordRegex)) {
                 reason += jsi18n["password.regex.violation"] + passwordRegex.value;
             }
         }
