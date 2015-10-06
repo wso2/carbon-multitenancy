@@ -27,7 +27,7 @@ function addTenant(isUpdating, isPublicCloud, isEmailUser) {
             if (adminPassword.value != adminPasswordRepeat.value) {
                 reason += jsi18n["password.mismatched"];
             }
-            if (validateString(adminPassword, passwordRegex) != "") {
+            if (validatePassword(adminPassword, passwordRegex) != "") {
                 reason += jsi18n["password.regex.violation"] + passwordRegex.value;
             }
         }
@@ -90,7 +90,7 @@ function addTenant(isUpdating, isPublicCloud, isEmailUser) {
             if (adminPassword.value != adminPasswordRepeat.value) {
                 reason += jsi18n["password.mismatched"];
             }
-            if (validateString(adminPassword, passwordRegex) != "") {
+            if (validatePassword(adminPassword, passwordRegex) != "") {
                 reason += jsi18n["password.regex.violation"] + passwordRegex.value;
             }
         }
@@ -225,25 +225,11 @@ function activateDeactivate(domain, isActive) {
     }
 }
 
-function validateString(inputTag, regInput) {
-    var stringValue = inputTag.value;
+function validatePassword(passwordTag, regInput) {
+    var stringValue = passwordTag.value;
     var regString = regInput.value;
-    var reason = "";
     if (regString != "null" && !stringValue.match(new RegExp(regString))) {
-        reason = "No conformance";
-        return reason;
-    } else if (regString != "null" && stringValue == '') {
-        return reason;
+        return false;
     }
-
-    if (stringValue == '') {
-        reason = "Empty string";
-        return reason;
-    }
-
-    if (stringValue.indexOf("/") > -1) {
-        reason = "Domain";
-        return reason;
-    }
-    return reason;
+    return true;
 }
