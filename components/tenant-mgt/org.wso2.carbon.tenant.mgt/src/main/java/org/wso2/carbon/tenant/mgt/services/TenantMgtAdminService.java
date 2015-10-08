@@ -400,7 +400,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
             carbonContext.setTenantId(tenantId);
 
             TenantMgtUtil.addClaimsToUserStoreManager(tenant);
-        }finally {
+        } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
 
