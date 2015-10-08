@@ -392,14 +392,17 @@ public class TenantMgtAdminService extends AbstractAdmin {
         tenant.setAdminFirstName(tenantInfoBean.getFirstname());
         tenant.setAdminLastName(tenantInfoBean.getLastname());
 
-        PrivilegedCarbonContext.startTenantFlow();
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
 
-        PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-        carbonContext.setTenantDomain(tenantDomain);
-        carbonContext.setTenantId(tenantId);
+            PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            carbonContext.setTenantDomain(tenantDomain);
+            carbonContext.setTenantId(tenantId);
 
-        TenantMgtUtil.addClaimsToUserStoreManager(tenant);
-        carbonContext.endTenantFlow();
+            TenantMgtUtil.addClaimsToUserStoreManager(tenant);
+        }finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
 
         // filling the email value
         if (tenantInfoBean.getEmail() != null && !tenantInfoBean.getEmail().equals("")) {
@@ -435,18 +438,19 @@ public class TenantMgtAdminService extends AbstractAdmin {
             try {
                 PrivilegedCarbonContext.startTenantFlow();
 
-                carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
                 carbonContext.setTenantDomain(tenantDomain);
                 carbonContext.setTenantId(tenantId);
                 userStoreManager.updateCredentialByAdmin(tenantInfoBean.getAdmin(),
                                                          tenantInfoBean.getAdminPassword());
-                carbonContext.endTenantFlow();
             } catch (UserStoreException e) {
                 String msg = "Error in changing the tenant admin password, tenant domain: " +
                              tenantInfoBean.getTenantDomain() + ". " + e.getMessage() + " for: " +
                              tenantInfoBean.getAdmin();
                 log.error(msg, e);
                 throw new Exception(msg, e);
+            } finally {
+                PrivilegedCarbonContext.endTenantFlow();
             }
         } else {
             //Password should be empty since no password update done
