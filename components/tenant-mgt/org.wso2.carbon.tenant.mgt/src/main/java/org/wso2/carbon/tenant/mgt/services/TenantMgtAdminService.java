@@ -391,7 +391,15 @@ public class TenantMgtAdminService extends AbstractAdmin {
 
         tenant.setAdminFirstName(tenantInfoBean.getFirstname());
         tenant.setAdminLastName(tenantInfoBean.getLastname());
+
+        PrivilegedCarbonContext.startTenantFlow();
+
+        PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        carbonContext.setTenantDomain(tenantDomain);
+        carbonContext.setTenantId(tenantId);
+
         TenantMgtUtil.addClaimsToUserStoreManager(tenant);
+        carbonContext.endTenantFlow();
 
         // filling the email value
         if (tenantInfoBean.getEmail() != null && !tenantInfoBean.getEmail().equals("")) {
@@ -425,8 +433,14 @@ public class TenantMgtAdminService extends AbstractAdmin {
             // now we will update the tenant admin with the admin given
             // password.
             try {
+                PrivilegedCarbonContext.startTenantFlow();
+
+                carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                carbonContext.setTenantDomain(tenantDomain);
+                carbonContext.setTenantId(tenantId);
                 userStoreManager.updateCredentialByAdmin(tenantInfoBean.getAdmin(),
                                                          tenantInfoBean.getAdminPassword());
+                carbonContext.endTenantFlow();
             } catch (UserStoreException e) {
                 String msg = "Error in changing the tenant admin password, tenant domain: " +
                              tenantInfoBean.getTenantDomain() + ". " + e.getMessage() + " for: " +
