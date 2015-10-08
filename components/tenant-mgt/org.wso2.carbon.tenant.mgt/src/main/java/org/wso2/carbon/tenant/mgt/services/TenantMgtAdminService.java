@@ -400,61 +400,54 @@ public class TenantMgtAdminService extends AbstractAdmin {
             carbonContext.setTenantId(tenantId);
 
             TenantMgtUtil.addClaimsToUserStoreManager(tenant);
+
+            // filling the email value
+            if (tenantInfoBean.getEmail() != null && !tenantInfoBean.getEmail().equals("")) {
+                // validate the email
+                try {
+                    CommonUtil.validateEmail(tenantInfoBean.getEmail());
+                } catch (Exception e) {
+                    String msg = "Invalid email is provided.";
+                    log.error(msg, e);
+                    throw new Exception(msg, e);
+                }
+                tenant.setEmail(tenantInfoBean.getEmail());
+            }
+
+            UserRealm userRealm = configSystemRegistry.getUserRealm();
+            try {
+                userStoreManager = userRealm.getUserStoreManager();
+            } catch (UserStoreException e) {
+                String msg = "Error in getting the user store manager for tenant, tenant domain: " +
+                        tenantDomain + ".";
+                log.error(msg, e);
+                throw new Exception(msg, e);
+            }
+
+            boolean updatePassword = false;
+            if (tenantInfoBean.getAdminPassword() != null
+                    && !tenantInfoBean.getAdminPassword().equals("")) {
+                updatePassword = true;
+            }
+            if (!userStoreManager.isReadOnly() && updatePassword) {
+                // now we will update the tenant admin with the admin given
+                // password.
+                try {
+                    userStoreManager.updateCredentialByAdmin(tenantInfoBean.getAdmin(),
+                            tenantInfoBean.getAdminPassword());
+                } catch (UserStoreException e) {
+                    String msg = "Error in changing the tenant admin password, tenant domain: " +
+                            tenantInfoBean.getTenantDomain() + ". " + e.getMessage() + " for: " +
+                            tenantInfoBean.getAdmin();
+                    log.error(msg, e);
+                    throw new Exception(msg, e);
+                }
+            } else {
+                //Password should be empty since no password update done
+                tenantInfoBean.setAdminPassword("");
+            }
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
-        }
-
-        // filling the email value
-        if (tenantInfoBean.getEmail() != null && !tenantInfoBean.getEmail().equals("")) {
-            // validate the email
-            try {
-                CommonUtil.validateEmail(tenantInfoBean.getEmail());
-            } catch (Exception e) {
-                String msg = "Invalid email is provided.";
-                log.error(msg, e);
-                throw new Exception(msg, e);
-            }
-            tenant.setEmail(tenantInfoBean.getEmail());
-        }
-
-        UserRealm userRealm = configSystemRegistry.getUserRealm();
-        try {
-            userStoreManager = userRealm.getUserStoreManager();
-        } catch (UserStoreException e) {
-            String msg = "Error in getting the user store manager for tenant, tenant domain: " +
-                         tenantDomain + ".";
-            log.error(msg, e);
-            throw new Exception(msg, e);
-        }
-
-        boolean updatePassword = false;
-        if (tenantInfoBean.getAdminPassword() != null
-            && !tenantInfoBean.getAdminPassword().equals("")) {
-            updatePassword = true;
-        }
-        if (!userStoreManager.isReadOnly() && updatePassword) {
-            // now we will update the tenant admin with the admin given
-            // password.
-            try {
-                PrivilegedCarbonContext.startTenantFlow();
-
-                PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-                carbonContext.setTenantDomain(tenantDomain);
-                carbonContext.setTenantId(tenantId);
-                userStoreManager.updateCredentialByAdmin(tenantInfoBean.getAdmin(),
-                                                         tenantInfoBean.getAdminPassword());
-            } catch (UserStoreException e) {
-                String msg = "Error in changing the tenant admin password, tenant domain: " +
-                             tenantInfoBean.getTenantDomain() + ". " + e.getMessage() + " for: " +
-                             tenantInfoBean.getAdmin();
-                log.error(msg, e);
-                throw new Exception(msg, e);
-            } finally {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        } else {
-            //Password should be empty since no password update done
-            tenantInfoBean.setAdminPassword("");
         }
 
         try {
