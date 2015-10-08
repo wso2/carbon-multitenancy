@@ -41,7 +41,7 @@
         <module>org.wso2.carbon.tenant.redirector.servlet</module>
         <module>org.wso2.carbon.tenant.redirector.servlet.ui</module>
         <module>org.wso2.carbon.tenant.throttling.agent</module>
-        <module>org.wso2.carbon.tenant.usage.agent</module>
+        <!--<module>org.wso2.carbon.tenant.usage.agent</module>-->
         <module>org.wso2.carbon.tenant.theme.mgt</module>
         <module>org.wso2.carbon.tenant.theme.mgt.ui</module>
         <module>org.wso2.carbon.tenant.sso.redirector.ui</module>
