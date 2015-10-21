@@ -942,16 +942,16 @@
     <properties>
         <!-- Carbon kernel version-->
         <carbon.kernel.version>4.4.1</carbon.kernel.version>
-        <carbon.kernel.imp.pkg.version>[4.4.0, 4.5.0)</carbon.kernel.imp.pkg.version>
+        <carbon.kernel.imp.pkg.version>[4.4.0, 5.0.0)</carbon.kernel.imp.pkg.version>
         <carbon.kernel.registry.imp.pkg.version>[1.0.1, 2.0.0)</carbon.kernel.registry.imp.pkg.version>
 
         <!-- Carbon Commons version-->
-        <carbon.commons.version>4.4.4</carbon.commons.version>
-        <carbon.commons.imp.pkg.version>[4.4.0, 4.5.0)</carbon.commons.imp.pkg.version>
+        <carbon.commons.version>4.4.7</carbon.commons.version>
+        <carbon.commons.imp.pkg.version>[4.4.0, 5.0.0)</carbon.commons.imp.pkg.version>
 
         <!-- Carbon Registry version-->
         <carbon.registry.version>4.4.5</carbon.registry.version>
-        <carbon.registry.imp.pkg.version>[4.4.0, 4.5.0)</carbon.registry.imp.pkg.version>
+        <carbon.registry.imp.pkg.version>[4.4.0, 5.0.0)</carbon.registry.imp.pkg.version>
 
         <!-- Carbon Identity version-->
         <carbon.identity.version>5.0.0</carbon.identity.version>
@@ -960,7 +960,7 @@
         <!-- Carbon Multi-tenancy version-->
         <carbon.multitenancy.version>4.5.0-SNAPSHOT</carbon.multitenancy.version>
         <carbon.multitenancy.exp.pkg.version>${carbon.multitenancy.version}</carbon.multitenancy.exp.pkg.version>
-        <carbon.multitenancy.imp.pkg.version>[4.5.0, 4.6.0)</carbon.multitenancy.imp.pkg.version>
+        <carbon.multitenancy.imp.pkg.version>[4.5.0, 5.0.0)</carbon.multitenancy.imp.pkg.version>
 
         <carbon.captcha.mgt.version>4.2.0</carbon.captcha.mgt.version>
         <carbon.captcha.mgt.imp.pkg.version>[4.2.0,4.3.0)</carbon.captcha.mgt.imp.pkg.version>
