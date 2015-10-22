@@ -152,7 +152,7 @@ String domainName = request.getParameter("domain");
 <form id="addTenantForm" action="submit_tenant_ajaxprocessor.jsp" method="post">
     <input type="hidden" name="isUpdating" id="isUpdating" value="false">
     <input name="userNameRegex" id="userNameRegex" type="hidden" value="<%=userStoreInfo.getUserNameRegEx()%>"/>
-    <input name="passwordRegex" id="passwordRegex" type="hidden"git value="<%=userStoreInfo.getPasswordRegEx()%>"/>
+    <input name="passwordRegex" id="passwordRegex" type="hidden" value="<%=userStoreInfo.getPasswordRegEx()%>"/>
     <table class="styledLeft">
         <thead>
         <tr>
