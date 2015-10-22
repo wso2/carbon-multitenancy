@@ -1,5 +1,15 @@
 # carbon-multitenancy
-Latest Released Version v4.4.3.
+
+---
+
+|  Branch | Build Status |
+| :------------ |:-------------
+| master      | [![Build Status](https://wso2.org/jenkins/job/carbon-multitenancy/badge/icon)](https://wso2.org/jenkins/job/carbon-multitenancy) |
+
+
+---
+
+Latest Released Version v4.5.0, v4.4.3.
 
 #### carbon-multitenancy repo contains the the following component.
 
