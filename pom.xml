@@ -950,8 +950,8 @@
         <carbon.commons.imp.pkg.version>[4.4.0, 5.0.0)</carbon.commons.imp.pkg.version>
 
         <!-- Carbon Registry version-->
-        <carbon.registry.version>4.4.9</carbon.registry.version>
-        <carbon.registry.imp.pkg.version>[4.4.0, 5.0.0)</carbon.registry.imp.pkg.version>
+        <carbon.registry.version>4.5.0</carbon.registry.version>
+        <carbon.registry.imp.pkg.version>[4.5.0, 5.0.0)</carbon.registry.imp.pkg.version>
 
         <!-- Carbon Identity version-->
         <carbon.identity.version>4.5.6</carbon.identity.version>
