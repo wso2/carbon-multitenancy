@@ -9,7 +9,7 @@
 
 ---
 
-Latest Released Version v4.5.0, v4.4.3.
+Latest Released Version v4.5.0, v4.4.4.
 
 #### carbon-multitenancy repo contains the the following component.
 
