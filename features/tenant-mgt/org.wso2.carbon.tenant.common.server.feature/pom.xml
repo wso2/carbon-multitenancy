@@ -169,11 +169,11 @@
                                 <importBundleDef>org.apache.rampart.wso2:rampart-policy</importBundleDef>
                                 <importBundleDef>org.apache.rampart.wso2:rampart-core</importBundleDef>
                                 <importBundleDef>org.apache.rampart.wso2:rampart-trust</importBundleDef>
-                                <importBundleDef>org.wso2.carbon.commons:org.wso2.carbon.application.upload</importBundleDef>
+                                <importBundleDef>org.wso2.carbon.commons:org.wso2.carbon.application.upload:compatible:${carbon.commons.version}</importBundleDef>
                             </importBundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:${carbon.kernel.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.tenant.mgt.common.server:${carbon.commons.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.tenant.mgt.common.server:compatible:${carbon.commons.version}</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.identity.authenticator.saml2.sso.server:${carbon.identity.version}</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.registry.core.server:${carbon.registry.version}</importFeatureDef>
                             </importFeatures>
