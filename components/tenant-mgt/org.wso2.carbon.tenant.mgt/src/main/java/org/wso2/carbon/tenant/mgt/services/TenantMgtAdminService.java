@@ -15,6 +15,7 @@
  */
 package org.wso2.carbon.tenant.mgt.services;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -402,7 +403,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
             TenantMgtUtil.addClaimsToUserStoreManager(tenant);
 
             // filling the email value
-            if (tenantInfoBean.getEmail() != null && !tenantInfoBean.getEmail().equals("")) {
+            if (StringUtils.isNotBlank(tenantInfoBean.getEmail())) {
                 // validate the email
                 try {
                     CommonUtil.validateEmail(tenantInfoBean.getEmail());
@@ -425,8 +426,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
             }
 
             boolean updatePassword = false;
-            if (tenantInfoBean.getAdminPassword() != null
-                    && !tenantInfoBean.getAdminPassword().equals("")) {
+            if (StringUtils.isNotBlank(tenantInfoBean.getAdminPassword())) {
                 updatePassword = true;
             }
             if (!userStoreManager.isReadOnly() && updatePassword) {
