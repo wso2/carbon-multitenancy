@@ -419,7 +419,7 @@
                 <version>${wsdl4j.wso2.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.neethi.wso2</groupId>
+                <groupId>org.wso2.orbit.org.apache.neethi</groupId>
                 <artifactId>neethi</artifactId>
                 <version>${neethi.osgi.version}</version>
             </dependency>
@@ -941,20 +941,20 @@
 
     <properties>
         <!-- Carbon kernel version-->
-        <carbon.kernel.version>4.4.1</carbon.kernel.version>
+        <carbon.kernel.version>4.4.3</carbon.kernel.version>
         <carbon.kernel.imp.pkg.version>[4.4.0, 5.0.0)</carbon.kernel.imp.pkg.version>
         <carbon.kernel.registry.imp.pkg.version>[1.0.1, 2.0.0)</carbon.kernel.registry.imp.pkg.version>
 
         <!-- Carbon Commons version-->
-        <carbon.commons.version>4.4.7</carbon.commons.version>
+        <carbon.commons.version>4.4.9</carbon.commons.version>
         <carbon.commons.imp.pkg.version>[4.4.0, 5.0.0)</carbon.commons.imp.pkg.version>
 
         <!-- Carbon Registry version-->
-        <carbon.registry.version>4.4.5</carbon.registry.version>
+        <carbon.registry.version>4.5.1</carbon.registry.version>
         <carbon.registry.imp.pkg.version>[4.4.0, 5.0.0)</carbon.registry.imp.pkg.version>
 
         <!-- Carbon Identity version-->
-        <carbon.identity.version>5.0.0</carbon.identity.version>
+        <carbon.identity.version>5.0.8</carbon.identity.version>
         <carbon.identity.imp.pkg.version>[5.0.0, 6.0.0)</carbon.identity.imp.pkg.version>
 
         <!-- Carbon Multi-tenancy version-->
@@ -991,14 +991,14 @@
         <orbit.version.axiom>1.2.11.wso2v6</orbit.version.axiom>
 
         <!-- Axis2 Version -->
-        <axis2.wso2.version>1.6.1-wso2v14</axis2.wso2.version>
-        <axis2.version>1.6.1-wso2v14</axis2.version>
+        <axis2.wso2.version>1.6.1-wso2v16</axis2.wso2.version>
+        <axis2.version>1.6.1-wso2v16</axis2.version>
         <axis2.osgi.version.range>[1.6.1.wso2v12, 1.7.0)</axis2.osgi.version.range>
-        <orbit.version.axis2>1.6.1.wso2v14</orbit.version.axis2>
+        <orbit.version.axis2>1.6.1.wso2v16</orbit.version.axis2>
         <axis2.wso2.version.aar.plugin>1.6.2</axis2.wso2.version.aar.plugin>
-        <neethi.osgi.version>2.0.4.wso2v4</neethi.osgi.version>
+        <neethi.osgi.version>2.0.4.wso2v5</neethi.osgi.version>
         <neethi.osgi.version.range>[2.0.4.wso2v4, 3.1.0)</neethi.osgi.version.range>
-        <axis2-transports.version>1.1.0-wso2v11</axis2-transports.version>
+        <axis2-transports.version>1.1.1-wso2v2</axis2-transports.version>
 
         <!-- Xerces Version -->
         <xercesImpl.version>2.11.0</xercesImpl.version>
@@ -1011,7 +1011,7 @@
         <version.javax.servlet>3.0.0.v201112011016</version.javax.servlet>
 
         <!-- Rampart Version -->
-        <rampart.wso2.version>1.6.1.wso2v16</rampart.wso2.version>
+        <rampart.wso2.version>1.6.1.wso2v19</rampart.wso2.version>
 
         <slf4j.wso2.version>1.5.10.wso2v1</slf4j.wso2.version>
 
