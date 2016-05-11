@@ -70,8 +70,8 @@
                                 </includedFeatureDef>
                             </includedFeatures>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.registry.core:compatible:${carbon.registry.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.tenant.mgt.common:compatible:${carbon.commons.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.registry.core:compatible:${carbon.registry.import.feature.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.tenant.mgt.common:compatible:${carbon.commons.import.feature.version}</importFeatureDef>
                             </importFeatures>
 
                         </configuration>
