@@ -10,7 +10,7 @@
     <groupId>org.wso2.carbon.multitenancy</groupId>
     <artifactId>carbon-multitenancy</artifactId>
     <packaging>pom</packaging>
-    <version>4.5.2-SNAPSHOT</version>
+    <version>4.5.3-SNAPSHOT</version>
     <name>WSO2 Carbon - Platform Aggregator Pom</name>
     <url>http://wso2.org</url>
 
@@ -44,16 +44,16 @@
                 <artifactId>org.wso2.carbon.application.deployer</artifactId>
                 <version>${carbon.kernel.version}</version>
             </dependency>
-	  <dependency>
-             <groupId>org.wso2.carbon.commons</groupId>
-             <artifactId>org.wso2.carbon.user.mgt.stub</artifactId>
-             <version>${carbon.commons.version}</version>
-         </dependency>
-	<dependency>
-            <groupId>org.wso2.carbon.commons</groupId>
-            <artifactId>org.wso2.carbon.email.verification</artifactId>
-            <version>${carbon.commons.version}</version>
-        </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.commons</groupId>
+                <artifactId>org.wso2.carbon.user.mgt.stub</artifactId>
+                <version>${carbon.commons.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.commons</groupId>
+                <artifactId>org.wso2.carbon.email.verification</artifactId>
+                <version>${carbon.commons.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.core</artifactId>
@@ -465,8 +465,6 @@
             </dependency>
 
 
-
-
             <dependency>
                 <groupId>org.eclipse.jgit.wso2</groupId>
                 <artifactId>org.eclipse.jgit</artifactId>
@@ -506,15 +504,13 @@
                 <artifactId>org.wso2.carbon.security.mgt</artifactId>
                 <version>${carbon.identity.version}</version>
             </dependency>
-            
 
-            
+
             <dependency>
                 <groupId>backport-util-concurrent.wso2</groupId>
                 <artifactId>backport-util-concurrent</artifactId>
                 <version>${orbit.version.backport.util}</version>
             </dependency>
-            
 
 
             <dependency>
@@ -544,7 +540,6 @@
                 <artifactId>cxf-rt-transports-http-jetty</artifactId>
                 <version>${cxf.version}</version>
             </dependency>
-
 
 
             <dependency>
@@ -947,18 +942,21 @@
 
         <!-- Carbon Commons version-->
         <carbon.commons.version>4.4.9</carbon.commons.version>
+        <carbon.commons.import.feature.version>4.4.0</carbon.commons.import.feature.version>
         <carbon.commons.imp.pkg.version>[4.4.0, 5.0.0)</carbon.commons.imp.pkg.version>
 
         <!-- Carbon Registry version-->
         <carbon.registry.version>4.5.1</carbon.registry.version>
+        <carbon.registry.import.feature.version>4.5.0</carbon.registry.import.feature.version>
         <carbon.registry.imp.pkg.version>[4.4.0, 5.0.0)</carbon.registry.imp.pkg.version>
 
         <!-- Carbon Identity version-->
         <carbon.identity.version>5.0.8</carbon.identity.version>
+        <carbon.identity.import.feature.version>5.0.0</carbon.identity.import.feature.version>
         <carbon.identity.imp.pkg.version>[5.0.0, 6.0.0)</carbon.identity.imp.pkg.version>
 
         <!-- Carbon Multi-tenancy version-->
-        <carbon.multitenancy.version>4.5.2-SNAPSHOT</carbon.multitenancy.version>
+        <carbon.multitenancy.version>4.5.3-SNAPSHOT</carbon.multitenancy.version>
         <carbon.multitenancy.exp.pkg.version>${carbon.multitenancy.version}</carbon.multitenancy.exp.pkg.version>
         <carbon.multitenancy.imp.pkg.version>[4.5.0, 5.0.0)</carbon.multitenancy.imp.pkg.version>
 
