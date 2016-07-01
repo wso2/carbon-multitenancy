@@ -76,18 +76,21 @@ public class TenantMgtAdminService extends AbstractAdmin {
                                 tenantInfoBean.getOriginatedService(),false);
         tenantInfoBean.setTenantId(tenantId);
 
-        PrivilegedCarbonContext.startTenantFlow();
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
 
-        PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-        carbonContext.setTenantDomain(tenantDomain);
-        carbonContext.setTenantId(tenantId);
+            PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            carbonContext.setTenantDomain(tenantDomain);
+            carbonContext.setTenantId(tenantId);
 
-        TenantMgtUtil.addClaimsToUserStoreManager(tenant);
+            TenantMgtUtil.addClaimsToUserStoreManager(tenant);
+        } finally {
+            //Remove thread local variable set to identify operation triggered for a tenant admin user.
+            TenantMgtUtil.clearTenantAdminCreationOperation();
 
-        //Remove thread local variable set to identify operation triggered for a tenant admin user.
-        TenantMgtUtil.clearTenantAdminCreationOperation();
+            PrivilegedCarbonContext.endTenantFlow();
+        }
 
-        PrivilegedCarbonContext.endTenantFlow();
         notifyTenantAddition(tenantInfoBean);
         //adding the subscription entry
         /*try {
