@@ -65,6 +65,10 @@ public class TenantMgtAdminService extends AbstractAdmin {
         String tenantDomain = tenantInfoBean.getTenantDomain();
         TenantMgtUtil.validateDomain(tenantDomain);
         checkIsSuperTenantInvoking();
+
+        //Set a thread local variable to identify the operations triggered for a tenant admin user
+        TenantMgtUtil.setTenantAdminCreationOperation(true);
+
         Tenant tenant = TenantMgtUtil.initializeTenant(tenantInfoBean);
         TenantPersistor  persistor = new TenantPersistor();
         // not validating the domain ownership, since created by super tenant
@@ -77,7 +81,11 @@ public class TenantMgtAdminService extends AbstractAdmin {
         PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
         carbonContext.setTenantDomain(tenantDomain);
         carbonContext.setTenantId(tenantId);
+
         TenantMgtUtil.addClaimsToUserStoreManager(tenant);
+
+        //Remove thread local variable set to identify operation triggered for a tenant admin user.
+        TenantMgtUtil.clearTenantAdminCreationOperation();
 
         PrivilegedCarbonContext.endTenantFlow();
         notifyTenantAddition(tenantInfoBean);
