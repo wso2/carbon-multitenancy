@@ -117,15 +117,28 @@ function activationChanged(cbox, domain) {
     if (!cbox.checked) {
         CARBON.showConfirmationDialog("Are you sure you want to deactivate the domain: " +
                 domain + ".", function() {
-            var submitForm = document.getElementById(domain + "_form");
-            submitForm.submit();
+            changeTenentActivation(domain);
         }, function() {
             cbox.checked = "on";
         });
     } else {
-        var submitForm = document.getElementById(domain + "_form");
-        submitForm.submit();
+        changeTenentActivation(domain);
     }
+
+}
+
+function changeTenentActivation (domain){
+    jQuery.ajax({
+        type: "POST",
+        url: "activate_tenant_ajaxprocessor.jsp",
+        headers: {
+            Accept: "text/html"
+        },
+        data: {
+            "activatingDomain": domain
+        },
+        async: false
+    });
 }
 
 function fillAdminValue() {
