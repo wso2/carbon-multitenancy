@@ -45,9 +45,9 @@
                 <version>${carbon.kernel.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon.commons</groupId>
+                <groupId>org.wso2.carbon.identity</groupId>
                 <artifactId>org.wso2.carbon.user.mgt.stub</artifactId>
-                <version>${carbon.commons.version}</version>
+                <version>${carbon.identity.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.commons</groupId>
@@ -154,19 +154,19 @@
                 <version>${carbon.commons.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon.commons</groupId>
+                <groupId>org.wso2.carbon.identity</groupId>
                 <artifactId>org.wso2.carbon.user.mgt</artifactId>
-                <version>${carbon.commons.version}</version>
+                <version>${carbon.identity.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon.commons</groupId>
+                <groupId>org.wso2.carbon.identity</groupId>
                 <artifactId>org.wso2.carbon.user.mgt.common</artifactId>
-                <version>${carbon.commons.version}</version>
+                <version>${carbon.identity.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon.commons</groupId>
+                <groupId>org.wso2.carbon.identity</groupId>
                 <artifactId>org.wso2.carbon.user.mgt.ui</artifactId>
-                <version>${carbon.commons.version}</version>
+                <version>${carbon.identity.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.commons</groupId>
@@ -339,9 +339,9 @@
                 <version>${carbon.commons.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon.commons</groupId>
-                <artifactId>org.wso2.carbon.databridge.agent.thrift</artifactId>
-                <version>${carbon.commons.version}</version>
+                <groupId>org.wso2.carbon.analytics-common</groupId>
+                <artifactId>org.wso2.carbon.databridge.agent</artifactId>
+                <version>${carbon.analytics-common.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.commons</groupId>
@@ -548,9 +548,9 @@
                 <version>${carbon.commons.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon.commons</groupId>
-                <artifactId>org.wso2.carbon.databridge.agent.thrift</artifactId>
-                <version>${carbon.commons.version}</version>
+                <groupId>org.wso2.carbon.analytics-common</groupId>
+                <artifactId>org.wso2.carbon.databridge.agent</artifactId>
+                <version>${carbon.analytics-common.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.commons</groupId>
@@ -605,7 +605,7 @@
                 <version>${carbon.multitenancy.version}</version>
                 <exclusions>
                     <exclusion>
-                        <groupId>org.wso2.carbon</groupId>
+                        <groupId>org.wso2.identity</groupId>
                         <artifactId>org.wso2.carbon.user.mgt</artifactId>
                     </exclusion>
                 </exclusions>
@@ -657,9 +657,9 @@
                 <version>${bcprov-jdk15.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon.commons</groupId>
+                <groupId>org.wso2.carbon.identity</groupId>
                 <artifactId>org.wso2.carbon.um.ws.api</artifactId>
-                <version>${carbon.commons.version}</version>
+                <version>${carbon.identity.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
@@ -941,9 +941,12 @@
         <carbon.kernel.registry.imp.pkg.version>[1.0.1, 2.0.0)</carbon.kernel.registry.imp.pkg.version>
 
         <!-- Carbon Commons version-->
-        <carbon.commons.version>4.4.9</carbon.commons.version>
-        <carbon.commons.import.feature.version>4.4.0</carbon.commons.import.feature.version>
-        <carbon.commons.imp.pkg.version>[4.4.0, 5.0.0)</carbon.commons.imp.pkg.version>
+        <carbon.commons.version>4.5.4</carbon.commons.version>
+        <carbon.commons.import.feature.version>4.5.0</carbon.commons.import.feature.version>
+        <carbon.commons.imp.pkg.version>[4.5.0, 5.0.0)</carbon.commons.imp.pkg.version>
+
+        <!-- Carbon Analytics Commons version -->
+        <carbon.analytics-common.version>5.0.11</carbon.analytics-common.version>
 
         <!-- Carbon Registry version-->
         <carbon.registry.version>4.5.1</carbon.registry.version>
@@ -952,7 +955,7 @@
 
         <!-- Carbon Identity version-->
         <carbon.identity.version>5.1.0</carbon.identity.version>
-        <carbon.identity.import.feature.version>5.0.0</carbon.identity.import.feature.version>
+        <carbon.identity.import.feature.version>5.1.0</carbon.identity.import.feature.version>
         <carbon.identity.imp.pkg.version>[5.0.0, 6.0.0)</carbon.identity.imp.pkg.version>
 
         <!-- Carbon Multi-tenancy version-->
