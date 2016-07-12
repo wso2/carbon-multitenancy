@@ -30,13 +30,6 @@
 
 <div id="middle">
 <%
-
-    String httpMethod = request.getMethod().toLowerCase();
-    if (!"post".equals(httpMethod)) {
-        response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-        return;
-    }
-
 //    First remove captcha images first stored in webapps
     String error1 = "Error in adding the tenant.";
     String error2 = "Error in updating the tenant.";

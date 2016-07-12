@@ -28,13 +28,6 @@
 
 <div id="middle">
 <%
-
-    String httpMethod = request.getMethod().toLowerCase();
-    if (!"post".equals(httpMethod)) {
-        response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-        return;
-    }
-
     String error = "Error in updating the tenant activation status.";
     String tenantDomain = "";
     Boolean activated = (Boolean)session.getAttribute("isActivatedTenant");
