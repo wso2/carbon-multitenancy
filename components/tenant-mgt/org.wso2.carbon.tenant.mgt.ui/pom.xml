@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.multitenancy</groupId>
         <artifactId>tenant-mgt-parent</artifactId>
-        <version>4.6.0-SNAPSHOT</version>
+        <version>4.6.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -44,7 +44,7 @@
                         </Export-Package>
                         <Import-Package>
                             org.wso2.carbon.tenant.mgt.stub.*; version="${carbon.multitenancy.imp.pkg.version}",
-                            org.wso2.carbon.user.mgt.stub.*;version="${carbon.commons.imp.pkg.version}",
+                            org.wso2.carbon.user.mgt.stub.*;version="${carbon.identity.imp.pkg.version}",
                             org.apache.axis2.client.*,
                             javax.servlet;version="${imp.pkg.version.javax.servlet}",
                             javax.servlet.http;version="${imp.pkg.version.javax.servlet}",
@@ -103,7 +103,7 @@
             <artifactId>org.wso2.carbon.tenant.common.stub</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.commons</groupId>
+            <groupId>org.wso2.carbon.identity</groupId>
             <artifactId>org.wso2.carbon.user.mgt.stub</artifactId>
         </dependency>
     </dependencies>
