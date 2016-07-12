@@ -39,7 +39,7 @@ public class RedirectorJSPFilter implements Filter {
         if (!(servletRequest instanceof HttpServletRequest)) {
             return;
         }
-        String url = ((HttpServletRequest) servletRequest).getServletPath();
+        String url = ((HttpServletRequest) servletRequest).getRequestURI();
         if(url.contains("//")){
             url = url.replace("//", "/");
         }

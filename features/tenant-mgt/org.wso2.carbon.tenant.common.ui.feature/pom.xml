@@ -20,14 +20,14 @@
     <parent>
         <groupId>org.wso2.carbon.multitenancy</groupId>
         <artifactId>tenant-mgt-feature</artifactId>
-        <version>4.6.1-SNAPSHOT</version>
+        <version>4.6.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.tenant.common.ui.feature</artifactId>
     <packaging>pom</packaging>
-    <version>4.6.1-SNAPSHOT</version>
+    <version>4.6.0-SNAPSHOT</version>
     <name>WSO2 Stratos - Common UI Feature</name>
     <url>http://wso2.org</url>
     <description>This feature contains the bundles required for Front-end servlet functionality</description>
@@ -102,10 +102,10 @@
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.ui:${carbon.kernel.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.registry.core.ui:compatible:${carbon.registry.import.feature.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.tenant.mgt.common.ui:compatible:${carbon.commons.import.feature.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.registry.core.ui:compatible:${carbon.registry.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.tenant.mgt.common.ui:compatible:${carbon.commons.version}</importFeatureDef>
                                 <importFeatureDef>
-                                    org.wso2.carbon.identity.authenticator.saml2.sso.ui:compatible:${carbon.identity.import.feature.version}
+                                    org.wso2.carbon.identity.authenticator.saml2.sso.ui:${carbon.identity.version}
                                 </importFeatureDef>
                             </importFeatures>
                         </configuration>

@@ -17,15 +17,27 @@
 */
 package org.wso2.carbon.usage.agent.util;
 
+import org.apache.axiom.om.OMAbstractFactory;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMFactory;
+import org.apache.axiom.om.OMNamespace;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.databridge.agent.DataPublisher;
+import org.wso2.carbon.databridge.agent.thrift.Agent;
+import org.wso2.carbon.databridge.agent.thrift.AsyncDataPublisher;
+import org.wso2.carbon.databridge.agent.thrift.DataPublisher;
+import org.wso2.carbon.databridge.agent.thrift.conf.AgentConfiguration;
+import org.wso2.carbon.databridge.agent.thrift.exception.AgentException;
 import org.wso2.carbon.databridge.commons.Event;
-import org.wso2.carbon.databridge.commons.utils.DataBridgeCommonsUtils;
+import org.wso2.carbon.databridge.commons.exception.AuthenticationException;
+import org.wso2.carbon.databridge.commons.exception.NoStreamDefinitionExistException;
+import org.wso2.carbon.databridge.commons.exception.TransportException;
 import org.wso2.carbon.statistics.services.util.SystemStatistics;
 import org.wso2.carbon.stratos.common.util.CommonUtil;
+import org.wso2.carbon.stratos.common.util.StratosConfiguration;
 import org.wso2.carbon.usage.agent.beans.BandwidthUsage;
 import org.wso2.carbon.usage.agent.exception.UsageException;
 import org.wso2.carbon.user.api.Tenant;
@@ -35,6 +47,8 @@ import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.usage.agent.beans.APIManagerRequestStats;
 
+import java.math.BigInteger;
+import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,7 +60,9 @@ public class PublisherUtils {
     private static Log log = LogFactory.getLog(PublisherUtils.class);
     private static final String TRANSPORT = "https";
     private static ConfigurationContextService configurationContextService;
+    private static Agent agent;
     private static DataPublisher dataPublisher;
+    private static AsyncDataPublisher asyncDataPublisher;
     private static String streamId;
     private static final String usageEventStream = "org.wso2.carbon.usage.agent";
     private static final String usageEventStreamVersion = "1.0.0";
@@ -149,11 +165,66 @@ public class PublisherUtils {
             return;
         }
 
-        streamId = DataBridgeCommonsUtils.generateStreamId(usageEventStream, usageEventStreamVersion);
-        log.info("Event stream with stream ID: " + streamId + " found.");
+        try {
+
+            streamId = dataPublisher.findStream(usageEventStream, usageEventStreamVersion);
+            log.info("Event stream with stream ID: " + streamId + " found.");
+
+        } catch (NoStreamDefinitionExistException e) {
+
+            log.info("Defining the event stream because it was not found in BAM");
+            try {
+                defineStream();    
+            } catch (Exception ex) {
+                String msg = "An error occurred while defining the even stream for Usage agent. " + e.getMessage();
+                log.warn(msg);
+            }
+
+        }
 
     }
     
+    private static void defineStream() throws Exception {
+        streamId = dataPublisher.
+                defineStream("{" +
+                        "  'name':'" + usageEventStream +"'," +
+                        "  'version':'" + usageEventStreamVersion +"'," +
+                        "  'nickName': 'usage.agent'," +
+                        "  'description': 'Tenant usage data'," +
+                        "  'metaData':[" +
+                        "          {'name':'clientType','type':'STRING'}" +
+                        "  ]," +
+                        "  'payloadData':[" +
+                        "          {'name':'ServerName','type':'STRING'}," +
+                        "          {'name':'TenantID','type':'STRING'}," +
+                        "          {'name':'Type','type':'STRING'}," +
+                        "          {'name':'Value','type':'LONG'}" +
+                        "  ]" +
+                        "}");
+        
+    }
+    
+    private static void defineRequestStatEventStream() throws Exception{
+        reqStatEventStreamId = dataPublisher.
+                defineStream("{" +
+                        "  'name':'" + reqStatEventStream +"'," +
+                        "  'version':'" + reqStatEventStreamVersion +"'," +
+                        "  'nickName': 'service.request.stats'," +
+                        "  'description': 'Tenants service request statistics'," +
+                        "  'metaData':[" +
+                        "          {'name':'clientType','type':'STRING'}" +
+                        "  ]," +
+                        "  'payloadData':[" +
+                        "          {'name':'ServerName','type':'STRING'}," +
+                        "          {'name':'TenantID','type':'STRING'}," +
+                        "          {'name':'RequestCount','type':'INT'}," +
+                        "          {'name':'ResponseCount','type':'INT'}," +
+                        "          {'name':'FaultCount','type':'INT'}," +
+                        "          {'name':'ResponseTime','type':'LONG'}" +
+                        "  ]" +
+                        "}");
+    }
+
     public static void createDataPublisher(){
 
         ServerConfiguration serverConfig =  CarbonUtils.getServerConfiguration();
@@ -187,6 +258,12 @@ public class PublisherUtils {
             log.warn("Cannot create the async data publisher because the data publisher is null");
             return;
         }
+
+        try {
+            asyncDataPublisher = new AsyncDataPublisher(dataPublisher);
+        } catch (Exception e) {
+            log.error("Could not create an async data publisher using the data publisher", e);
+        }
     }
 
 
@@ -212,8 +289,18 @@ public class PublisherUtils {
 
         if(streamId == null){
             try{
-                streamId = DataBridgeCommonsUtils.generateStreamId(usageEventStream, usageEventStreamVersion);
-            } catch (Exception exc){
+                streamId = dataPublisher.findStream(usageEventStream, usageEventStreamVersion);
+            }catch (NoStreamDefinitionExistException e){
+                log.info("Defining the event stream because it was not found in BAM");
+                try{
+                    defineStream();
+                } catch(Exception ex){
+                    String msg = "Error occurred while defining the event stream for publishing usage data. " + ex.getMessage();
+                    log.error(msg);
+                    //We do not want to proceed without an event stream. Therefore we return.
+                    return;
+                }
+            }catch (Exception exc){
                 log.error("Error occurred while searching for stream id. " + exc.getMessage());
                 //We do not want to proceed without an event stream. Therefore we return.
                 return;
@@ -228,7 +315,7 @@ public class PublisherUtils {
                                                     usage.getMeasurement(),
                                                     usage.getValue()});
 
-            dataPublisher.tryPublish(usageEvent);
+            dataPublisher.publish(usageEvent);
 
         } catch (Exception e) {
             log.error("Error occurred while publishing usage event to BAM. " + e.getMessage(), e);
@@ -252,8 +339,18 @@ public class PublisherUtils {
 
         if(reqStatEventStreamId == null){
             try{
-                reqStatEventStreamId = DataBridgeCommonsUtils.generateStreamId(reqStatEventStream, reqStatEventStreamVersion);
-            } catch (Exception exc){
+                reqStatEventStreamId = dataPublisher.findStream(reqStatEventStream, reqStatEventStreamVersion);
+            }catch (NoStreamDefinitionExistException e){
+                log.info("Defining the event stream because it was not found in BAM");
+                try{
+                    defineRequestStatEventStream();
+                } catch(Exception ex){
+                    String msg = "Error occurred while defining the event stream for publishing usage data. " + ex.getMessage();
+                    log.error(msg);
+                    //We do not want to proceed without an event stream. Therefore we return.
+                    return;
+                }
+            }catch (Exception exc){
                 log.error("Error occurred while searching for stream id. " + exc.getMessage());
                 //We do not want to proceed without an event stream. Therefore we return.
                 return;
@@ -299,7 +396,17 @@ public class PublisherUtils {
 
         if (streamId == null) {
             try {
-                streamId = DataBridgeCommonsUtils.generateStreamId(usageEventStream, usageEventStreamVersion);
+                streamId = dataPublisher.findStream(usageEventStream, usageEventStreamVersion);
+            } catch (NoStreamDefinitionExistException e) {
+                log.info("Defining the event stream because it was not found in BAM");
+                try {
+                    defineStream();
+                } catch (Exception ex) {
+                    String msg = "Error occurred while defining the event stream for publishing usage data. " + ex.getMessage();
+                    log.error(msg);
+                    //We do not want to proceed without an event stream. Therefore we return.
+                    return;
+                }
             } catch (Exception exc) {
                 log.error("Error occurred while searching for stream id. " + exc.getMessage());
                 //We do not want to proceed without an event stream. Therefore we return.

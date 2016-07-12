@@ -65,10 +65,6 @@ public class TenantMgtAdminService extends AbstractAdmin {
         String tenantDomain = tenantInfoBean.getTenantDomain();
         TenantMgtUtil.validateDomain(tenantDomain);
         checkIsSuperTenantInvoking();
-
-        //Set a thread local variable to identify the operations triggered for a tenant admin user
-        TenantMgtUtil.setTenantAdminCreationOperation(true);
-
         Tenant tenant = TenantMgtUtil.initializeTenant(tenantInfoBean);
         TenantPersistor  persistor = new TenantPersistor();
         // not validating the domain ownership, since created by super tenant
@@ -76,21 +72,14 @@ public class TenantMgtAdminService extends AbstractAdmin {
                                 tenantInfoBean.getOriginatedService(),false);
         tenantInfoBean.setTenantId(tenantId);
 
-        try {
-            PrivilegedCarbonContext.startTenantFlow();
+        PrivilegedCarbonContext.startTenantFlow();
 
-            PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-            carbonContext.setTenantDomain(tenantDomain);
-            carbonContext.setTenantId(tenantId);
+        PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        carbonContext.setTenantDomain(tenantDomain);
+        carbonContext.setTenantId(tenantId);
+        TenantMgtUtil.addClaimsToUserStoreManager(tenant);
 
-            TenantMgtUtil.addClaimsToUserStoreManager(tenant);
-        } finally {
-            //Remove thread local variable set to identify operation triggered for a tenant admin user.
-            TenantMgtUtil.clearTenantAdminCreationOperation();
-
-            PrivilegedCarbonContext.endTenantFlow();
-        }
-
+        PrivilegedCarbonContext.endTenantFlow();
         notifyTenantAddition(tenantInfoBean);
         //adding the subscription entry
         /*try {

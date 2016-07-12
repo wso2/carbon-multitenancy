@@ -83,8 +83,31 @@
 
         <%
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+            String activatingDomain = request.getParameter("activate.domain");
             String action = request.getParameter("action");
             String domainName = request.getParameter("domain");
+            if (activatingDomain != null) {
+                // try to activate deactive the tenant
+                String activate = request.getParameter("activate");
+                try {
+                    if (activate != null && activate.equalsIgnoreCase("on")) {
+                        TenantMgtUtil.activateTenant(request, config, session);
+                    } else {
+                        TenantMgtUtil.deactivateTenant(request, config, session);
+                    }
+                } catch (Exception e) {
+                    String error1 = "Error in activating/deactivating tenant";
+                    request.setAttribute(CarbonUIMessage.ID,
+                            new CarbonUIMessage(error1, error1, null));
+
+        %>
+
+        <jsp:forward page="../admin/error.jsp?<%=error1%>"/>
+
+        <%
+                    return;
+                }
+            }
 
             String pageNumberStr = request.getParameter("pageNumber");
             if (pageNumberStr == null) {

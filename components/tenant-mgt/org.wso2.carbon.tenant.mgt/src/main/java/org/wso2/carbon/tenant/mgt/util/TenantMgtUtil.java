@@ -63,7 +63,6 @@ public class TenantMgtUtil {
 
     private static final Log log = LogFactory.getLog(TenantMgtUtil.class);
     private static final String ILLEGAL_CHARACTERS_FOR_TENANT_DOMAIN = ".*[^a-zA-Z0-9\\._\\-].*";
-    private static ThreadLocal<Boolean> isTenantAdminCreationOperation = new ThreadLocal<>();
 
     /**
      * Prepares string to show theme management page.
@@ -525,24 +524,5 @@ public class TenantMgtUtil {
         } catch (Exception e) {
             throw new RuntimeException("Error in looking up data source: " + e.getMessage(), e);
         }
-    }
-
-    public static boolean isTenantAdminCreationOperation() {
-        if (isTenantAdminCreationOperation == null) {
-            //This is the default behaviour
-            return false;
-        }
-        if (isTenantAdminCreationOperation.get() == null) {
-            return false;
-        }
-        return isTenantAdminCreationOperation.get();
-    }
-
-    public static void setTenantAdminCreationOperation(boolean isAdminCreationOperation) {
-        isTenantAdminCreationOperation.set(isAdminCreationOperation);
-    }
-
-    public static void clearTenantAdminCreationOperation() {
-        isTenantAdminCreationOperation.remove();
     }
 }
