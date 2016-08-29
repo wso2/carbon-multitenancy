@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.multitenancy</groupId>
         <artifactId>tenant-mgt-feature</artifactId>
-        <version>4.3.5-SNAPSHOT</version>
+        <version>4.6.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -32,11 +32,6 @@
     <description>This feature contains the core bundles required for Back-end servlet functionality</description>
 
     <dependencies>
-        <dependency>
-            <groupId>org.wso2.carbon.commons</groupId>
-            <artifactId>org.wso2.carbon.tenant.common</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>org.wso2.carbon.multitenancy</groupId>
             <artifactId>org.wso2.carbon.tenant.dispatcher</artifactId>
@@ -120,11 +115,7 @@
                                 <resource>
                                     <directory>resources</directory>
                                     <includes>
-                                        <include>conf/cloud-services-desc.xml</include>
-                                        <include>conf/multitenancy-packages.xml</include>
-                                        <include>conf/tenant-mgt.xml</include>
-                                        <include>conf/stratos.xml</include>
-                                        <include>conf/eula.xml</include>
+                                        <include>conf/tenant-mgt.xml</include>                                
                                         <include>conf/usage-throttling-agent-config.xml</include>
                                         <include>p2.inf</include>
                                         <include>build.properties</include>
@@ -148,7 +139,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.tenant.common.server</id>
-                            <propertiesFile>../../../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:server
@@ -158,7 +149,6 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon.commons:org.wso2.carbon.tenant.common</bundleDef>
                                 <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.redirector.servlet</bundleDef>
                                 <!--<bundleDef>org.wso2.carbon:org.wso2.carbon.sample.installer:2.2.1</bundleDef>-->
                                 <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.dispatcher</bundleDef>
@@ -179,15 +169,13 @@
                                 <importBundleDef>org.apache.rampart.wso2:rampart-policy</importBundleDef>
                                 <importBundleDef>org.apache.rampart.wso2:rampart-core</importBundleDef>
                                 <importBundleDef>org.apache.rampart.wso2:rampart-trust</importBundleDef>
-                                <importBundleDef>org.wso2.carbon.commons:org.wso2.carbon.application.upload</importBundleDef>
+                                <importBundleDef>org.wso2.carbon.commons:org.wso2.carbon.application.upload:compatible:${carbon.commons.version}</importBundleDef>
                             </importBundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:${carbon.kernel.version}</importFeatureDef>
-                                <importFeatureDef>
-                                    org.wso2.carbon.identity.authenticator.saml2.sso.server:${carbon.identity.version}
-                                </importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.registry.core.server:${carbon.registry.version}
-                                </importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.tenant.mgt.common.server:compatible:${carbon.commons.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.identity.authenticator.saml2.sso.server:${carbon.identity.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.registry.core.server:compatible:${carbon.registry.version}</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

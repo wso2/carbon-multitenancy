@@ -100,8 +100,10 @@
     if (request.getParameter(SAML2SSOAuthenticatorConstants.LOG_OUT_REQ) != null &&
 		session.getAttribute(CarbonSecuredHttpContext.LOGGED_USER) != null) {
         LogoutRequestBuilder logoutRequestBuilder = new LogoutRequestBuilder();
-        LogoutRequest logoutReq = logoutRequestBuilder.buildLogoutRequest(SAML2SSOAuthenticatorConstants.LOGGED_IN_USER, SAML2SSOAuthenticatorConstants.LOGOUT_USER,
-                (String)request.getSession().getAttribute(SAML2SSOAuthenticatorConstants.IDP_SESSION_INDEX));
+        LogoutRequest logoutReq = logoutRequestBuilder.buildLogoutRequest(
+                (String) session.getAttribute(CarbonSecuredHttpContext.LOGGED_USER),
+                SAML2SSOAuthenticatorConstants.LOGOUT_USER,
+                (String) request.getSession().getAttribute(SAML2SSOAuthenticatorConstants.IDP_SESSION_INDEX));
         encodedReq = Util.encode(Util.marshall(logoutReq));
         relayState = UUIDGenerator.generateUUID();
         url = Util.getIdentityProviderSLOServiceURL();
@@ -118,7 +120,8 @@
         AuthenticatorsConfiguration authenticatorsConfiguration = AuthenticatorsConfiguration.getInstance();
         AuthenticatorsConfiguration.AuthenticatorConfig authenticatorConfig =
                 authenticatorsConfiguration.getAuthenticatorConfig(SAML2SSOAuthenticatorConstants.AUTHENTICATOR_NAME); 
-        AuthnRequest authRequest = authnReqGenerator.buildAuthenticationRequest(null,authenticatorConfig.getParameters().get(SAML2SSOAuthenticatorConstants.NAMEID_POLICY_FORMAT), isPassive);
+        AuthnRequest authRequest = authnReqGenerator.buildAuthenticationRequest(null,
+                authenticatorConfig.getParameters().get(SAML2SSOAuthenticatorConstants.NAMEID_POLICY_FORMAT), isPassive);
         encodedReq = Util.encode(Util.marshall(authRequest));
         relayState = UUIDGenerator.generateUUID();
 	if(request.getParameter(SAML2SSOAuthenticatorConstants.LOG_OUT_REQ) != null &&
