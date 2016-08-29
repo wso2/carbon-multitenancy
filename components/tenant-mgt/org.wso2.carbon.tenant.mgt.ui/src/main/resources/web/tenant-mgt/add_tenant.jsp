@@ -274,7 +274,7 @@ String domainName = request.getParameter("domain");
                             <%if (!isUpdating) {%><span class="required">*</span></td>
                         <%}%>
                         <td colspan="2"><input type="password" name="admin-password"
-                                               id="admin-password" style="width:400px"/>
+                                               id="admin-password" style="width:400px" automcomplete="false"/>
                         </td>
                     </tr>
                     <tr>
@@ -286,7 +286,7 @@ String domainName = request.getParameter("domain");
                         <td colspan="2"><input type="password"
                                                name="admin-password-repeat"
                                                id="admin-password-repeat"
-                                               style="width:400px"/></td>
+                                               style="width:400px" automcomplete="false"/></td>
                     </tr>
                     <% if (!isEmailUserNameEnabled)  { %>
                     <tr>
