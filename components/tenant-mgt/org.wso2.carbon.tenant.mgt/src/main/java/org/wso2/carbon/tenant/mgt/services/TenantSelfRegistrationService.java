@@ -33,6 +33,8 @@ import org.wso2.carbon.user.core.tenant.Tenant;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * TenantSelfRegistration - This is the Web service that will be called when
@@ -122,6 +124,87 @@ public class TenantSelfRegistrationService {
                 if (log.isDebugEnabled()) {
                     log.debug("Subscription added successfully for the tenant: " +
                               tenantInfoBean.getTenantDomain());
+                }
+            }
+        } catch (Exception e) {
+            String msg = "Error occurred while adding the subscription for tenant: " + domainName;
+            log.error(msg, e);
+        }
+
+        // If Email Validation is made optional, tenant will be activated now.
+        if (CommonUtil.isTenantManagementEmailsDisabled() ||
+                !CommonUtil.isEmailValidationMandatory()) {
+            TenantMgtUtil.activateTenantInitially(tenantInfoBean, tenantId);
+        }
+        return TenantMgtUtil.prepareStringToShowThemeMgtPage(tenant.getId());
+    }
+
+    /**
+     * Registers a tenant - Tenant Self Registration For trusted User (users which were created first)
+     * <<no captcha validation/verification is needed as well as user claims such as first name last name>>
+     *
+     * @param tenantInfoBean  - tenantInformation
+     * @return String UUID
+     * @throws Exception if the tenant registration fails.
+     */
+    public String registerTenantForTrustedUser(TenantInfoBean tenantInfoBean)
+            throws Exception {
+
+        Date date = new Date();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        tenantInfoBean.setCreatedDate(cal);
+
+        // validate the email
+        try {
+            log.info("validating email");
+            CommonUtil.validateEmail(tenantInfoBean.getEmail());
+        } catch (Exception e) {
+            String msg = "Invalid email is provided.";
+            log.error(msg, e);
+            throw new AxisFault(msg);
+        }
+        // validate the domain
+        String domainName = tenantInfoBean.getTenantDomain();
+        try {
+            log.info("validating domain");
+            TenantMgtUtil.validateDomain(domainName);
+        } catch (Exception e) {
+            String msg = "Domain Validation Failed.";
+            log.error(msg, e);
+            throw new AxisFault(msg);
+        }
+        log.info("initializing tenant ");
+        // persists the tenant.
+        Tenant tenant = TenantMgtUtil.initializeTenant(tenantInfoBean);
+        TenantPersistor  persistor = new TenantPersistor();
+        int tenantId = persistor.persistTenant(tenant, true, tenantInfoBean.getSuccessKey(),
+                tenantInfoBean.getOriginatedService(),false);
+        log.info("Setting  tenant id "+tenantId);
+        tenantInfoBean.setTenantId(tenantId);
+        log.info("adding claims for "+tenantId);
+        TenantMgtUtil.addClaimsToUserStoreManager(tenant);
+
+        //Notify tenant addition
+        try {
+            log.info("triggerAddTenant for "+tenantId);
+            TenantMgtUtil.triggerAddTenant(tenantInfoBean);
+        } catch (StratosException e) {
+            String msg = "Error in notifying tenant addition.";
+            log.error(msg, e);
+            throw new Exception(msg, e);
+        }
+
+        //adding the subscription entry
+        try {
+            if (TenantMgtServiceComponent.getBillingService() != null) {
+                TenantMgtServiceComponent.getBillingService().addUsagePlan(tenant,
+                        tenantInfoBean.getUsagePlan());
+                log.info("Subscription added successfully for the tenant: " +
+                        tenantInfoBean.getTenantDomain());
+                if (log.isDebugEnabled()) {
+                    log.debug("Subscription added successfully for the tenant: " +
+                            tenantInfoBean.getTenantDomain());
                 }
             }
         } catch (Exception e) {

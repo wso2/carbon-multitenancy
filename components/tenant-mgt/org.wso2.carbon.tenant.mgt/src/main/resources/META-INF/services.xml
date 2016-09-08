@@ -26,6 +26,8 @@
         </parameter>
         <operation name="registerTenant">
         </operation>
+        <operation name="registerTenantForTrustedUser">
+        </operation>
         <operation name="checkDomainAvailability">
         </operation>
         <operation name="validateOrSuggestDomain">
