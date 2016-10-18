@@ -39,6 +39,9 @@ import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.user.mgt.UserMgtConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * TenantPersistenceManager - Methods related to persisting the tenant.
  */
@@ -81,6 +84,8 @@ public class TenantPersistor {
     private int persistTenantInUserStore(Tenant tenant, boolean checkDomainValidation, String successKey) throws Exception {
         int tenantId;
         validateAdminUserName(tenant);
+        validateAdminPassword(tenant);
+
         String tenantDomain = tenant.getDomain();
 
         boolean isDomainAvailable = CommonUtil.isDomainNameAvailable(tenantDomain);
@@ -288,6 +293,34 @@ public class TenantPersistor {
         if (log.isDebugEnabled()) {
             log.debug("Admin User Name has been validated.");
         }
+    }
+
+    /**
+     * Validates the admin username according to the user password regular expression
+     *
+     * @param tenant - tenant to be persisted
+     * @thorws Exception UserStoreException
+     */
+
+    private void validateAdminPassword(Tenant tenant) throws UserStoreException {
+        RealmConfiguration realmConfig = TenantMgtCoreServiceComponent.
+                getBootstrapRealmConfiguration();
+        String userPasswordRegex = realmConfig.getUserStoreProperty(UserCoreConstants.RealmConfig.PROPERTY_JAVA_REG_EX);
+        String userPassword = tenant.getAdminPassword();
+        boolean valid = true;
+        if (userPassword == null) {
+            throw new UserStoreException("Admin User password not found!");
+        }
+        if (userPasswordRegex != null) {
+            Pattern regex = Pattern.compile(userPasswordRegex);
+            Matcher matcher = regex.matcher(userPassword);
+            valid = matcher.matches();
+        }
+        if (!valid) {
+            throw new UserStoreException("Entered admin password doesn't comply with password pattern " +
+                    userPasswordRegex);
+        }
+
     }
 
     /**
