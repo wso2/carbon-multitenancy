@@ -15,6 +15,7 @@
 ~ specific language governing permissions and limitations
 ~ under the License.
 -->
+<%@ page import="org.owasp.encoder.Encode" %>
 <%@page import="org.wso2.carbon.user.mgt.ui.UserAdminClient" %>
 <%@ page import="org.wso2.carbon.stratos.common.util.CommonUtil" %>
 <%@ page import="org.wso2.carbon.tenant.mgt.stub.beans.xsd.TenantInfoBean" %>
@@ -81,7 +82,7 @@ String domainName = request.getParameter("domain");
     String usagePlan = "";
     boolean isActive = false;
     int tenantId = -1;
-    String error1 = "Tenant with the domain : " + domainName + " doesn't exist.";
+    String error1 = "Tenant with the domain : " + Encode.forHtml(domainName) + " doesn't exist.";
     boolean isUpdating = false;
     boolean isPublicCloud = CommonUtil.isPublicCloudSetup();
     String isCloudDeployment =  ServerConfiguration.getInstance().getFirstProperty("IsCloudDeployment");
@@ -174,7 +175,7 @@ String domainName = request.getParameter("domain");
                                 onchange="fillAdminValue();" <%if (isUpdating) { %>
                                 readonly="true" <% }%> type="text" name="domain"
                                 id="domain" style="width:400px"
-                                value="<%=domainName%>"/>
+                                value="<%=Encode.forHtml(domainName)%>"/>
                         </td>
                     </tr>
                     <%if (!isUpdating) { %>
@@ -367,12 +368,12 @@ String domainName = request.getParameter("domain");
         <tr id="buttonRow2">
             <td class="buttonRow">
                 <input class="button" type="button" name="activateButton" id="activateButton"
-                       onclick="return activateDeactivate('<%=domainName%>','<%=isActive%>');"
+                       onclick="return activateDeactivate('<%=Encode.forHtml(domainName)%>','<%=isActive%>');"
                         <% if (isActive) { %> value="<fmt:message key="deactivate.account.btn"/>"
                 <% } else { %> value="<fmt:message key="activate.account.btn"/>" <% } %>/>
             </td>
 
-            <input type="hidden" name="activatingDomain" id="activatingDomain" value="<%=domainName%>"/>
+            <input type="hidden" name="activatingDomain" id="activatingDomain" value="<%=Encode.forHtml(domainName)%>"/>
 
         </tr>
         </tbody>
