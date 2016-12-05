@@ -33,9 +33,9 @@ import javax.ws.rs.core.Response;
 
 /**
  * Handles tenants in a containerized environment. The service is available at.
- * http://localhost:8080/tenants
+ * http://localhost:9090/tenants
  */
-@Api(value = "service", description = "Manage tenants in containerized environment")
+@Api(value = "service", description = "Manage tenants in a containerized environment")
 @SwaggerDefinition(
         info = @Info(
                 title = "Tenants Swagger Definition",
@@ -68,19 +68,15 @@ public class TenantService implements Microservice {
 
     @Activate
     protected void activate(BundleContext bundleContext) {
-        System.out.println("***************** bundle activated *****************");
-        // Nothing to do
     }
 
     @Deactivate
     protected void deactivate(BundleContext bundleContext) {
-        System.out.println("***************** bundle deactivated *****************");
-        // Nothing to do
     }
 
     /**
      * Get list of all the available tenants.
-     * http://localhost:8080/tenants
+     * http://localhost:9090/tenants
      *
      * @return Response
      */
@@ -100,7 +96,7 @@ public class TenantService implements Microservice {
 
     /**
      * Get details of a particular tenant.
-     * http://localhost:8080/tenants/tenant-a
+     * http://localhost:9090/tenants/tenant-a
      *
      * @param name Tenant name
      * @return Response
@@ -128,8 +124,8 @@ public class TenantService implements Microservice {
     }
 
     /**
-     * Add a new tenant
-     * curl -X POST -H "Content-Type: application/json" -d '{ name: "tenant-a" }' http://localhost:8080/tenants
+     * Add a new tenant.
+     * curl -X POST -H "Content-Type: application/json" -d '{ name: "tenant-a" }' http://localhost:9090/tenants
      *
      * @param tenant Tenant object
      * @return Response
@@ -152,13 +148,12 @@ public class TenantService implements Microservice {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("{ \"error\": \"" + e.getMessage() + "\" }")
                     .build();
-
         }
     }
 
     /**
      * Delete a tenant
-     * curl -X DELETE http://localhost:8080/tenants/tenant-a
+     * curl -X DELETE http://localhost:9090/tenants/tenant-a
      *
      * @param name Tenant name
      * @return Response
@@ -181,19 +176,5 @@ public class TenantService implements Microservice {
             return Response.status(Response.Status.NOT_FOUND)
                     .build();
         }
-    }
-
-    /**
-     * Update a tenant.
-     *
-     * @param name   Tenant name
-     * @param tenant Tenant
-     * @return Response
-     */
-    @PUT
-    @Path("/{name}")
-    public Response update(@PathParam("name") String name, Tenant tenant) {
-        return Response.status(Response.Status.NOT_IMPLEMENTED)
-                .build();
     }
 }

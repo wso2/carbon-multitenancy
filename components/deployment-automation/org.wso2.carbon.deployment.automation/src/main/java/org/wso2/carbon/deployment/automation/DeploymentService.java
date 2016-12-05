@@ -16,17 +16,42 @@
 
 package org.wso2.carbon.deployment.automation;
 
-import com.sun.corba.se.impl.protocol.MinimalServantCacheLocalCRDImpl;
+import io.swagger.annotations.*;
 import org.osgi.service.component.annotations.Component;
+import org.wso2.carbon.deployment.automation.exceptions.DeploymentAutomationException;
 import org.wso2.carbon.deployment.automation.interfaces.DeploymentProvider;
 import org.wso2.carbon.deployment.automation.kubernetes.KubernetesDeploymentProvider;
+import org.wso2.carbon.deployment.automation.models.Product;
 import org.wso2.msf4j.Microservice;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+/**
+ * Handles deployment automation in a containerized environment. The service is available at,
+ * http://localhost:9090/deployments
+ */
+@Api(value = "service", description = "Manage deplyment automation in a containerized environment")
+@SwaggerDefinition(
+        info = @Info(
+                title = "Deployment Automation Swagger Definition",
+                version = "1.0",
+                description = "Deployment automation service. Manages deployments in a containerized environment.",
+                license = @License(
+                        name = "Apache 2.0",
+                        url = "http://www.apache.org/licenses/LICENSE-2.0"
+                ),
+                contact = @Contact(
+                        name = "WSO2 Inc.",
+                        email = "dev@wso2.org",
+                        url = "http://wso2.com"
+                )
+        )
+)
 @Path("/deployments")
 @Component(
         name = "org.wso2.carbon.deployment.automation.DeploymentService",
@@ -34,64 +59,79 @@ import javax.ws.rs.core.Response;
         immediate = true
 )
 public class DeploymentService implements Microservice {
-
-    private DeploymentProvider deploymentProvider;
-
-    /**
-     * Initializes the concrete deployment provider.
-     */
-    public DeploymentService() {
-        this.deploymentProvider = new KubernetesDeploymentProvider();
-    }
+    private static final String DEPLOYMENT_KUBERNETES = "kubernetes";
 
     /**
-     * Deploy a product in a containerized environment.
+     * Deploy a product in the environment.
+     * curl -X POST -H "Content-Type: application/json"
+     * -d '{"product":"esb","version":"4.9.0","pattern":1,"platform":"kubernetes"}' http://localhost:9090/deployments
      *
-     * @param definition
-     * @return
+     * @param product Product details
+     * @return Response
      */
     @POST
     @Path("/")
-    public Response deploy(String definition) {
-        if (deploymentProvider.deploy(definition)) {
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Deploy a specific product.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Product deployed successfully"),
+            @ApiResponse(code = 400, message = "Product deployment failed")
+    })
+    public Response deploy(@ApiParam(value = "Product object", required = true) Product product) {
+        try {
+            DeploymentProvider provider = getDeploymentProvider(product.getPlatform());
+            provider.deploy(product);
             return Response.ok()
                     .build();
+        } catch (DeploymentAutomationException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(e.getMessage())
+                    .build();
         }
-        return Response.status(Response.Status.BAD_REQUEST)
-                .build();
     }
 
     /**
-     * Un-deploy a product from a containerized environment.
+     * Undeploy a product from the environment.
+     * curl -X DELETE -H "Content-Type: application/json"
+     * -d '{"product":"esb","version":"4.9.0","pattern":1,"platform":"kubernetes"}' http://localhost:9090/deployments
      *
-     * @return
+     * @param product Product details
+     * @return Response
      */
     @DELETE
     @Path("/")
-    public Response undeploy(String definition) {
-        if (deploymentProvider.undeploy(definition)) {
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Remove a specific product deployment.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Removed product deployment successfully"),
+            @ApiResponse(code = 400, message = "Removing product deployment failed")
+    })
+    public Response undeploy(@ApiParam(value = "Product object", required = true) Product product) {
+        try {
+            DeploymentProvider provider = getDeploymentProvider(product.getPlatform());
+            provider.undeploy(product);
             return Response.ok()
                     .build();
+        } catch (DeploymentAutomationException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(e.getMessage())
+                    .build();
         }
-        return Response.status(Response.Status.BAD_REQUEST)
-                .build();
     }
 
     /**
-     * Deploy a load balancer.
+     * Get deployment provider.
      *
-     * @param definition
-     * @return
+     * @param platform Name of the deployment platform
+     * @return DeploymentProvider
+     * @throws DeploymentAutomationException
      */
-    @POST
-    @Path("/lb")
-    public Response deployLoadBalancer(String definition) {
-        if (deploymentProvider.addLoadBalancer(definition)) {
-            return Response.ok()
-                    .build();
+    private DeploymentProvider getDeploymentProvider(String platform) throws DeploymentAutomationException {
+        if (platform.toLowerCase().equals(DEPLOYMENT_KUBERNETES)) {
+            return new KubernetesDeploymentProvider();
         }
-        return Response.status(Response.Status.BAD_REQUEST)
-                .build();
+        throw new DeploymentAutomationException("Deployment platform '" + platform +
+                "' is not supported by the service.");
     }
 }
 

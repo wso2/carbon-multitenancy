@@ -16,13 +16,19 @@
 
 package org.wso2.carbon.deployment.automation.kubernetes;
 
-import io.fabric8.kubernetes.api.model.ReplicationController;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.extensions.Deployment;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.wso2.carbon.deployment.automation.exceptions.DeploymentAutomationException;
 import org.wso2.carbon.deployment.automation.interfaces.DeploymentProvider;
+import org.wso2.carbon.deployment.automation.models.Product;
 import org.yaml.snakeyaml.Yaml;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -32,99 +38,106 @@ import java.util.Map;
  * Deployment provider for Kubernetes cluster manager.
  */
 public class KubernetesDeploymentProvider extends KubernetesBase implements DeploymentProvider {
-
-    public static final String KIND_DEPLOYMENT = "deployment";
-    public static final String KIND_SERVICE = "service";
-    public static final String KIND_INGRESS = "ingress";
+    private static final String KIND_DEPLOYMENT = "deployment";
+    private static final String KIND_SERVICE = "service";
+    private static final String KIND_INGRESS = "ingress";
+    private static final String KIND_LIST = "list";
+    private static final String ENV_KUBERNETES_HOME = "KUBERNETES_HOME";
 
     /**
      * Deploy a product in a Kubernetes environment.
      *
-     * @param definition YAML definition of the entire deployment
+     * @param product Product details
      * @return Status
      */
     @Override
-    public boolean deploy(String definition) {
+    public void deploy(Product product) throws DeploymentAutomationException {
         // TODO: set the KUBERNETES_NAMESPACE=tenant-1 environment variable
-        Map<String, String> definitions = extractDefinitionsByKind(definition);
-
+        Map<String, String> artifacts = getKubernetesArtifacts(product);
         // Add deployment
-        Deployment deployment = new Yaml().loadAs(definitions.get(KIND_DEPLOYMENT), Deployment.class);
-        client.extensions().deployments().create(deployment);
-
+        if (artifacts.containsKey(KIND_DEPLOYMENT)) {
+            Deployment deployment = new Yaml().loadAs(artifacts.get(KIND_DEPLOYMENT), Deployment.class);
+            client.extensions().deployments().create(deployment);
+        }
         // Add service
-        Service service = new Yaml().loadAs(definitions.get(KIND_SERVICE), Service.class);
-        client.services().create(service);
-
+        if (artifacts.containsKey(KIND_SERVICE)) {
+            Service service = new Yaml().loadAs(artifacts.get(KIND_SERVICE), Service.class);
+            client.services().create(service);
+        }
         // Add ingress
-        Ingress ingress = new Yaml().loadAs(definitions.get(KIND_INGRESS), Ingress.class);
-        client.extensions().ingresses().create(ingress);
-
-        return true;
+        if (artifacts.containsKey(KIND_INGRESS)) {
+            Ingress ingress = new Yaml().loadAs(artifacts.get(KIND_INGRESS), Ingress.class);
+            client.extensions().ingresses().create(ingress);
+        }
     }
 
     /**
      * Remove a product deployment from a Kubernetes environment.
      *
-     * @param definition YAML definition of the entire deployment
+     * @param product Product details
      * @return Status
      */
     @Override
-    public boolean undeploy(String definition) {
-        boolean result = true;
-        Map<String, String> definitions = extractDefinitionsByKind(definition);
-
+    public void undeploy(Product product) throws DeploymentAutomationException {
+        Map<String, String> artifacts = getKubernetesArtifacts(product);
         //Remove ingress
-        Ingress ingress = new Yaml().loadAs(definitions.get(KIND_INGRESS), Ingress.class);
-        result &= client.extensions()
-                .ingresses()
-                .withName(ingress.getMetadata().getName())
-                .delete();
-
-        // Remove service
-        Service service = new Yaml().loadAs(definitions.get(KIND_SERVICE), Service.class);
-        result &= client.services()
-                .withName(service.getMetadata().getName())
-                .delete();
-
-        // Remove deployment
-        Deployment deployment = new Yaml().loadAs(definitions.get(KIND_DEPLOYMENT), Deployment.class);
-        result &= client.extensions()
-                .deployments()
-                .withName(deployment.getMetadata().getName())
-                .delete();
-
-        return result;
-    }
-
-    /**
-     * Add a replication controller.
-     *
-     * @param definition YAML definition of the replication controller.
-     * @return Status
-     */
-    @Override
-    public boolean addLoadBalancer(String definition) {
-        ReplicationController controller = new Yaml().loadAs(definition, ReplicationController.class);
-        client.replicationControllers().create(controller);
-        return true;
-    }
-
-    /**
-     * Extract definitions by kind.
-     *
-     * @param definition YAML Definition
-     * @return Definition map by kind
-     */
-    private Map<String, String> extractDefinitionsByKind(String definition) {
-        Map<String, String> definitions = new HashMap<String, String>();
-        // Read the given definition, split it into sub items and deploy each item i.e. deployment, service and ingress
-        Map<String, Object> map = (Map<String, Object>) new Yaml().load(definition);
-        List<LinkedHashMap> items = (List<LinkedHashMap>) map.get("items");
-
-        for (LinkedHashMap item : items) {
-            definitions.put(item.get("kind").toString().toLowerCase(), new Yaml().dump(item));
+        if (artifacts.containsKey(KIND_INGRESS)){
+            Ingress ingress = new Yaml().loadAs(artifacts.get(KIND_INGRESS), Ingress.class);
+            client.extensions()
+                    .ingresses()
+                    .withName(ingress.getMetadata().getName())
+                    .delete();
         }
-        return definitions;
+        // Remove service
+        if (artifacts.containsKey(KIND_SERVICE)) {
+            Service service = new Yaml().loadAs(artifacts.get(KIND_SERVICE), Service.class);
+            client.services()
+                    .withName(service.getMetadata().getName())
+                    .delete();
+        }
+        // Remove deployment
+        if (artifacts.containsKey(KIND_DEPLOYMENT)) {
+            Deployment deployment = new Yaml().loadAs(artifacts.get(KIND_DEPLOYMENT), Deployment.class);
+            client.extensions()
+                    .deployments()
+                    .withName(deployment.getMetadata().getName())
+                    .delete();
+        }
+    }
+
+    /**
+     * Get the kubernetes artifacts from the file system.
+     * In order to identify the directory which resides respective artifacts, KUBERNETES_HOME environment variable
+     * should be set.
+     *
+     * @param product Product details
+     * @return Hashmap of Kubernetes artifacts against kind
+     * @throws DeploymentAutomationException
+     */
+    private Map<String, String> getKubernetesArtifacts(Product product) throws DeploymentAutomationException {
+        String kubernetesHome = System.getenv(ENV_KUBERNETES_HOME);
+        if (kubernetesHome == null || kubernetesHome.equals("")) {
+            throw new DeploymentAutomationException(ENV_KUBERNETES_HOME + " environment variable is not set.");
+        }
+        String path = (kubernetesHome.endsWith("/") ? kubernetesHome : kubernetesHome + "/") + product.getProduct() +
+                "/" + product.getVersion() + "/pattern-" + product.getPattern() + "/profile.yaml";
+
+        Map<String, String> results = new HashMap<String, String>();
+        Map<String, Object> map = null;
+        try {
+            map = (Map<String, Object>) new Yaml().load(new FileInputStream(new File(path)));
+        } catch (FileNotFoundException e) {
+            throw new DeploymentAutomationException("Unable to find the Kubernetes artifact for the given product" +
+                    path, e);
+        }
+        if (map.get("kind").toString().toLowerCase().equals(KIND_LIST)) {
+            for (LinkedHashMap item : (List<LinkedHashMap>) map.get("items")) {
+                results.put(item.get("kind").toString().toLowerCase(), new Yaml().dump(item));
+            }
+        } else {
+            // todo
+            results.put(map.get("kind").toString().toLowerCase(), new Yaml().dump(map));
+        }
+        return results;
     }
 }

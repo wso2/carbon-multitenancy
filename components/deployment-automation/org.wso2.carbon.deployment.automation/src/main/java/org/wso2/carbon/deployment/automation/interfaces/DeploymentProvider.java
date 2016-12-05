@@ -16,36 +16,27 @@
 
 package org.wso2.carbon.deployment.automation.interfaces;
 
+import org.wso2.carbon.deployment.automation.exceptions.DeploymentAutomationException;
+import org.wso2.carbon.deployment.automation.models.Product;
+
 /**
  * Interface for a deployment provider.
  */
 public interface DeploymentProvider {
-    /**
-     * List deployments.
-     */
-//    List<Deployment> listDeployments();
-
+    
     /**
      * Deploy a product in a respective environment.
      *
-     * @param definition YAML definition
+     * @param product Product details
      * @return Status
      */
-    boolean deploy(String definition);
+    void deploy(Product product) throws DeploymentAutomationException;
 
     /**
      * Remove a product deployment.
      *
-     * @param definition YAML definition
+     * @param product Product details
      * @return Status
      */
-    boolean undeploy(String definition);
-
-    /**
-     * Add a load balancer.
-     *
-     * @param definition YAML definition
-     * @return Status
-     */
-    boolean addLoadBalancer(String definition);
+    void undeploy(Product product) throws DeploymentAutomationException;
 }

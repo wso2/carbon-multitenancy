@@ -28,7 +28,7 @@ public class Tenant {
     private String name;
 
     /**
-     * No arg constructor is required for XML marshalling.
+     * Default constructor is required for XML marshalling.
      */
     public Tenant() {
     }
