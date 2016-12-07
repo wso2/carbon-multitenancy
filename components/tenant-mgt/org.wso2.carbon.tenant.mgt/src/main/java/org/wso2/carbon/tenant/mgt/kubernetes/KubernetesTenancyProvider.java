@@ -23,8 +23,8 @@ import org.wso2.carbon.tenant.mgt.exceptions.TenantManagementException;
 import org.wso2.carbon.tenant.mgt.interfaces.TenancyProvider;
 import org.wso2.carbon.tenant.mgt.models.Tenant;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Tenant provider for Kubernetes cluster manager.
@@ -40,16 +40,13 @@ public class KubernetesTenancyProvider extends KubernetesBase implements Tenancy
      * @return Array of tenants
      */
     @Override
-    public Tenant[] getTenants() {
-        List<Tenant> tenants = new ArrayList<Tenant>();
-        for (Namespace ns : client.namespaces().list().getItems()) {
-            String name = ns.getMetadata().getName();
-            // Do not return reserved namespaces.
-            if (!isReservedNamespace(name)) {
-                tenants.add(new Tenant(name));
-            }
-        }
-        return tenants.toArray(new Tenant[tenants.size()]);
+    public List<Tenant> getTenants() {
+        return client.namespaces().list().getItems().stream()
+                .filter(namespace -> !isReservedNamespace(namespace.getMetadata().getName()))
+                .map(namespace -> {
+                    return new Tenant(namespace.getMetadata().getName());
+                })
+                .collect(Collectors.toList());
     }
 
     /**
@@ -64,7 +61,6 @@ public class KubernetesTenancyProvider extends KubernetesBase implements Tenancy
         Namespace namespace = client.namespaces()
                 .withName(sanitizeTenantName(name))
                 .get();
-
         if (namespace == null) {
             throw new TenantManagementException("Tenant '" + name + "' not found.");
         }

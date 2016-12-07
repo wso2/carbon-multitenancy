@@ -7,16 +7,33 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @SuppressWarnings("unused")
 @XmlRootElement
-public class Product {
+public class Deployment {
+    private String id;
     private String product;
     private String version;
     private int pattern;
     private String platform;
 
+    public Deployment(String id, String product, String version, int pattern, String platform) {
+        this.id = id;
+        this.product = product;
+        this.version = version;
+        this.pattern = pattern;
+        this.platform = platform;
+    }
+
     /**
      * Default constructor is required for XML marshalling.
      */
-    public Product() {
+    public Deployment() {
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getProduct() {
@@ -50,4 +67,6 @@ public class Product {
     public void setPlatform(String platform) {
         this.platform = platform;
     }
+
+
 }

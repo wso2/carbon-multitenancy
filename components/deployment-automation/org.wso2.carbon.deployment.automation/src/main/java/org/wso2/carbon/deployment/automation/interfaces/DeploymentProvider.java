@@ -17,26 +17,40 @@
 package org.wso2.carbon.deployment.automation.interfaces;
 
 import org.wso2.carbon.deployment.automation.exceptions.DeploymentAutomationException;
-import org.wso2.carbon.deployment.automation.models.Product;
+import org.wso2.carbon.deployment.automation.models.Deployment;
+
+import java.util.List;
 
 /**
  * Interface for a deployment provider.
  */
 public interface DeploymentProvider {
-    
+    /**
+     * Get all the deployments.
+     *
+     * @return List of deployments
+     */
+    List<Deployment> listDeployments();
+
+    /**
+     * Get a deployment by ID.
+     *
+     * @param id Deployment ID
+     * @return Deployment
+     */
+    Deployment getDeployment(String id);
+
     /**
      * Deploy a product in a respective environment.
      *
-     * @param product Product details
-     * @return Status
+     * @param deployment Deployment details
      */
-    void deploy(Product product) throws DeploymentAutomationException;
+    void deploy(Deployment deployment) throws DeploymentAutomationException;
 
     /**
      * Remove a product deployment.
      *
-     * @param product Product details
-     * @return Status
+     * @param deployment Deployment details
      */
-    void undeploy(Product product) throws DeploymentAutomationException;
+    void undeploy(Deployment deployment) throws DeploymentAutomationException;
 }

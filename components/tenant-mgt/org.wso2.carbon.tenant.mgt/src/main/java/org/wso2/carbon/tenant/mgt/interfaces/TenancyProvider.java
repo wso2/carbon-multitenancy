@@ -18,6 +18,8 @@ package org.wso2.carbon.tenant.mgt.interfaces;
 import org.wso2.carbon.tenant.mgt.exceptions.TenantManagementException;
 import org.wso2.carbon.tenant.mgt.models.Tenant;
 
+import java.util.List;
+
 /**
  * Interface of a tenant provider.
  */
@@ -28,7 +30,7 @@ public interface TenancyProvider {
      *
      * @return Tenant[]
      */
-    Tenant[] getTenants();
+    List<Tenant> getTenants();
 
     /**
      * Get details of a tenant.
