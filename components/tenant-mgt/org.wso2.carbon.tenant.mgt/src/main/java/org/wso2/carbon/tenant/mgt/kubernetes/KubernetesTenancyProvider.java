@@ -19,7 +19,10 @@ package org.wso2.carbon.tenant.mgt.kubernetes;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.NamespaceBuilder;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
-import org.wso2.carbon.tenant.mgt.exceptions.TenantManagementException;
+import org.wso2.carbon.tenant.mgt.exceptions.BadRequestException;
+import org.wso2.carbon.tenant.mgt.exceptions.DeploymentEnvironmentException;
+import org.wso2.carbon.tenant.mgt.exceptions.TenantCreationFailedException;
+import org.wso2.carbon.tenant.mgt.exceptions.TenantNotFoundException;
 import org.wso2.carbon.tenant.mgt.interfaces.TenancyProvider;
 import org.wso2.carbon.tenant.mgt.models.Tenant;
 
@@ -30,9 +33,17 @@ import java.util.stream.Collectors;
  * Tenant provider for Kubernetes cluster manager.
  */
 public class KubernetesTenancyProvider extends KubernetesBase implements TenancyProvider {
-
     public static final String RESERVED_NAMESPACE_DEFAULT = "default";
     public static final String RESERVED_NAMESPACE_KUBE_SYSTEM = "kube-system";
+
+    /**
+     * Initializes the Kubernetes client by providing the master node endpoint. Initially it looks for the master node
+     * IP address and the port from the KUBERNETES_MASTER_IP and KUBERNETES_MASTER_PORT environment variables and if not
+     * available it falls back to the default endpoint URL.
+     */
+    public KubernetesTenancyProvider() throws DeploymentEnvironmentException {
+        super();
+    }
 
     /**
      * Get list of tenants i.e. namespaces other than the default and kube-system.
@@ -57,12 +68,10 @@ public class KubernetesTenancyProvider extends KubernetesBase implements Tenancy
      * @throws TenantManagementException
      */
     @Override
-    public Tenant getTenant(String name) throws TenantManagementException {
-        Namespace namespace = client.namespaces()
-                .withName(sanitizeTenantName(name))
-                .get();
+    public Tenant getTenant(String name) throws TenantNotFoundException {
+        Namespace namespace = client.namespaces().withName(sanitizeTenantName(name)).get();
         if (namespace == null) {
-            throw new TenantManagementException("Tenant '" + name + "' not found.");
+            throw new TenantNotFoundException("Tenant '" + name + "' not found.");
         }
         return new Tenant(namespace.getMetadata().getName());
     }
@@ -75,18 +84,16 @@ public class KubernetesTenancyProvider extends KubernetesBase implements Tenancy
      * @throws TenantManagementException
      */
     @Override
-    public void createTenant(Tenant tenant) throws TenantManagementException {
+    public void createTenant(Tenant tenant) throws TenantCreationFailedException, BadRequestException {
         String name = sanitizeTenantName(tenant.getName());
         // Unable to create a tenant with the system namespace name
         if (isReservedNamespace(name)) {
-            throw new TenantManagementException("Tenant name '" + tenant.getName() + "' is unavailable.");
+            throw new BadRequestException("Tenant name '" + tenant.getName() + "' is unavailable.");
         }
-
         // Check whether the namespace already exists
         if (isNamespaceExists(name)) {
-            throw new TenantManagementException("Tenant '" + tenant.getName() + "' already exists.");
+            throw new TenantCreationFailedException("Tenant '" + tenant.getName() + "' already exists.");
         }
-
         client.namespaces().create(new NamespaceBuilder()
                 .withMetadata(
                         new ObjectMetaBuilder()
@@ -103,10 +110,11 @@ public class KubernetesTenancyProvider extends KubernetesBase implements Tenancy
      * @throws TenantManagementException
      */
     @Override
-    public boolean deleteTenant(String name) throws TenantManagementException {
+    public boolean deleteTenant(String name) {
         name = sanitizeTenantName(name);
+        // DELETE operation on non-existing resource does not return 404, but 200.
         if (isReservedNamespace(name)) {
-            throw new TenantManagementException("Tenant '" + name + "' cannot be deleted.");
+            return true;
         }
         return client.namespaces().withName(name).delete();
     }

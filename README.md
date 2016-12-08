@@ -42,7 +42,7 @@ Request Body: Tenant object
 DELETE /tenants/{name}
 ```
 
-###### Models:
+#### Models:
 
 Tenant model
 ```
@@ -60,14 +60,14 @@ This repository contains featured required for deployment automation functionali
 Following endpoints are exposed in the deployment automation API.
 
 ```
-GET /deployments?platform={platform}
+GET /deployments
 ```
 
 Produces: `application/json`
 Response: List of deployments
 
 ```
-GET /deployments/{id}?platform={platform}
+GET /deployments/{id}
 ```
 
 Produces: `application/json`
@@ -87,7 +87,7 @@ DELETE /deployments
 Consumes: `application/json`
 Request Body: Deployment object
 
-###### Models:
+#### Models:
 
 Deployment model
 ```
@@ -96,7 +96,6 @@ Deployment model
     product: String
     version: String
     pattern: Integer
-    platform: String
 }
 ```
 

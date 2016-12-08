@@ -3,7 +3,7 @@ package org.wso2.carbon.deployment.automation.models;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * Product model.
+ * Deployment model.
  */
 @SuppressWarnings("unused")
 @XmlRootElement
@@ -12,14 +12,12 @@ public class Deployment {
     private String product;
     private String version;
     private int pattern;
-    private String platform;
 
-    public Deployment(String id, String product, String version, int pattern, String platform) {
+    public Deployment(String id, String product, String version, int pattern) {
         this.id = id;
         this.product = product;
         this.version = version;
         this.pattern = pattern;
-        this.platform = platform;
     }
 
     /**
@@ -59,14 +57,4 @@ public class Deployment {
     public void setPattern(int pattern) {
         this.pattern = pattern;
     }
-
-    public String getPlatform() {
-        return platform;
-    }
-
-    public void setPlatform(String platform) {
-        this.platform = platform;
-    }
-
-
 }

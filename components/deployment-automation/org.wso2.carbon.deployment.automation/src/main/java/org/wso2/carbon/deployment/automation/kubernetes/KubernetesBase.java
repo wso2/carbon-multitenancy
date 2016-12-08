@@ -17,12 +17,17 @@ package org.wso2.carbon.deployment.automation.kubernetes;
 
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * Base class for Kubernetes service providers.
  */
 public class KubernetesBase {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesBase.class);
     private static final String DEFAULT_KUBERNETES_MASTER_IP = "172.17.8.101";
     private static final String DEFAULT_KUBERNETES_MASTER_PORT = "8080";
     private static final String KUBERNETES_MASTER_IP_ENV = "KUBERNETES_MASTER_IP";
@@ -46,6 +51,15 @@ public class KubernetesBase {
         if (endpointPort == null || endpointPort.isEmpty()) {
             endpointPort = DEFAULT_KUBERNETES_MASTER_PORT;
         }
-        this.client = new DefaultKubernetesClient("http://" + endpointIP + ":" + endpointPort);
+
+        URL url;
+        try {
+            url = new URL("http", endpointIP, Integer.parseInt(endpointPort), "");
+            this.client = new DefaultKubernetesClient(url.toString());
+        } catch (MalformedURLException e) {
+            LOGGER.error("Unable to identify the Kubernetes master node.", e);
+        } catch (NullPointerException e) {
+            LOGGER.error("Unable to identify the Kubernetes master node.", e);
+        }
     }
 }

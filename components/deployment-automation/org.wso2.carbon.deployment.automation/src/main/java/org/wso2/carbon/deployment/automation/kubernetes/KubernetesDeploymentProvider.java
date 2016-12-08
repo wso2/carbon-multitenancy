@@ -18,7 +18,9 @@ package org.wso2.carbon.deployment.automation.kubernetes;
 
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
-import org.wso2.carbon.deployment.automation.exceptions.DeploymentAutomationException;
+import org.wso2.carbon.deployment.automation.exceptions.BadRequestException;
+import org.wso2.carbon.deployment.automation.exceptions.DeploymentEnvironmentException;
+import org.wso2.carbon.deployment.automation.exceptions.DeploymentNotFoundException;
 import org.wso2.carbon.deployment.automation.interfaces.DeploymentProvider;
 import org.wso2.carbon.deployment.automation.models.Deployment;
 import org.yaml.snakeyaml.Yaml;
@@ -54,8 +56,7 @@ public class KubernetesDeploymentProvider extends KubernetesBase implements Depl
                             deployment.getMetadata().getUid(),
                             labels.get("product"),
                             labels.get("version"),
-                            Integer.parseInt(labels.get("pattern")),
-                            "kubernetes");
+                            Integer.parseInt(labels.get("pattern")));
                 })
                 .collect(Collectors.toList());
     }
@@ -67,7 +68,7 @@ public class KubernetesDeploymentProvider extends KubernetesBase implements Depl
      * @return Deployment
      */
     @Override
-    public Deployment getDeployment(String id) {
+    public Deployment getDeployment(String id) throws DeploymentNotFoundException {
         Optional<Deployment> filteredDeployments = client.extensions().deployments().list().getItems().stream()
                 .filter(deployment -> deployment.getMetadata().getUid().equals(id))
                 .map(deployment -> {
@@ -76,27 +77,25 @@ public class KubernetesDeploymentProvider extends KubernetesBase implements Depl
                             deployment.getMetadata().getUid(),
                             labels.get("product"),
                             labels.get("version"),
-                            Integer.parseInt(labels.get("pattern")),
-                            "kubernetes");
+                            Integer.parseInt(labels.get("pattern")));
                 }).findFirst();
 
-        if (filteredDeployments.isPresent()) {
-            return filteredDeployments.get();
+        if (!filteredDeployments.isPresent()) {
+            throw new DeploymentNotFoundException("Deployment '" + id + "' not found.");
         }
-        return null;
+        return filteredDeployments.get();
     }
 
     /**
      * Deploy a product in a Kubernetes environment.
      *
      * @param deployment Deployment details
+     * @throws DeploymentEnvironmentException
      */
     @Override
-    public void deploy(Deployment deployment) throws DeploymentAutomationException {
-        // TODO: set the KUBERNETES_NAMESPACE=tenant-1 environment variable
+    public void deploy(Deployment deployment) throws DeploymentEnvironmentException, BadRequestException {
         for (String profilePath : getProductProfiles(deployment)) {
             Map<String, String> resources = fetchResources(profilePath);
-
             // Add deployment
             if (resources.containsKey(KIND_DEPLOYMENT)) {
                 io.fabric8.kubernetes.api.model.extensions.Deployment kubernetesDeployment = new Yaml().loadAs(
@@ -120,12 +119,12 @@ public class KubernetesDeploymentProvider extends KubernetesBase implements Depl
      * Undeploy a product from a Kubernetes environment.
      *
      * @param deployment Deployment details
+     * @throws DeploymentEnvironmentException
      */
     @Override
-    public void undeploy(Deployment deployment) throws DeploymentAutomationException {
+    public void undeploy(Deployment deployment) throws DeploymentEnvironmentException, BadRequestException {
         for (String profilePath : getProductProfiles(deployment)) {
             Map<String, String> resources = fetchResources(profilePath);
-
             //Remove ingress
             if (resources.containsKey(KIND_INGRESS)) {
                 Ingress ingress = new Yaml().loadAs(resources.get(KIND_INGRESS), Ingress.class);
@@ -158,33 +157,35 @@ public class KubernetesDeploymentProvider extends KubernetesBase implements Depl
      *
      * @param deployment Deployment details
      * @return List of paths to profiles
-     * @throws DeploymentAutomationException
      */
-    private List<String> getProductProfiles(Deployment deployment) throws DeploymentAutomationException {
-        String path = Paths.get(System.getProperty("carbon.home"), "deployment", "kubernetes", deployment.getProduct(), deployment.getVersion(),
-                "pattern-" + deployment.getPattern()).toString();
+    private List<String> getProductProfiles(Deployment deployment) throws BadRequestException {
+        String path = Paths.get(System.getProperty("carbon.home"), "deployment", "kubernetes-artifacts",
+                deployment.getProduct(), deployment.getVersion(), "pattern-" + deployment.getPattern()).toString();
 
         File patternDir = new File(path);
+        if (!patternDir.exists()) {
+            throw new BadRequestException("Unable to find the deployment artifacts for given details.");
+        }
         return Arrays.stream(patternDir.listFiles())
                 .filter(file -> file.getName().endsWith(YAML_EXTENSION))
-                .map(file -> path + "/" + file.getName())
+                .map(file -> Paths.get(path, file.getName()).toString())
                 .collect(Collectors.toList());
     }
 
     /**
-     * Parse product profile to fetch Kubenetes resourses.
+     * Parse product profile to fetch Kubernetes resources.
      *
      * @param path Path to profile
      * @return Map contains resources
-     * @throws DeploymentAutomationException
+     * @throws DeploymentEnvironmentException
      */
-    private Map<String, String> fetchResources(String path) throws DeploymentAutomationException {
+    private Map<String, String> fetchResources(String path) throws DeploymentEnvironmentException {
         Map<String, String> resources = new HashMap<String, String>();
         Map<String, Object> map = null;
         try {
             map = (Map<String, Object>) new Yaml().load(new FileInputStream(new File(path)));
         } catch (FileNotFoundException e) {
-            throw new DeploymentAutomationException("Unable to find the profle for the given product", e);
+            throw new DeploymentEnvironmentException("Unable to find the profle for the given product", e);
         }
         if (map.get("kind").toString().toLowerCase().equals(KIND_LIST)) {
             for (LinkedHashMap item : (List<LinkedHashMap>) map.get("items")) {

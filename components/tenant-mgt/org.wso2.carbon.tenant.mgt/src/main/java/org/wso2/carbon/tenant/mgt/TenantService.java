@@ -21,7 +21,10 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-import org.wso2.carbon.tenant.mgt.exceptions.TenantManagementException;
+import org.wso2.carbon.tenant.mgt.exceptions.DeploymentEnvironmentException;
+import org.wso2.carbon.tenant.mgt.exceptions.TenantCreationFailedException;
+import org.wso2.carbon.tenant.mgt.exceptions.TenantNotFoundException;
+import org.wso2.carbon.tenant.mgt.exceptions.BadRequestException;
 import org.wso2.carbon.tenant.mgt.interfaces.TenancyProvider;
 import org.wso2.carbon.tenant.mgt.kubernetes.KubernetesTenancyProvider;
 import org.wso2.carbon.tenant.mgt.models.Tenant;
@@ -59,38 +62,31 @@ import javax.ws.rs.core.Response;
         immediate = true
 )
 public class TenantService implements Microservice {
-
-    private TenancyProvider tenancyProvider;
-
-    public TenantService() {
-        this.tenancyProvider = new KubernetesTenancyProvider();
-    }
-
-    @Activate
-    protected void activate(BundleContext bundleContext) {
-    }
-
-    @Deactivate
-    protected void deactivate(BundleContext bundleContext) {
-    }
+    private static final String DEPLOYMENT_KUBERNETES = "kubernetes";
+    private static final String ENV_DEPLOYMENT_PLATFORM = "WSO2_DEPLOYMENT_PLATFORM";
 
     /**
      * Get list of all the available tenants.
      * http://localhost:9090/tenants
      *
-     * @return Response
+     * @return Tenants
+     * @throws DeploymentEnvironmentException
      */
     @GET
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
             value = "Get all tenants",
-            notes = "Returns all the available tenants",
             response = Tenant.class,
             responseContainer = "List")
-    public Response getAllTenants() {
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Success"),
+            @ApiResponse(code = 412, message = "Invalid deployment platform"),
+    })
+    public Response getAllTenants() throws DeploymentEnvironmentException {
         return Response.ok()
-                .entity(tenancyProvider.getTenants())
+                .entity(getTenancyProvider().getTenants())
+                .type(MediaType.APPLICATION_JSON)
                 .build();
     }
 
@@ -99,56 +95,51 @@ public class TenantService implements Microservice {
      * http://localhost:9090/tenants/tenant-a
      *
      * @param name Tenant name
-     * @return Response
+     * @return Tenant
+     * @throws TenantNotFoundException
+     * @throws DeploymentEnvironmentException
      */
     @GET
     @Path("/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(
-            value = "Get a tenant",
-            notes = "Find and return a tenant by name")
+    @ApiOperation(value = "Get a tenant by name")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Tenant found"),
-            @ApiResponse(code = 404, message = "Tenant not found")
+            @ApiResponse(code = 404, message = "Tenant not found"),
+            @ApiResponse(code = 412, message = "Invalid deployment platform")
     })
-    public Response getTenant(@ApiParam(value = "Tenant name", required = true) @PathParam("name") String name) {
-        try {
-            Tenant tenant = tenancyProvider.getTenant(name);
-            return Response.ok()
-                    .entity(tenant)
-                    .build();
-        } catch (TenantManagementException e) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .build();
-        }
+    public Response getTenant(@ApiParam(value = "Tenant name", required = true) @PathParam("name") String name)
+            throws TenantNotFoundException, DeploymentEnvironmentException {
+        return Response.ok()
+                .entity(getTenancyProvider().getTenant(name))
+                .type(MediaType.APPLICATION_JSON)
+                .build();
     }
 
     /**
      * Add a new tenant.
      * curl -X POST -H "Content-Type: application/json" -d '{ name: "tenant-a" }' http://localhost:9090/tenants
      *
-     * @param tenant Tenant object
-     * @return Response
+     * @param tenant Tenant
+     * @return Status
+     * @throws TenantCreationFailedException
+     * @throws DeploymentEnvironmentException
      */
     @POST
     @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)
-    @ApiOperation(
-            value = "Add a new tenant")
+    @ApiOperation(value = "Add new tenant")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Tenant created"),
-            @ApiResponse(code = 400, message = "Tenant creation failed")
+            @ApiResponse(code = 400, message = "Invalid request body"),
+            @ApiResponse(code = 409, message = "Tenant creation failed"),
+            @ApiResponse(code = 412, message = "Invalid deployment platform")
     })
-    public Response addTenant(@ApiParam(value = "Tenant object", required = true) Tenant tenant) {
-        try {
-            tenancyProvider.createTenant(tenant);
-            return Response.status(Response.Status.CREATED)
-                    .build();
-        } catch (TenantManagementException e) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("{ \"error\": \"" + e.getMessage() + "\" }")
-                    .build();
-        }
+    public Response addTenant(@ApiParam(value = "Tenant object", required = true) Tenant tenant)
+            throws TenantCreationFailedException, DeploymentEnvironmentException, BadRequestException {
+        getTenancyProvider().createTenant(tenant);
+        return Response.status(Response.Status.CREATED)
+                .build();
     }
 
     /**
@@ -156,25 +147,47 @@ public class TenantService implements Microservice {
      * curl -X DELETE http://localhost:9090/tenants/tenant-a
      *
      * @param name Tenant name
-     * @return Response
+     * @return Status
+     * @throws DeploymentEnvironmentException
      */
     @DELETE
     @Path("/{name}")
-    @ApiOperation(
-            value = "Delete a tenant",
-            notes = "Delete a tenant identified by name")
+    @ApiOperation(value = "Delete tenant by name")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Tenant deleted"),
-            @ApiResponse(code = 404, message = "Tenant not found")
+            @ApiResponse(code = 412, message = "Invalid deployment platform")
     })
-    public Response delete(@ApiParam(value = "Tenant name", required = true) @PathParam("name") String name) {
-        try {
-            tenancyProvider.deleteTenant(name);
-            return Response.ok()
-                    .build();
-        } catch (TenantManagementException e) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .build();
+    public Response delete(@ApiParam(value = "Tenant name", required = true) @PathParam("name") String name)
+            throws DeploymentEnvironmentException {
+        getTenancyProvider().deleteTenant(name);
+        return Response.ok()
+                .build();
+    }
+
+    /**
+     * Get tenancy provider.
+     *
+     * @return Deployment platform
+     * @throws DeploymentEnvironmentException
+     */
+    private TenancyProvider getTenancyProvider() throws DeploymentEnvironmentException {
+        String platform = System.getenv(ENV_DEPLOYMENT_PLATFORM);
+        if (platform == null || platform.equals("")) {
+            throw new DeploymentEnvironmentException("Unable to identify the deployment platform.");
         }
+
+        if (platform.toLowerCase().equals(DEPLOYMENT_KUBERNETES)) {
+            return new KubernetesTenancyProvider();
+        } else {
+            throw new DeploymentEnvironmentException("Unsupported deployment platform: " + platform);
+        }
+    }
+
+    @Activate
+    protected void activate(BundleContext bundleContext) {
+    }
+
+    @Deactivate
+    protected void deactivate(BundleContext bundleContext) {
     }
 }

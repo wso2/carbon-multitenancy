@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.wso2.carbon.tenant.mgt.exceptions;
 
 /**
- * Tenant management exception.
+ * Tenant failed exception.
  */
-public class TenantManagementException extends Exception {
-
-    public TenantManagementException(String message) {
+public class TenantCreationFailedException extends Exception {
+    public TenantCreationFailedException(String message) {
         super(message);
     }
 
-    public TenantManagementException(String message, Throwable cause) {
+    public TenantCreationFailedException(String message, Throwable cause) {
         super(message, cause);
     }
 }

@@ -16,7 +16,9 @@
 
 package org.wso2.carbon.deployment.automation.interfaces;
 
-import org.wso2.carbon.deployment.automation.exceptions.DeploymentAutomationException;
+import org.wso2.carbon.deployment.automation.exceptions.BadRequestException;
+import org.wso2.carbon.deployment.automation.exceptions.DeploymentEnvironmentException;
+import org.wso2.carbon.deployment.automation.exceptions.DeploymentNotFoundException;
 import org.wso2.carbon.deployment.automation.models.Deployment;
 
 import java.util.List;
@@ -38,19 +40,19 @@ public interface DeploymentProvider {
      * @param id Deployment ID
      * @return Deployment
      */
-    Deployment getDeployment(String id);
+    Deployment getDeployment(String id) throws DeploymentNotFoundException;
 
     /**
      * Deploy a product in a respective environment.
      *
      * @param deployment Deployment details
      */
-    void deploy(Deployment deployment) throws DeploymentAutomationException;
+    void deploy(Deployment deployment) throws DeploymentEnvironmentException, BadRequestException;
 
     /**
      * Remove a product deployment.
      *
      * @param deployment Deployment details
      */
-    void undeploy(Deployment deployment) throws DeploymentAutomationException;
+    void undeploy(Deployment deployment) throws DeploymentEnvironmentException, BadRequestException;
 }

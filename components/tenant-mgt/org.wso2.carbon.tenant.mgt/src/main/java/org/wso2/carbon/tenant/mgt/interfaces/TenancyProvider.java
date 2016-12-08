@@ -15,7 +15,9 @@
  */
 package org.wso2.carbon.tenant.mgt.interfaces;
 
-import org.wso2.carbon.tenant.mgt.exceptions.TenantManagementException;
+import org.wso2.carbon.tenant.mgt.exceptions.BadRequestException;
+import org.wso2.carbon.tenant.mgt.exceptions.TenantCreationFailedException;
+import org.wso2.carbon.tenant.mgt.exceptions.TenantNotFoundException;
 import org.wso2.carbon.tenant.mgt.models.Tenant;
 
 import java.util.List;
@@ -28,7 +30,7 @@ public interface TenancyProvider {
     /**
      * Get all the tenants.
      *
-     * @return Tenant[]
+     * @return List of tenants
      */
     List<Tenant> getTenants();
 
@@ -37,24 +39,23 @@ public interface TenancyProvider {
      *
      * @param name Tenant name
      * @return Tenant
-     * @throws TenantManagementException
+     * @throws TenantNotFoundException
      */
-    Tenant getTenant(String name) throws TenantManagementException;
+    Tenant getTenant(String name) throws TenantNotFoundException;
 
     /**
-     * Create a tenant using a given name.
+     * Create a tenant.
      *
      * @param tenant Tenant
-     * @throws TenantManagementException
+     * @throws TenantCreationFailedException
      */
-    void createTenant(Tenant tenant) throws TenantManagementException;
+    void createTenant(Tenant tenant) throws TenantCreationFailedException, BadRequestException;
 
     /**
-     * Delete a tenant.
+     * Delete a tenant by name.
      *
      * @param name Tenant name
      * @return Status
-     * @throws TenantManagementException
      */
-    boolean deleteTenant(String name) throws TenantManagementException;
+    boolean deleteTenant(String name);
 }
