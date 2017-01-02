@@ -144,7 +144,7 @@ public class KeyStoreGenerator {
             //generate key pair
             KeyPairGenerator keyPairGenerator = null;
             keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-            keyPairGenerator.initialize(1024);
+            keyPairGenerator.initialize(2048);
             KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
             // Common Name and alias for the generated certificate
