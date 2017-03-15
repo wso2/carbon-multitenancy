@@ -28,7 +28,7 @@ import java.net.URL;
  */
 public class KubernetesBase {
 
-    private static final Logger log = LoggerFactory.getLogger(KubernetesBase.class);
+    private static final Logger logger = LoggerFactory.getLogger(KubernetesBase.class);
 
     private static final String DEFAULT_KUBERNETES_MASTER_IP = "172.17.8.101";
     private static final String DEFAULT_KUBERNETES_MASTER_PORT = "8080";
@@ -59,7 +59,7 @@ public class KubernetesBase {
             url = new URL("http", endpointIP, Integer.parseInt(endpointPort), "");
             this.client = new DefaultKubernetesClient(url.toString());
         } catch (MalformedURLException e) {
-            log.error("Could not generate Kubernetes master URL with ip address: " + endpointIP + " and port: "
+            logger.error("Could not generate Kubernetes master URL with ip address: " + endpointIP + " and port: "
                     + endpointPort, e);
         }
     }
