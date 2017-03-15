@@ -28,7 +28,9 @@ import java.net.URL;
  * Base class for Kubernetes service providers.
  */
 public class KubernetesBase {
-    private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesBase.class);
+
+    private static final Logger log = LoggerFactory.getLogger(KubernetesBase.class);
+
     private static final String DEFAULT_KUBERNETES_MASTER_IP = "172.17.8.101";
     private static final String DEFAULT_KUBERNETES_MASTER_PORT = "8080";
     private static final String KUBERNETES_MASTER_IP_ENV = "KUBERNETES_MASTER_IP";
@@ -58,9 +60,9 @@ public class KubernetesBase {
             url = new URL("http", endpointIP, Integer.parseInt(endpointPort), "");
             this.client = new DefaultKubernetesClient(url.toString());
         } catch (MalformedURLException e) {
-            LOGGER.error("Unable to identify the Kubernetes master node.", e);
+            log.error("Unable to identify the Kubernetes master node.", e);
         } catch (NullPointerException e) {
-            LOGGER.error("Unable to identify the Kubernetes master node.", e);
+            log.error("Unable to identify the Kubernetes master node.", e);
         }
     }
 }
