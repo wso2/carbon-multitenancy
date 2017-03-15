@@ -59,9 +59,8 @@ public class KubernetesBase {
             url = new URL("http", endpointIP, Integer.parseInt(endpointPort), "");
             this.client = new DefaultKubernetesClient(url.toString());
         } catch (MalformedURLException e) {
-            log.error("Unable to identify the Kubernetes master node.", e);
-        } catch (NullPointerException e) {
-            log.error("Unable to identify the Kubernetes master node.", e);
+            log.error("Could not generate Kubernetes master URL with ip address: " + endpointIP + " and port: "
+                    + endpointPort, e);
         }
     }
 }
