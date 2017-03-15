@@ -19,6 +19,86 @@ The goal of multitenancy is to maximize resource sharing by allowing multiple us
 
 This repository contains the features required for multitenancy functionality.
 
+Following endpoints are exposed in the tenant management API.
+
+```    
+GET /tenants
+```
+Produces: `application/json`
+Response: List of tenants
+    
+```
+GET /tenants/{name}
+```
+Produces: `application/json`
+Response: Tenant object
+```
+POST /tenants
+```
+Consumes: `application/json`
+Request Body: Tenant object
+    
+```
+DELETE /tenants/{name}
+```
+
+#### Models:
+
+Tenant model
+```
+{
+    name: String
+}
+```
+
+* deployment-automation
+
+The goal of deployment automation is to provide easy to use API which can be used to deploy WSO2 products in a containerized environment.
+
+This repository contains featured required for deployment automation functionality.
+
+Following endpoints are exposed in the deployment automation API.
+
+```
+GET /deployments
+```
+
+Produces: `application/json`
+Response: List of deployments
+
+```
+GET /deployments/{id}
+```
+
+Produces: `application/json`
+Response: Deployment object
+
+```
+POST /deployments
+```
+
+Consumes: `application/json`
+Request Body: Deployment object 
+
+```
+DELETE /deployments
+```
+
+Consumes: `application/json`
+Request Body: Deployment object
+
+#### Models:
+
+Deployment model
+```
+{
+    id: String
+    product: String
+    version: String
+    pattern: Integer
+}
+```
+
 ## How to Contribute
 * Please report issues at [Carbon JIRA] (https://wso2.org/jira/browse/CARBON).
 * Send your bug fixes pull requests to [master branch] (https://github.com/wso2/carbon-multitenancy/tree/master)
