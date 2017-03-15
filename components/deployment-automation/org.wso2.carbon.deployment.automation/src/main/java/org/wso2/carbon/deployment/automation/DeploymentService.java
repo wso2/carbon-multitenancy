@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://wso2.com) All Rights Reserved.
+ * Copyright (c) 2017, WSO2 Inc. (http://wso2.com) All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,40 @@
 
 package org.wso2.carbon.deployment.automation;
 
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Contact;
+import io.swagger.annotations.Info;
+import io.swagger.annotations.License;
+import io.swagger.annotations.SwaggerDefinition;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-import org.wso2.carbon.deployment.automation.exceptions.*;
 import org.wso2.carbon.deployment.automation.exceptions.BadRequestException;
+import org.wso2.carbon.deployment.automation.exceptions.DeploymentEnvironmentException;
+import org.wso2.carbon.deployment.automation.exceptions.DeploymentNotFoundException;
 import org.wso2.carbon.deployment.automation.interfaces.DeploymentProvider;
 import org.wso2.carbon.deployment.automation.kubernetes.KubernetesDeploymentProvider;
 import org.wso2.carbon.deployment.automation.models.Deployment;
 import org.wso2.msf4j.Microservice;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
  * Handles deployment automation in a containerized environment. The service is available at,
- * http://localhost:9090/deployments
+ * http://<hostname>:<port>/deployments
  */
 @Api(value = "service", description = "Manage deployment automation in a containerized environment")
 @SwaggerDefinition(
@@ -60,6 +75,7 @@ import javax.ws.rs.core.Response;
         immediate = true
 )
 public class DeploymentService implements Microservice {
+
     private static final String DEPLOYMENT_KUBERNETES = "kubernetes";
     private static final String ENV_DEPLOYMENT_PLATFORM = "WSO2_DEPLOYMENT_PLATFORM";
 

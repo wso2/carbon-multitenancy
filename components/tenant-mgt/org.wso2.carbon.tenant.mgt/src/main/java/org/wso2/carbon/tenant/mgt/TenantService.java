@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://wso2.com) All Rights Reserved.
+ * Copyright (c) 2017, WSO2 Inc. (http://wso2.com) All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,27 +16,41 @@
 
 package org.wso2.carbon.tenant.mgt;
 
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Contact;
+import io.swagger.annotations.Info;
+import io.swagger.annotations.License;
+import io.swagger.annotations.SwaggerDefinition;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.wso2.carbon.tenant.mgt.exceptions.BadRequestException;
 import org.wso2.carbon.tenant.mgt.exceptions.DeploymentEnvironmentException;
 import org.wso2.carbon.tenant.mgt.exceptions.TenantCreationFailedException;
 import org.wso2.carbon.tenant.mgt.exceptions.TenantNotFoundException;
-import org.wso2.carbon.tenant.mgt.exceptions.BadRequestException;
 import org.wso2.carbon.tenant.mgt.interfaces.TenancyProvider;
 import org.wso2.carbon.tenant.mgt.kubernetes.KubernetesTenancyProvider;
 import org.wso2.carbon.tenant.mgt.models.Tenant;
 import org.wso2.msf4j.Microservice;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
- * Handles tenants in a containerized environment. The service is available at.
- * http://localhost:9090/tenants
+ * Handles tenants in a containerized environment. The service is available at:
+ * http://<hostname>:<port>/tenants
  */
 @Api(value = "service", description = "Manage tenants in a containerized environment")
 @SwaggerDefinition(

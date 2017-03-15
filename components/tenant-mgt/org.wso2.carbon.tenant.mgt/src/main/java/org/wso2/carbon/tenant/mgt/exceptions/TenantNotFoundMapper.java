@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://wso2.com) All Rights Reserved.
+ * Copyright (c) 2017, WSO2 Inc. (http://wso2.com) All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import javax.ws.rs.ext.ExceptionMapper;
         service = ExceptionMapper.class,
         immediate = true
 )
- public class TenantNotFoundMapper  implements ExceptionMapper<TenantNotFoundException> {
+public class TenantNotFoundMapper implements ExceptionMapper<TenantNotFoundException> {
     @Override
     public Response toResponse(TenantNotFoundException exception) {
         return Response.status(Response.Status.NOT_FOUND).build();
