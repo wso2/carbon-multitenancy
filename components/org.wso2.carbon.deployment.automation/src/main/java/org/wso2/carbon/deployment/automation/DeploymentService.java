@@ -25,10 +25,6 @@ import io.swagger.annotations.Contact;
 import io.swagger.annotations.Info;
 import io.swagger.annotations.License;
 import io.swagger.annotations.SwaggerDefinition;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
 import org.wso2.carbon.deployment.automation.exceptions.BadRequestException;
 import org.wso2.carbon.deployment.automation.exceptions.DeploymentEnvironmentException;
 import org.wso2.carbon.deployment.automation.exceptions.DeploymentNotFoundException;
@@ -69,11 +65,6 @@ import javax.ws.rs.core.Response;
         )
 )
 @Path("/deployments")
-@Component(
-        name = "org.wso2.carbon.deployment.automation.DeploymentService",
-        service = Microservice.class,
-        immediate = true
-)
 public class DeploymentService implements Microservice {
 
     private static final String DEPLOYMENT_KUBERNETES = "kubernetes";
@@ -192,19 +183,11 @@ public class DeploymentService implements Microservice {
             throw new DeploymentEnvironmentException("Unable to identify the deployment platform.");
         }
 
-        if (platform.toLowerCase().equals(DEPLOYMENT_KUBERNETES)) {
+        if (platform.equalsIgnoreCase(DEPLOYMENT_KUBERNETES)) {
             return new KubernetesDeploymentProvider();
         } else {
             throw new DeploymentEnvironmentException("Unsupported deployment platform: " + platform);
         }
-    }
-
-    @Activate
-    protected void activate(BundleContext bundleContext) {
-    }
-
-    @Deactivate
-    protected void deactivate(BundleContext bundleContext) {
     }
 }
 

@@ -25,10 +25,6 @@ import io.swagger.annotations.Contact;
 import io.swagger.annotations.Info;
 import io.swagger.annotations.License;
 import io.swagger.annotations.SwaggerDefinition;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
 import org.wso2.carbon.tenant.mgt.exceptions.BadRequestException;
 import org.wso2.carbon.tenant.mgt.exceptions.DeploymentEnvironmentException;
 import org.wso2.carbon.tenant.mgt.exceptions.TenantCreationFailedException;
@@ -70,12 +66,8 @@ import javax.ws.rs.core.Response;
         )
 )
 @Path("/tenants")
-@Component(
-        name = "org.wso2.carbon.tenant.mgt.TenantService",
-        service = Microservice.class,
-        immediate = true
-)
 public class TenantService implements Microservice {
+
     private static final String DEPLOYMENT_KUBERNETES = "kubernetes";
     private static final String ENV_DEPLOYMENT_PLATFORM = "WSO2_DEPLOYMENT_PLATFORM";
 
@@ -187,21 +179,13 @@ public class TenantService implements Microservice {
     private TenancyProvider getTenancyProvider() throws DeploymentEnvironmentException {
         String platform = System.getenv(ENV_DEPLOYMENT_PLATFORM);
         if (platform == null || platform.equals("")) {
-            throw new DeploymentEnvironmentException("Unable to identify the deployment platform.");
+            throw new DeploymentEnvironmentException("Unable to identify the deployment platform");
         }
 
-        if (platform.toLowerCase().equals(DEPLOYMENT_KUBERNETES)) {
+        if (platform.equalsIgnoreCase(DEPLOYMENT_KUBERNETES)) {
             return new KubernetesTenancyProvider();
         } else {
             throw new DeploymentEnvironmentException("Unsupported deployment platform: " + platform);
         }
-    }
-
-    @Activate
-    protected void activate(BundleContext bundleContext) {
-    }
-
-    @Deactivate
-    protected void deactivate(BundleContext bundleContext) {
     }
 }

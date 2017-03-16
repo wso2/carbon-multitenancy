@@ -33,8 +33,9 @@ import java.util.stream.Collectors;
  * Tenant provider for Kubernetes cluster manager.
  */
 public class KubernetesTenancyProvider extends KubernetesBase implements TenancyProvider {
-    public static final String RESERVED_NAMESPACE_DEFAULT = "default";
-    public static final String RESERVED_NAMESPACE_KUBE_SYSTEM = "kube-system";
+
+    private static final String RESERVED_NAMESPACE_DEFAULT = "default";
+    private static final String RESERVED_NAMESPACE_KUBE_SYSTEM = "kube-system";
 
     /**
      * Initializes the Kubernetes client by providing the master node endpoint. Initially it looks for the master node
@@ -65,7 +66,7 @@ public class KubernetesTenancyProvider extends KubernetesBase implements Tenancy
      *
      * @param name Tenant name
      * @return Tenant
-     * @throws TenantManagementException
+     * @throws TenantNotFoundException
      */
     @Override
     public Tenant getTenant(String name) throws TenantNotFoundException {
@@ -81,7 +82,8 @@ public class KubernetesTenancyProvider extends KubernetesBase implements Tenancy
      *
      * @param tenant Tenant
      * @return Status
-     * @throws TenantManagementException
+     * @throws TenantCreationFailedException
+     * @throws BadRequestException
      */
     @Override
     public void createTenant(Tenant tenant) throws TenantCreationFailedException, BadRequestException {
@@ -107,7 +109,6 @@ public class KubernetesTenancyProvider extends KubernetesBase implements Tenancy
      *
      * @param name Tenant name
      * @return Status
-     * @throws TenantManagementException
      */
     @Override
     public boolean deleteTenant(String name) {
@@ -146,6 +147,6 @@ public class KubernetesTenancyProvider extends KubernetesBase implements Tenancy
      * @return Sanitized namespace
      */
     private String sanitizeTenantName(String name) {
-        return name.replaceAll("\\.", "-").toLowerCase();
+        return name.replaceAll("\\.", "-");
     }
 }

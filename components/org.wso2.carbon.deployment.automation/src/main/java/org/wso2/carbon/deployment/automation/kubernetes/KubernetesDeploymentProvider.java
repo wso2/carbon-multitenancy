@@ -28,6 +28,7 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -41,11 +42,14 @@ import java.util.stream.Collectors;
  * Deployment provider for Kubernetes cluster manager.
  */
 public class KubernetesDeploymentProvider extends KubernetesBase implements DeploymentProvider {
+
     private static final String KIND_DEPLOYMENT = "deployment";
     private static final String KIND_SERVICE = "service";
     private static final String KIND_INGRESS = "ingress";
     private static final String KIND_LIST = "list";
     private static final String YAML_EXTENSION = ".yaml";
+    private static final String KIND = "kind";
+    private static final String ITEMS = "items";
 
     /**
      * Get list of deployments.
@@ -186,18 +190,29 @@ public class KubernetesDeploymentProvider extends KubernetesBase implements Depl
      */
     private Map<String, String> fetchResources(String path) throws DeploymentEnvironmentException {
         Map<String, String> resources = new HashMap<String, String>();
-        Map<String, Object> map = null;
+        Map<String, Object> map;
+        FileInputStream fileInputStream = null;
+
         try {
-            map = (Map<String, Object>) new Yaml().load(new FileInputStream(new File(path)));
+            fileInputStream = new FileInputStream(new File(path));
+            map = (Map<String, Object>) new Yaml().load(fileInputStream);
         } catch (FileNotFoundException e) {
-            throw new DeploymentEnvironmentException("Unable to find the profle for the given product", e);
+            throw new DeploymentEnvironmentException("Unable to find the profile for the given product", e);
+        } finally {
+            if (fileInputStream != null) {
+                try {
+                    fileInputStream.close();
+                } catch (IOException ignore) {
+                }
+            }
         }
-        if (map.get("kind").toString().toLowerCase().equals(KIND_LIST)) {
-            for (LinkedHashMap item : (List<LinkedHashMap>) map.get("items")) {
-                resources.put(item.get("kind").toString().toLowerCase(), new Yaml().dump(item));
+
+        if (map.get(KIND).toString().equalsIgnoreCase(KIND_LIST)) {
+            for (LinkedHashMap item : (List<LinkedHashMap>) map.get(ITEMS)) {
+                resources.put(item.get(KIND).toString(), new Yaml().dump(item));
             }
         } else {
-            resources.put(map.get("kind").toString().toLowerCase(), new Yaml().dump(map));
+            resources.put(map.get(KIND).toString(), new Yaml().dump(map));
         }
         return resources;
     }

@@ -21,6 +21,7 @@ package org.wso2.carbon.deployment.automation.exceptions;
  * This exception is thrown when there is an issue in identifying the deployment environment.
  */
 public class DeploymentEnvironmentException extends Exception {
+
     public DeploymentEnvironmentException(String message) {
         super(message);
     }
