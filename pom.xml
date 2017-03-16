@@ -34,8 +34,8 @@
     <url>http://wso2.org</url>
 
     <modules>
-        <module>components/tenant-mgt</module>
-        <module>components/deployment-automation</module>
+        <module>components/org.wso2.carbon.deployment.automation</module>
+        <module>components/org.wso2.carbon.tenant.mgt</module>
     </modules>
 
     <repositories>
