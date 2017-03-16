@@ -46,7 +46,7 @@ public class KubernetesDeploymentProvider extends KubernetesBase implements Depl
     private static final String KIND_DEPLOYMENT = "deployment";
     private static final String KIND_SERVICE = "service";
     private static final String KIND_INGRESS = "ingress";
-    private static final String KIND_LIST = "list";
+    private static final String LIST = "list";
     private static final String YAML_EXTENSION = ".yaml";
     private static final String KIND = "kind";
     private static final String ITEMS = "items";
@@ -207,12 +207,18 @@ public class KubernetesDeploymentProvider extends KubernetesBase implements Depl
             }
         }
 
-        if (map.get(KIND).toString().equalsIgnoreCase(KIND_LIST)) {
-            for (LinkedHashMap item : (List<LinkedHashMap>) map.get(ITEMS)) {
+        String kindValue = (map.get(KIND) != null) ? map.get(KIND).toString() : null;
+        if (kindValue == null) {
+            throw new DeploymentEnvironmentException("Kind property not found in Kubernetes resource: " + path);
+        }
+
+        if (kindValue.equalsIgnoreCase(LIST)) {
+            List<LinkedHashMap> items = (List<LinkedHashMap>) map.get(ITEMS);
+            for (LinkedHashMap item : items) {
                 resources.put(item.get(KIND).toString(), new Yaml().dump(item));
             }
         } else {
-            resources.put(map.get(KIND).toString(), new Yaml().dump(map));
+            resources.put(kindValue, new Yaml().dump(map));
         }
         return resources;
     }

@@ -178,11 +178,11 @@ public class TenantService implements Microservice {
      */
     private TenancyProvider getTenancyProvider() throws DeploymentEnvironmentException {
         String platform = System.getenv(ENV_DEPLOYMENT_PLATFORM);
-        if (platform == null || platform.equals("")) {
+        if (platform == null || platform.isEmpty()) {
             throw new DeploymentEnvironmentException("Unable to identify the deployment platform");
         }
 
-        if (platform.equalsIgnoreCase(DEPLOYMENT_KUBERNETES)) {
+        if (DEPLOYMENT_KUBERNETES.equalsIgnoreCase(platform)) {
             return new KubernetesTenancyProvider();
         } else {
             throw new DeploymentEnvironmentException("Unsupported deployment platform: " + platform);
