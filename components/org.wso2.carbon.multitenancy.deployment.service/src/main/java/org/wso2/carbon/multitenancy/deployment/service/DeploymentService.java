@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.deployment.automation;
+package org.wso2.carbon.multitenancy.deployment.service;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -25,12 +25,12 @@ import io.swagger.annotations.Contact;
 import io.swagger.annotations.Info;
 import io.swagger.annotations.License;
 import io.swagger.annotations.SwaggerDefinition;
-import org.wso2.carbon.deployment.automation.exceptions.BadRequestException;
-import org.wso2.carbon.deployment.automation.exceptions.DeploymentEnvironmentException;
-import org.wso2.carbon.deployment.automation.exceptions.DeploymentNotFoundException;
-import org.wso2.carbon.deployment.automation.interfaces.DeploymentProvider;
-import org.wso2.carbon.deployment.automation.kubernetes.KubernetesDeploymentProvider;
-import org.wso2.carbon.deployment.automation.models.Deployment;
+import org.wso2.carbon.multitenancy.deployment.service.exceptions.BadRequestException;
+import org.wso2.carbon.multitenancy.deployment.service.exceptions.DeploymentEnvironmentException;
+import org.wso2.carbon.multitenancy.deployment.service.exceptions.DeploymentNotFoundException;
+import org.wso2.carbon.multitenancy.deployment.service.interfaces.DeploymentProvider;
+import org.wso2.carbon.multitenancy.deployment.service.kubernetes.KubernetesDeploymentProvider;
+import org.wso2.carbon.multitenancy.deployment.service.models.Deployment;
 import org.wso2.msf4j.Microservice;
 
 import javax.ws.rs.Consumes;

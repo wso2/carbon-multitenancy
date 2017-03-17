@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.tenant.mgt.exceptions;
+package org.wso2.carbon.multitenancy.tenant.service.exceptions;
 
 import org.osgi.service.component.annotations.Component;
 
@@ -26,7 +26,7 @@ import javax.ws.rs.ext.ExceptionMapper;
  * Exception mapper for DeploymentEnvironmentException.
  */
 @Component(
-        name = "org.wso2.carbon.tenant.mgt.exceptions.DeploymentEnvironmentMapper",
+        name = "org.wso2.carbon.multitenancy.tenant.service.exceptions.DeploymentEnvironmentMapper",
         service = ExceptionMapper.class,
         immediate = true
 )

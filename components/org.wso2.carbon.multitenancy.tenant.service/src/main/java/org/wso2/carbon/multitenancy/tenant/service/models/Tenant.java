@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.tenant.mgt.models;
+package org.wso2.carbon.multitenancy.tenant.service.models;
 
 import javax.xml.bind.annotation.XmlRootElement;
 

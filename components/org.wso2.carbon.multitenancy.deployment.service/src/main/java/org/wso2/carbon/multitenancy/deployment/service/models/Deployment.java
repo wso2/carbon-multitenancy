@@ -1,4 +1,4 @@
-package org.wso2.carbon.deployment.automation.models;
+package org.wso2.carbon.multitenancy.deployment.service.models;
 
 import javax.xml.bind.annotation.XmlRootElement;
 

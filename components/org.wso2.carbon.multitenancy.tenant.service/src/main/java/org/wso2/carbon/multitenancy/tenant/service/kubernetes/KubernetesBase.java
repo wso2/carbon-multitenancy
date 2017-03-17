@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.wso2.carbon.tenant.mgt.kubernetes;
+package org.wso2.carbon.multitenancy.tenant.service.kubernetes;
 
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.tenant.mgt.exceptions.DeploymentEnvironmentException;
+import org.wso2.carbon.multitenancy.tenant.service.exceptions.DeploymentEnvironmentException;
 
 import java.net.MalformedURLException;
 import java.net.URL;

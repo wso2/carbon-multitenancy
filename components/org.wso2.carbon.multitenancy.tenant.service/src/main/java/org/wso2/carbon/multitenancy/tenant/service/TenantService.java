@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.tenant.mgt;
+package org.wso2.carbon.multitenancy.tenant.service;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -25,13 +25,13 @@ import io.swagger.annotations.Contact;
 import io.swagger.annotations.Info;
 import io.swagger.annotations.License;
 import io.swagger.annotations.SwaggerDefinition;
-import org.wso2.carbon.tenant.mgt.exceptions.BadRequestException;
-import org.wso2.carbon.tenant.mgt.exceptions.DeploymentEnvironmentException;
-import org.wso2.carbon.tenant.mgt.exceptions.TenantCreationFailedException;
-import org.wso2.carbon.tenant.mgt.exceptions.TenantNotFoundException;
-import org.wso2.carbon.tenant.mgt.interfaces.TenancyProvider;
-import org.wso2.carbon.tenant.mgt.kubernetes.KubernetesTenancyProvider;
-import org.wso2.carbon.tenant.mgt.models.Tenant;
+import org.wso2.carbon.multitenancy.tenant.service.exceptions.BadRequestException;
+import org.wso2.carbon.multitenancy.tenant.service.exceptions.DeploymentEnvironmentException;
+import org.wso2.carbon.multitenancy.tenant.service.exceptions.TenantCreationFailedException;
+import org.wso2.carbon.multitenancy.tenant.service.exceptions.TenantNotFoundException;
+import org.wso2.carbon.multitenancy.tenant.service.interfaces.TenancyProvider;
+import org.wso2.carbon.multitenancy.tenant.service.kubernetes.KubernetesTenancyProvider;
+import org.wso2.carbon.multitenancy.tenant.service.models.Tenant;
 import org.wso2.msf4j.Microservice;
 
 import javax.ws.rs.Consumes;

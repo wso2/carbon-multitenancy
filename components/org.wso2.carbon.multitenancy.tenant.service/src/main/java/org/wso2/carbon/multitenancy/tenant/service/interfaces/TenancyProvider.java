@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.wso2.carbon.tenant.mgt.interfaces;
+package org.wso2.carbon.multitenancy.tenant.service.interfaces;
 
-import org.wso2.carbon.tenant.mgt.exceptions.BadRequestException;
-import org.wso2.carbon.tenant.mgt.exceptions.TenantCreationFailedException;
-import org.wso2.carbon.tenant.mgt.exceptions.TenantNotFoundException;
-import org.wso2.carbon.tenant.mgt.models.Tenant;
+import org.wso2.carbon.multitenancy.tenant.service.exceptions.BadRequestException;
+import org.wso2.carbon.multitenancy.tenant.service.exceptions.TenantCreationFailedException;
+import org.wso2.carbon.multitenancy.tenant.service.exceptions.TenantNotFoundException;
+import org.wso2.carbon.multitenancy.tenant.service.models.Tenant;
 
 import java.util.List;
 

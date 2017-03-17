@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.deployment.automation.kubernetes;
+package org.wso2.carbon.multitenancy.deployment.service.kubernetes;
 
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
-import org.wso2.carbon.deployment.automation.exceptions.BadRequestException;
-import org.wso2.carbon.deployment.automation.exceptions.DeploymentEnvironmentException;
-import org.wso2.carbon.deployment.automation.exceptions.DeploymentNotFoundException;
-import org.wso2.carbon.deployment.automation.interfaces.DeploymentProvider;
-import org.wso2.carbon.deployment.automation.models.Deployment;
+import org.wso2.carbon.multitenancy.deployment.service.exceptions.BadRequestException;
+import org.wso2.carbon.multitenancy.deployment.service.exceptions.DeploymentEnvironmentException;
+import org.wso2.carbon.multitenancy.deployment.service.exceptions.DeploymentNotFoundException;
+import org.wso2.carbon.multitenancy.deployment.service.interfaces.DeploymentProvider;
+import org.wso2.carbon.multitenancy.deployment.service.models.Deployment;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;

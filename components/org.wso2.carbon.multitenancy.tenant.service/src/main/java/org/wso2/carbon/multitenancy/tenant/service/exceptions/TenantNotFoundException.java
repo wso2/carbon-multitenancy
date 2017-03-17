@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.tenant.mgt.exceptions;
+package org.wso2.carbon.multitenancy.tenant.service.exceptions;
 
 /**
  * Tenant not found exception.

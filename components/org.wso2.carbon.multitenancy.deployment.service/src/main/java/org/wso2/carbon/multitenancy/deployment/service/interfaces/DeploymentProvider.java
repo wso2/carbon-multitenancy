@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.deployment.automation.interfaces;
+package org.wso2.carbon.multitenancy.deployment.service.interfaces;
 
-import org.wso2.carbon.deployment.automation.exceptions.BadRequestException;
-import org.wso2.carbon.deployment.automation.exceptions.DeploymentEnvironmentException;
-import org.wso2.carbon.deployment.automation.exceptions.DeploymentNotFoundException;
-import org.wso2.carbon.deployment.automation.models.Deployment;
+import org.wso2.carbon.multitenancy.deployment.service.exceptions.BadRequestException;
+import org.wso2.carbon.multitenancy.deployment.service.exceptions.DeploymentEnvironmentException;
+import org.wso2.carbon.multitenancy.deployment.service.exceptions.DeploymentNotFoundException;
+import org.wso2.carbon.multitenancy.deployment.service.models.Deployment;
 
 import java.util.List;
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.deployment.automation.exceptions;
+package org.wso2.carbon.multitenancy.deployment.service.exceptions;
 
 import org.osgi.service.component.annotations.Component;
 
@@ -26,7 +26,7 @@ import javax.ws.rs.ext.ExceptionMapper;
  * Exception mapper for BadRequestException.
  */
 @Component(
-        name = "org.wso2.carbon.deployment.automation.exceptions.BadRequestMapper",
+        name = "org.wso2.carbon.multitenancy.deployment.service.exceptions.BadRequestMapper",
         service = ExceptionMapper.class,
         immediate = true
 )

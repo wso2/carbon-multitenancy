@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.deployment.automation.exceptions;
+package org.wso2.carbon.multitenancy.deployment.service.exceptions;
 
 import org.osgi.service.component.annotations.Component;
 
@@ -25,7 +25,7 @@ import javax.ws.rs.ext.ExceptionMapper;
  * Exception mapper for DeploymentNotFoundException.
  */
 @Component(
-        name = "org.wso2.carbon.deployment.automation.exceptions.DeploymentNotFoundMapper",
+        name = "org.wso2.carbon.multitenancy.deployment.service.exceptions.DeploymentNotFoundMapper",
         service = ExceptionMapper.class,
         immediate = true
 )

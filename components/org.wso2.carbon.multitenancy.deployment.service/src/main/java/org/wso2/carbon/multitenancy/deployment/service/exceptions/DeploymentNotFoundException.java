@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.deployment.automation.exceptions;
+package org.wso2.carbon.multitenancy.deployment.service.exceptions;
 
 /**
  * Deployment not found exception.

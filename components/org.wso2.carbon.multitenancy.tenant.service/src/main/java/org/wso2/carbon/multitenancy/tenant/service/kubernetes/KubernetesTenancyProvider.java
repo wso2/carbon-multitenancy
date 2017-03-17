@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.tenant.mgt.kubernetes;
+package org.wso2.carbon.multitenancy.tenant.service.kubernetes;
 
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.NamespaceBuilder;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
-import org.wso2.carbon.tenant.mgt.exceptions.BadRequestException;
-import org.wso2.carbon.tenant.mgt.exceptions.DeploymentEnvironmentException;
-import org.wso2.carbon.tenant.mgt.exceptions.TenantCreationFailedException;
-import org.wso2.carbon.tenant.mgt.exceptions.TenantNotFoundException;
-import org.wso2.carbon.tenant.mgt.interfaces.TenancyProvider;
-import org.wso2.carbon.tenant.mgt.models.Tenant;
+import org.wso2.carbon.multitenancy.tenant.service.exceptions.BadRequestException;
+import org.wso2.carbon.multitenancy.tenant.service.exceptions.DeploymentEnvironmentException;
+import org.wso2.carbon.multitenancy.tenant.service.exceptions.TenantCreationFailedException;
+import org.wso2.carbon.multitenancy.tenant.service.exceptions.TenantNotFoundException;
+import org.wso2.carbon.multitenancy.tenant.service.interfaces.TenancyProvider;
+import org.wso2.carbon.multitenancy.tenant.service.models.Tenant;
 
 import java.util.List;
 import java.util.stream.Collectors;
