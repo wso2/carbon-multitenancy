@@ -35,6 +35,7 @@
     <modules>
         <module>components/org.wso2.carbon.multitenancy.deployment.service</module>
         <module>components/org.wso2.carbon.multitenancy.tenant.service</module>
+        <module>components/org.wso2.carbon.multitenancy.application</module>
     </modules>
 
     <repositories>
