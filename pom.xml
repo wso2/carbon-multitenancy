@@ -21,7 +21,7 @@
         <groupId>org.wso2</groupId>
         <artifactId>wso2</artifactId>
         <version>5</version>
-        <relativePath />
+        <relativePath/>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -33,8 +33,8 @@
     <url>http://wso2.org</url>
 
     <modules>
-        <module>components/org.wso2.carbon.deployment.automation</module>
-        <module>components/org.wso2.carbon.tenant.mgt</module>
+        <module>components/org.wso2.carbon.multitenancy.deployment.service</module>
+        <module>components/org.wso2.carbon.multitenancy.tenant.service</module>
     </modules>
 
     <repositories>

@@ -25,9 +25,10 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>org.wso2.carbon.tenant.mgt</artifactId>
+    <artifactId>carbon-multitenancy-tenant-service</artifactId>
     <packaging>bundle</packaging>
-    <name>WSO2 Tenant Management</name>
+    <name>WSO2 Carbon Multitenancy Tenant Service</name>
+    <description>A microservice for exposing tenant management features of WSO2 products</description>
 
     <dependencies>
         <dependency>
