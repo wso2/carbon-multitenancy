@@ -25,8 +25,9 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>org.wso2.carbon.deployment.automation</artifactId>
-    <name>WSO2 Deployment Automation</name>
+    <artifactId>carbon-multitenancy-deployment-service</artifactId>
+    <name>WSO2 Carbon Multitenancy Deployment Service</name>
+    <description>A microservice for exposing deployment automation features of WSO2 containers</description>
     <packaging>bundle</packaging>
 
     <dependencies>
