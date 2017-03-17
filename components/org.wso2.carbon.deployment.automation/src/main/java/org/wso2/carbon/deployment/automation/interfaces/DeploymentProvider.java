@@ -27,6 +27,7 @@ import java.util.List;
  * Interface for a deployment provider.
  */
 public interface DeploymentProvider {
+
     /**
      * Get all the deployments.
      *

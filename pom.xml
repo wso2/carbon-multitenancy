@@ -17,7 +17,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
     <parent>
         <groupId>org.wso2</groupId>
         <artifactId>wso2</artifactId>
@@ -30,7 +29,7 @@
     <artifactId>carbon-multitenancy</artifactId>
     <packaging>pom</packaging>
     <version>5.0.0-SNAPSHOT</version>
-    <name>WSO2 Carbon - Platform Aggregator POM</name>
+    <name>WSO2 Carbon Multitenancy Parent</name>
     <url>http://wso2.org</url>
 
     <modules>
@@ -49,7 +48,6 @@
                 <checksumPolicy>ignore</checksumPolicy>
             </releases>
         </repository>
-
         <repository>
             <id>wso2.releases</id>
             <name>WSO2 internal Repository</name>
@@ -60,7 +58,6 @@
                 <checksumPolicy>ignore</checksumPolicy>
             </releases>
         </repository>
-
         <repository>
             <id>wso2.snapshots</id>
             <name>Apache Snapshot Repository</name>
@@ -73,7 +70,6 @@
                 <enabled>false</enabled>
             </releases>
         </repository>
-
         <repository>
             <id>central</id>
             <name>Maven Central Repository</name>
@@ -85,7 +81,6 @@
                 <checksumPolicy>ignore</checksumPolicy>
             </releases>
         </repository>
-
         <repository>
             <id>spring-plugin-releases</id>
             <url>http://repo.springsource.org/plugins-release/</url>
@@ -99,19 +94,11 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <version>${maven.bundle.plugin.version}</version>
             </plugin>
-            <!-- FIXME: Disabling findbugs plugin -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>findbugs-maven-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 
     <properties>
-        <!-- Versions -->
+        <!-- Dependency versions -->
         <equinox.osgi.version>3.10.2.v20150203-1939</equinox.osgi.version>
         <osgi.framework.import.version.range>[1.8.0, 2.0.0)</osgi.framework.import.version.range>
         <rs-api.version>2.0</rs-api.version>
