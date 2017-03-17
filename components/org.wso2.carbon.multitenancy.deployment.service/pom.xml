@@ -95,7 +95,6 @@
     </dependencies>
 
     <properties>
-        <private.package>org.wso2.carbon.deployment.automation.*</private.package>
         <import.package>
             org.osgi.framework.*;version="${osgi.framework.import.version.range}",
             org.wso2.msf4j.*,
@@ -108,9 +107,11 @@
             io.fabric8.kubernetes.api.model.*;version="${kubernetes.osgi.version}",
             org.yaml.snakeyaml.*,
         </import.package>
+        <export.package>
+            org.wso2.carbon.multitenancy.deployment.service.*
+        </export.package>
         <carbon.component>
             osgi.service; objectClass="org.wso2.msf4j.Microservice"
         </carbon.component>
     </properties>
-
 </project>
