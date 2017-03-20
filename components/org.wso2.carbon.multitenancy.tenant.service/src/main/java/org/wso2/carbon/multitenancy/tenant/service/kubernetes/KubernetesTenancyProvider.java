@@ -20,7 +20,6 @@ import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.NamespaceBuilder;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import org.wso2.carbon.multitenancy.tenant.service.exceptions.BadRequestException;
-import org.wso2.carbon.multitenancy.tenant.service.exceptions.DeploymentEnvironmentException;
 import org.wso2.carbon.multitenancy.tenant.service.exceptions.TenantCreationFailedException;
 import org.wso2.carbon.multitenancy.tenant.service.exceptions.TenantNotFoundException;
 import org.wso2.carbon.multitenancy.tenant.service.interfaces.TenancyProvider;
@@ -38,11 +37,9 @@ public class KubernetesTenancyProvider extends KubernetesBase implements Tenancy
     private static final String RESERVED_NAMESPACE_KUBE_SYSTEM = "kube-system";
 
     /**
-     * Initializes the Kubernetes client by providing the master node endpoint. Initially it looks for the master node
-     * IP address and the port from the KUBERNETES_MASTER_IP and KUBERNETES_MASTER_PORT environment variables and if not
-     * available it falls back to the default endpoint URL.
+     * Initializes the Kubernetes client by providing the master node endpoint.
      */
-    public KubernetesTenancyProvider() throws DeploymentEnvironmentException {
+    public KubernetesTenancyProvider() {
         super();
     }
 

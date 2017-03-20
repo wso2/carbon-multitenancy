@@ -71,6 +71,32 @@ public class TenantService implements Microservice {
     private static final String DEPLOYMENT_KUBERNETES = "kubernetes";
     private static final String ENV_DEPLOYMENT_PLATFORM = "WSO2_DEPLOYMENT_PLATFORM";
 
+    private TenancyProvider tenancyProvider;
+
+    /**
+     * Default tenant service constructor.
+     */
+    public TenantService() {
+        String platform = System.getenv(ENV_DEPLOYMENT_PLATFORM);
+        if (platform == null || platform.isEmpty()) {
+            throw new RuntimeException("Unable to identify the deployment platform");
+        }
+
+        if (DEPLOYMENT_KUBERNETES.equalsIgnoreCase(platform)) {
+            tenancyProvider = new KubernetesTenancyProvider();
+        } else {
+            throw new RuntimeException("Unsupported deployment platform: " + platform);
+        }
+    }
+
+    /**
+     * Tenant service constructor for implementing tests.
+     * @param tenancyProvider
+     */
+    public TenantService(TenancyProvider tenancyProvider) {
+        this.tenancyProvider = tenancyProvider;
+    }
+
     /**
      * Get list of all the available tenants.
      * http://localhost:9090/tenants
@@ -91,7 +117,7 @@ public class TenantService implements Microservice {
     })
     public Response getAllTenants() throws DeploymentEnvironmentException {
         return Response.ok()
-                .entity(getTenancyProvider().getTenants())
+                .entity(tenancyProvider.getTenants())
                 .type(MediaType.APPLICATION_JSON)
                 .build();
     }
@@ -117,7 +143,7 @@ public class TenantService implements Microservice {
     public Response getTenant(@ApiParam(value = "Tenant name", required = true) @PathParam("name") String name)
             throws TenantNotFoundException, DeploymentEnvironmentException {
         return Response.ok()
-                .entity(getTenancyProvider().getTenant(name))
+                .entity(tenancyProvider.getTenant(name))
                 .type(MediaType.APPLICATION_JSON)
                 .build();
     }
@@ -143,7 +169,7 @@ public class TenantService implements Microservice {
     })
     public Response addTenant(@ApiParam(value = "Tenant object", required = true) Tenant tenant)
             throws TenantCreationFailedException, DeploymentEnvironmentException, BadRequestException {
-        getTenancyProvider().createTenant(tenant);
+        tenancyProvider.createTenant(tenant);
         return Response.status(Response.Status.CREATED)
                 .build();
     }
@@ -165,27 +191,8 @@ public class TenantService implements Microservice {
     })
     public Response delete(@ApiParam(value = "Tenant name", required = true) @PathParam("name") String name)
             throws DeploymentEnvironmentException {
-        getTenancyProvider().deleteTenant(name);
+        tenancyProvider.deleteTenant(name);
         return Response.ok()
                 .build();
-    }
-
-    /**
-     * Get tenancy provider.
-     *
-     * @return Deployment platform
-     * @throws DeploymentEnvironmentException
-     */
-    private TenancyProvider getTenancyProvider() throws DeploymentEnvironmentException {
-        String platform = System.getenv(ENV_DEPLOYMENT_PLATFORM);
-        if (platform == null || platform.isEmpty()) {
-            throw new DeploymentEnvironmentException("Unable to identify the deployment platform");
-        }
-
-        if (DEPLOYMENT_KUBERNETES.equalsIgnoreCase(platform)) {
-            return new KubernetesTenancyProvider();
-        } else {
-            throw new DeploymentEnvironmentException("Unsupported deployment platform: " + platform);
-        }
     }
 }
