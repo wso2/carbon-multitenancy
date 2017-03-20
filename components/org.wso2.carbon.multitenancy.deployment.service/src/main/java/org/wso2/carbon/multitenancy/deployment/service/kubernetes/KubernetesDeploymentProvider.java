@@ -18,6 +18,7 @@ package org.wso2.carbon.multitenancy.deployment.service.kubernetes;
 
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.multitenancy.deployment.service.exceptions.BadRequestException;
 import org.wso2.carbon.multitenancy.deployment.service.exceptions.DeploymentEnvironmentException;
 import org.wso2.carbon.multitenancy.deployment.service.exceptions.DeploymentNotFoundException;
@@ -43,6 +44,10 @@ import java.util.stream.Collectors;
  */
 public class KubernetesDeploymentProvider extends KubernetesBase implements DeploymentProvider {
 
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(KubernetesDeploymentProvider.class);
+
+    private static final String WSO2_KUBERNETES_ARTIFACTS_PATH_ENV = "WSO2_KUBERNETES_ARTIFACTS_PATH";
+    private static final String WSO2_KUBERNETES_ARTIFACTS_PATH_SYS_PROPERTY = "wso2.kubernetes.artifacts.path";
     private static final String KIND_DEPLOYMENT = "deployment";
     private static final String KIND_SERVICE = "service";
     private static final String KIND_INGRESS = "ingress";
@@ -50,6 +55,19 @@ public class KubernetesDeploymentProvider extends KubernetesBase implements Depl
     private static final String YAML_EXTENSION = ".yaml";
     private static final String KIND = "kind";
     private static final String ITEMS = "items";
+    private static final String PRODUCT = "product";
+    private static final String VERSION = "version";
+    private static final String PATTERN = "pattern";
+
+    private String artifactsPath;
+
+    public KubernetesDeploymentProvider() {
+        artifactsPath = System.getenv(WSO2_KUBERNETES_ARTIFACTS_PATH_ENV);
+        if (artifactsPath == null || artifactsPath.isEmpty()) {
+            artifactsPath = System.getProperty(WSO2_KUBERNETES_ARTIFACTS_PATH_SYS_PROPERTY);
+        }
+        logger.info("Kubernetes deployment provider initialized: [artifacts-path] " + artifactsPath);
+    }
 
     /**
      * Get list of deployments.
@@ -63,9 +81,9 @@ public class KubernetesDeploymentProvider extends KubernetesBase implements Depl
                     Map<String, String> labels = deployment.getSpec().getTemplate().getMetadata().getLabels();
                     return new Deployment(
                             deployment.getMetadata().getUid(),
-                            labels.get("product"),
-                            labels.get("version"),
-                            Integer.parseInt(labels.get("pattern")));
+                            labels.get(PRODUCT),
+                            labels.get(VERSION),
+                            Integer.parseInt(labels.get(PATTERN)));
                 })
                 .collect(Collectors.toList());
     }
@@ -84,9 +102,9 @@ public class KubernetesDeploymentProvider extends KubernetesBase implements Depl
                     Map<String, String> labels = deployment.getSpec().getTemplate().getMetadata().getLabels();
                     return new Deployment(
                             deployment.getMetadata().getUid(),
-                            labels.get("product"),
-                            labels.get("version"),
-                            Integer.parseInt(labels.get("pattern")));
+                            labels.get(PRODUCT),
+                            labels.get(VERSION),
+                            Integer.parseInt(labels.get(PATTERN)));
                 }).findFirst();
 
         if (!filteredDeployments.isPresent()) {
@@ -168,8 +186,8 @@ public class KubernetesDeploymentProvider extends KubernetesBase implements Depl
      * @return List of paths to profiles
      */
     private List<String> getProductProfiles(Deployment deployment) throws BadRequestException {
-        String path = Paths.get(System.getProperty("carbon.home"), "deployment", "kubernetes-artifacts",
-                deployment.getProduct(), deployment.getVersion(), "pattern-" + deployment.getPattern()).toString();
+        String path = Paths.get(artifactsPath, deployment.getProduct(), deployment.getVersion(),
+                "pattern-" + deployment.getPattern()).toString();
 
         File patternDir = new File(path);
         if (!patternDir.exists()) {

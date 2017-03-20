@@ -20,6 +20,7 @@ package org.wso2.carbon.multitenancy.deployment.service.exceptions;
  * Deployment not found exception.
  */
 public class DeploymentNotFoundException extends Exception {
+
     public DeploymentNotFoundException(String message) {
         super(message);
     }
