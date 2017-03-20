@@ -20,9 +20,9 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
 <suite name="carbon-multitenancy-test-suite">
-    <test name="carbon-multitenancy-tenant-service-test" preserve-order="true" parallel="false">
+    <test name="carbon-multitenancy-deploy-service-test" preserve-order="true" parallel="false">
         <packages>
-            <package name="org.wso2.carbon.multitenancy.tenant.service.tests"/>
+            <package name="org.wso2.carbon.multitenancy.deployment.service.tests"/>
         </packages>
     </test>
 </suite>

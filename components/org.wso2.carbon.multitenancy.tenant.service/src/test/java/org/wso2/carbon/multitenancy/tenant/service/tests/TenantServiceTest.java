@@ -32,6 +32,9 @@ import org.wso2.msf4j.MicroservicesRunner;
 
 import java.util.List;
 
+/**
+ * Tenant service test class.
+ */
 public class TenantServiceTest {
 
     private static final int SERVER_PORT = 8282;

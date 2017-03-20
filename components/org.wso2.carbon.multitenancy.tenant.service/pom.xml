@@ -104,6 +104,12 @@
             <version>${feign.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-gson</artifactId>
+            <version>${feign.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <properties>
