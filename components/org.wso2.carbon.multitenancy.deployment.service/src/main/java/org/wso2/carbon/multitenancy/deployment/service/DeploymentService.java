@@ -70,6 +70,32 @@ public class DeploymentService implements Microservice {
     private static final String DEPLOYMENT_KUBERNETES = "kubernetes";
     private static final String ENV_DEPLOYMENT_PLATFORM = "WSO2_DEPLOYMENT_PLATFORM";
 
+    private final DeploymentProvider deploymentProvider;
+
+    /**
+     * Default deployment service constructor.
+     */
+    public DeploymentService() {
+        String platform = System.getenv(ENV_DEPLOYMENT_PLATFORM);
+        if (platform == null || platform.isEmpty()) {
+            throw new RuntimeException("Unable to identify the deployment platform.");
+        }
+
+        if (DEPLOYMENT_KUBERNETES.equalsIgnoreCase(platform)) {
+            deploymentProvider = new KubernetesDeploymentProvider();
+        } else {
+            throw new RuntimeException("Unsupported deployment platform: " + platform);
+        }
+    }
+
+    /**
+     * Constructor for implementing tests.
+     * @param deploymentProvider
+     */
+    public DeploymentService(DeploymentProvider deploymentProvider) {
+        this.deploymentProvider = deploymentProvider;
+    }
+
     /**
      * Get list of deployments.
      * http://localhost:9090/deployments
@@ -90,7 +116,7 @@ public class DeploymentService implements Microservice {
     })
     public Response getDeployments() throws DeploymentEnvironmentException {
         return Response.ok()
-                .entity(getDeploymentProvider().listDeployments())
+                .entity(deploymentProvider.listDeployments())
                 .type(MediaType.APPLICATION_JSON)
                 .build();
     }
@@ -116,7 +142,7 @@ public class DeploymentService implements Microservice {
     public Response getDeployment(@ApiParam(value = "Deployment ID", required = true) @PathParam("id") String id)
             throws DeploymentEnvironmentException, DeploymentNotFoundException {
         return Response.ok()
-                .entity(getDeploymentProvider().getDeployment(id))
+                .entity(deploymentProvider.getDeployment(id))
                 .type(MediaType.APPLICATION_JSON)
                 .build();
     }
@@ -141,7 +167,7 @@ public class DeploymentService implements Microservice {
     })
     public Response deploy(@ApiParam(value = "Deployment object", required = true) Deployment deployment)
             throws DeploymentEnvironmentException, BadRequestException {
-        getDeploymentProvider().deploy(deployment);
+        deploymentProvider.deploy(deployment);
         return Response.ok()
                 .build();
     }
@@ -166,28 +192,9 @@ public class DeploymentService implements Microservice {
     })
     public Response undeploy(@ApiParam(value = "Deployment object", required = true) Deployment deployment)
             throws DeploymentEnvironmentException, BadRequestException {
-        getDeploymentProvider().undeploy(deployment);
+        deploymentProvider.undeploy(deployment);
         return Response.ok()
                 .build();
-    }
-
-    /**
-     * Get deployment provider.
-     *
-     * @return Deployment provider
-     * @throws DeploymentEnvironmentException
-     */
-    private DeploymentProvider getDeploymentProvider() throws DeploymentEnvironmentException {
-        String platform = System.getenv(ENV_DEPLOYMENT_PLATFORM);
-        if (platform == null || platform.isEmpty()) {
-            throw new DeploymentEnvironmentException("Unable to identify the deployment platform.");
-        }
-
-        if (DEPLOYMENT_KUBERNETES.equalsIgnoreCase(platform)) {
-            return new KubernetesDeploymentProvider();
-        } else {
-            throw new DeploymentEnvironmentException("Unsupported deployment platform: " + platform);
-        }
     }
 }
 
