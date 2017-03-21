@@ -18,6 +18,10 @@ package org.wso2.carbon.multitenancy.deployment.service.kubernetes;
 
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.multitenancy.deployment.service.exceptions.BadRequestException;
 import org.wso2.carbon.multitenancy.deployment.service.exceptions.DeploymentEnvironmentException;
 import org.wso2.carbon.multitenancy.deployment.service.exceptions.DeploymentNotFoundException;
@@ -41,7 +45,14 @@ import java.util.stream.Collectors;
 /**
  * Deployment provider for Kubernetes cluster manager.
  */
-public class KubernetesDeploymentProvider extends KubernetesBase implements DeploymentProvider {
+public class KubernetesDeploymentProvider implements DeploymentProvider {
+
+    private static final Logger logger = LoggerFactory.getLogger(KubernetesDeploymentProvider.class);
+
+    private static final String KUBERNETES_MASTER_ENV_VAR_NAME = "KUBERNETES_MASTER";
+    private static final String KUBERNETES_MASTER_SYS_PROPERTY_NAME = "kubernetes.master";
+    private static final String ARTIFACTS_PATH_ENV_VAR_NAME = "WSO2_KUBERNETES_ARTIFACTS_PATH";
+    private static final String ARTIFACTS_PATH_SYS_PROPERTY_NAME = "wso2.kubernetes.artifacts.path";
 
     private static final String KIND_DEPLOYMENT = "deployment";
     private static final String KIND_SERVICE = "service";
@@ -50,6 +61,37 @@ public class KubernetesDeploymentProvider extends KubernetesBase implements Depl
     private static final String YAML_EXTENSION = ".yaml";
     private static final String KIND = "kind";
     private static final String ITEMS = "items";
+    private static final String PRODUCT = "product";
+    private static final String VERSION = "version";
+    private static final String PATTERN = "pattern";
+
+    private KubernetesClient kubernetesClient;
+    private String artifactsPath;
+
+    public KubernetesDeploymentProvider() {
+        String kubernetesMasterUrl = System.getenv(KUBERNETES_MASTER_ENV_VAR_NAME);
+        if (kubernetesMasterUrl == null || kubernetesMasterUrl.isEmpty()) {
+            kubernetesMasterUrl = System.getProperty(KUBERNETES_MASTER_SYS_PROPERTY_NAME);
+        }
+        if (kubernetesMasterUrl == null || kubernetesMasterUrl.isEmpty()) {
+            throw new DeploymentEnvironmentException("Kubernetes master URL not found, set environment variable "
+            + KUBERNETES_MASTER_ENV_VAR_NAME + " or system property " + KUBERNETES_MASTER_SYS_PROPERTY_NAME + ".");
+        }
+        kubernetesClient = new DefaultKubernetesClient(kubernetesMasterUrl);
+
+        artifactsPath = System.getenv(ARTIFACTS_PATH_ENV_VAR_NAME);
+        if (artifactsPath == null || artifactsPath.isEmpty()) {
+            artifactsPath = System.getProperty(ARTIFACTS_PATH_SYS_PROPERTY_NAME);
+        }
+        if (artifactsPath == null || artifactsPath.isEmpty()) {
+            throw new DeploymentEnvironmentException("Artifacts path not found, set environment variable "
+            + ARTIFACTS_PATH_ENV_VAR_NAME + " or system property " + ARTIFACTS_PATH_SYS_PROPERTY_NAME + ".");
+        }
+
+        logger.info("Kubernetes deployment provider initialized");
+        logger.info("Kubernetes master URL: {}", kubernetesMasterUrl);
+        logger.info("Kubernetes artifacts path: {}", artifactsPath);
+    }
 
     /**
      * Get list of deployments.
@@ -58,14 +100,14 @@ public class KubernetesDeploymentProvider extends KubernetesBase implements Depl
      */
     @Override
     public List<Deployment> listDeployments() {
-        return client.extensions().deployments().list().getItems().stream()
+        return kubernetesClient.extensions().deployments().list().getItems().stream()
                 .map(deployment -> {
                     Map<String, String> labels = deployment.getSpec().getTemplate().getMetadata().getLabels();
                     return new Deployment(
                             deployment.getMetadata().getUid(),
-                            labels.get("product"),
-                            labels.get("version"),
-                            Integer.parseInt(labels.get("pattern")));
+                            labels.get(PRODUCT),
+                            labels.get(VERSION),
+                            Integer.parseInt(labels.get(PATTERN)));
                 })
                 .collect(Collectors.toList());
     }
@@ -78,15 +120,15 @@ public class KubernetesDeploymentProvider extends KubernetesBase implements Depl
      */
     @Override
     public Deployment getDeployment(String id) throws DeploymentNotFoundException {
-        Optional<Deployment> filteredDeployments = client.extensions().deployments().list().getItems().stream()
-                .filter(deployment -> deployment.getMetadata().getUid().equals(id))
+        Optional<Deployment> filteredDeployments = kubernetesClient.extensions().deployments().list().getItems()
+                .stream().filter(deployment -> deployment.getMetadata().getUid().equals(id))
                 .map(deployment -> {
                     Map<String, String> labels = deployment.getSpec().getTemplate().getMetadata().getLabels();
                     return new Deployment(
                             deployment.getMetadata().getUid(),
-                            labels.get("product"),
-                            labels.get("version"),
-                            Integer.parseInt(labels.get("pattern")));
+                            labels.get(PRODUCT),
+                            labels.get(VERSION),
+                            Integer.parseInt(labels.get(PATTERN)));
                 }).findFirst();
 
         if (!filteredDeployments.isPresent()) {
@@ -109,17 +151,17 @@ public class KubernetesDeploymentProvider extends KubernetesBase implements Depl
             if (resources.containsKey(KIND_DEPLOYMENT)) {
                 io.fabric8.kubernetes.api.model.extensions.Deployment kubernetesDeployment = new Yaml().loadAs(
                         resources.get(KIND_DEPLOYMENT), io.fabric8.kubernetes.api.model.extensions.Deployment.class);
-                client.extensions().deployments().create(kubernetesDeployment);
+                kubernetesClient.extensions().deployments().create(kubernetesDeployment);
             }
             // Add service
             if (resources.containsKey(KIND_SERVICE)) {
                 Service service = new Yaml().loadAs(resources.get(KIND_SERVICE), Service.class);
-                client.services().create(service);
+                kubernetesClient.services().create(service);
             }
             // Add ingress
             if (resources.containsKey(KIND_INGRESS)) {
                 Ingress ingress = new Yaml().loadAs(resources.get(KIND_INGRESS), Ingress.class);
-                client.extensions().ingresses().create(ingress);
+                kubernetesClient.extensions().ingresses().create(ingress);
             }
         }
     }
@@ -137,7 +179,7 @@ public class KubernetesDeploymentProvider extends KubernetesBase implements Depl
             //Remove ingress
             if (resources.containsKey(KIND_INGRESS)) {
                 Ingress ingress = new Yaml().loadAs(resources.get(KIND_INGRESS), Ingress.class);
-                client.extensions()
+                kubernetesClient.extensions()
                         .ingresses()
                         .withName(ingress.getMetadata().getName())
                         .delete();
@@ -145,7 +187,7 @@ public class KubernetesDeploymentProvider extends KubernetesBase implements Depl
             // Remove service
             if (resources.containsKey(KIND_SERVICE)) {
                 Service service = new Yaml().loadAs(resources.get(KIND_SERVICE), Service.class);
-                client.services()
+                kubernetesClient.services()
                         .withName(service.getMetadata().getName())
                         .delete();
             }
@@ -153,7 +195,7 @@ public class KubernetesDeploymentProvider extends KubernetesBase implements Depl
             if (resources.containsKey(KIND_DEPLOYMENT)) {
                 io.fabric8.kubernetes.api.model.extensions.Deployment kubernetesDeployment = new Yaml().loadAs(
                         resources.get(KIND_DEPLOYMENT), io.fabric8.kubernetes.api.model.extensions.Deployment.class);
-                client.extensions()
+                kubernetesClient.extensions()
                         .deployments()
                         .withName(kubernetesDeployment.getMetadata().getName())
                         .delete();
@@ -168,8 +210,8 @@ public class KubernetesDeploymentProvider extends KubernetesBase implements Depl
      * @return List of paths to profiles
      */
     private List<String> getProductProfiles(Deployment deployment) throws BadRequestException {
-        String path = Paths.get(System.getProperty("carbon.home"), "deployment", "kubernetes-artifacts",
-                deployment.getProduct(), deployment.getVersion(), "pattern-" + deployment.getPattern()).toString();
+        String path = Paths.get(artifactsPath, deployment.getProduct(), deployment.getVersion(),
+                "pattern-" + deployment.getPattern()).toString();
 
         File patternDir = new File(path);
         if (!patternDir.exists()) {

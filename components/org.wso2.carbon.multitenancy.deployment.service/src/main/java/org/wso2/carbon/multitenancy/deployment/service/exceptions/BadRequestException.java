@@ -20,6 +20,7 @@ package org.wso2.carbon.multitenancy.deployment.service.exceptions;
  * Bad request exception.
  */
 public class BadRequestException extends Exception {
+
     public BadRequestException(String message) {
         super(message);
     }

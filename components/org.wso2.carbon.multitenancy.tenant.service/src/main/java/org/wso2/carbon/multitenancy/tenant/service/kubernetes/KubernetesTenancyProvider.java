@@ -19,7 +19,11 @@ package org.wso2.carbon.multitenancy.tenant.service.kubernetes;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.NamespaceBuilder;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.multitenancy.tenant.service.exceptions.BadRequestException;
+import org.wso2.carbon.multitenancy.tenant.service.exceptions.DeploymentEnvironmentException;
 import org.wso2.carbon.multitenancy.tenant.service.exceptions.TenantCreationFailedException;
 import org.wso2.carbon.multitenancy.tenant.service.exceptions.TenantNotFoundException;
 import org.wso2.carbon.multitenancy.tenant.service.interfaces.TenancyProvider;
@@ -31,16 +35,34 @@ import java.util.stream.Collectors;
 /**
  * Tenant provider for Kubernetes cluster manager.
  */
-public class KubernetesTenancyProvider extends KubernetesBase implements TenancyProvider {
+public class KubernetesTenancyProvider implements TenancyProvider {
 
+    private static final Logger logger = LoggerFactory.getLogger(KubernetesTenancyProvider.class);
+
+    private static final String KUBERNETES_MASTER_ENV_VAR_NAME = "KUBERNETES_MASTER";
+    private static final String KUBERNETES_MASTER_SYS_PROPERTY_NAME = "kubernetes.master";
     private static final String RESERVED_NAMESPACE_DEFAULT = "default";
     private static final String RESERVED_NAMESPACE_KUBE_SYSTEM = "kube-system";
 
+    private final DefaultKubernetesClient kubernetesClient;
+
     /**
-     * Initializes the Kubernetes client by providing the master node endpoint.
+     * Initializes the Kubernetes kubernetesClient by providing the master node endpoint.
      */
     public KubernetesTenancyProvider() {
-        super();
+        String kubernetesMasterUrl = System.getenv(KUBERNETES_MASTER_ENV_VAR_NAME);
+        if (kubernetesMasterUrl == null || kubernetesMasterUrl.isEmpty()) {
+            kubernetesMasterUrl = System.getProperty(KUBERNETES_MASTER_SYS_PROPERTY_NAME);
+        }
+        if (kubernetesMasterUrl == null || kubernetesMasterUrl.isEmpty()) {
+            throw new DeploymentEnvironmentException("Kubernetes master URL not found, set environment variable "
+                    + KUBERNETES_MASTER_ENV_VAR_NAME + " or system property " + KUBERNETES_MASTER_SYS_PROPERTY_NAME
+                    + ".");
+        }
+        kubernetesClient = new DefaultKubernetesClient(kubernetesMasterUrl);
+
+        logger.info("Kubernetes tenancy provider initialized");
+        logger.info("Kubernetes master URL: {}", kubernetesMasterUrl);
     }
 
     /**
@@ -50,7 +72,7 @@ public class KubernetesTenancyProvider extends KubernetesBase implements Tenancy
      */
     @Override
     public List<Tenant> getTenants() {
-        return client.namespaces().list().getItems().stream()
+        return kubernetesClient.namespaces().list().getItems().stream()
                 .filter(namespace -> !isReservedNamespace(namespace.getMetadata().getName()))
                 .map(namespace -> {
                     return new Tenant(namespace.getMetadata().getName());
@@ -67,7 +89,7 @@ public class KubernetesTenancyProvider extends KubernetesBase implements Tenancy
      */
     @Override
     public Tenant getTenant(String name) throws TenantNotFoundException {
-        Namespace namespace = client.namespaces().withName(sanitizeTenantName(name)).get();
+        Namespace namespace = kubernetesClient.namespaces().withName(sanitizeTenantName(name)).get();
         if (namespace == null) {
             throw new TenantNotFoundException("Tenant '" + name + "' not found.");
         }
@@ -93,7 +115,7 @@ public class KubernetesTenancyProvider extends KubernetesBase implements Tenancy
         if (isNamespaceExists(name)) {
             throw new TenantCreationFailedException("Tenant '" + tenant.getName() + "' already exists.");
         }
-        client.namespaces().create(new NamespaceBuilder()
+        kubernetesClient.namespaces().create(new NamespaceBuilder()
                 .withMetadata(
                         new ObjectMetaBuilder()
                                 .withName(name)
@@ -114,7 +136,7 @@ public class KubernetesTenancyProvider extends KubernetesBase implements Tenancy
         if (isReservedNamespace(name)) {
             return true;
         }
-        return client.namespaces().withName(name).delete();
+        return kubernetesClient.namespaces().withName(name).delete();
     }
 
     /**
@@ -134,7 +156,7 @@ public class KubernetesTenancyProvider extends KubernetesBase implements Tenancy
      * @return Status
      */
     private boolean isNamespaceExists(String namespace) {
-        return (client.namespaces().withName(namespace).get() != null);
+        return (kubernetesClient.namespaces().withName(namespace).get() != null);
     }
 
     /**
