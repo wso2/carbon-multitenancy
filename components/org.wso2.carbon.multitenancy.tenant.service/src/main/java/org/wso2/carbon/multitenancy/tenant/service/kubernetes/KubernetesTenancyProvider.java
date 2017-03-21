@@ -23,6 +23,7 @@ import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.multitenancy.tenant.service.exceptions.BadRequestException;
+import org.wso2.carbon.multitenancy.tenant.service.exceptions.DeploymentEnvironmentException;
 import org.wso2.carbon.multitenancy.tenant.service.exceptions.TenantCreationFailedException;
 import org.wso2.carbon.multitenancy.tenant.service.exceptions.TenantNotFoundException;
 import org.wso2.carbon.multitenancy.tenant.service.interfaces.TenancyProvider;
@@ -40,8 +41,6 @@ public class KubernetesTenancyProvider implements TenancyProvider {
 
     private static final String KUBERNETES_MASTER_ENV_VAR_NAME = "KUBERNETES_MASTER";
     private static final String KUBERNETES_MASTER_SYS_PROPERTY_NAME = "kubernetes.master";
-    private static final String ARTIFACTS_PATH_ENV_VAR_NAME = "WSO2_KUBERNETES_ARTIFACTS_PATH";
-    private static final String ARTIFACTS_PATH_SYS_PROPERTY_NAME = "wso2.kubernetes.artifacts.path";
     private static final String RESERVED_NAMESPACE_DEFAULT = "default";
     private static final String RESERVED_NAMESPACE_KUBE_SYSTEM = "kube-system";
 
@@ -54,6 +53,10 @@ public class KubernetesTenancyProvider implements TenancyProvider {
         String kubernetesMasterUrl = System.getenv(KUBERNETES_MASTER_ENV_VAR_NAME);
         if (kubernetesMasterUrl == null || kubernetesMasterUrl.isEmpty()) {
             kubernetesMasterUrl = System.getProperty(KUBERNETES_MASTER_SYS_PROPERTY_NAME);
+        } else {
+            throw new DeploymentEnvironmentException("Kubernetes master URL not found, set environment variable "
+                    + KUBERNETES_MASTER_ENV_VAR_NAME + " or system property " + KUBERNETES_MASTER_SYS_PROPERTY_NAME
+                    + ".");
         }
         kubernetesClient = new DefaultKubernetesClient(kubernetesMasterUrl);
 

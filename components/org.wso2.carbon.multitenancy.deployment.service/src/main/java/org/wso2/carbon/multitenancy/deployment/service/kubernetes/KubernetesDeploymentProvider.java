@@ -72,13 +72,20 @@ public class KubernetesDeploymentProvider implements DeploymentProvider {
         String kubernetesMasterUrl = System.getenv(KUBERNETES_MASTER_ENV_VAR_NAME);
         if (kubernetesMasterUrl == null || kubernetesMasterUrl.isEmpty()) {
             kubernetesMasterUrl = System.getProperty(KUBERNETES_MASTER_SYS_PROPERTY_NAME);
+        } else {
+            throw new DeploymentEnvironmentException("Kubernetes master URL not found, set environment variable "
+            + KUBERNETES_MASTER_ENV_VAR_NAME + " or system property " + KUBERNETES_MASTER_SYS_PROPERTY_NAME + ".");
         }
         kubernetesClient = new DefaultKubernetesClient(kubernetesMasterUrl);
 
         artifactsPath = System.getenv(ARTIFACTS_PATH_ENV_VAR_NAME);
         if (artifactsPath == null || artifactsPath.isEmpty()) {
             artifactsPath = System.getProperty(ARTIFACTS_PATH_SYS_PROPERTY_NAME);
+        } else {
+            throw new DeploymentEnvironmentException("Artifacts path not found, set environment variable "
+            + ARTIFACTS_PATH_ENV_VAR_NAME + " or system property " + ARTIFACTS_PATH_SYS_PROPERTY_NAME + ".");
         }
+
         logger.info("Kubernetes deployment provider initialized");
         logger.info("Kubernetes master URL: {}", kubernetesMasterUrl);
         logger.info("Kubernetes artifacts path: {}", artifactsPath);
