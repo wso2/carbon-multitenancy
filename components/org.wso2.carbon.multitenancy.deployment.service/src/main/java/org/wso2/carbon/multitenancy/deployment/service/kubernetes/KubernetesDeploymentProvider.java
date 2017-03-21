@@ -72,7 +72,8 @@ public class KubernetesDeploymentProvider implements DeploymentProvider {
         String kubernetesMasterUrl = System.getenv(KUBERNETES_MASTER_ENV_VAR_NAME);
         if (kubernetesMasterUrl == null || kubernetesMasterUrl.isEmpty()) {
             kubernetesMasterUrl = System.getProperty(KUBERNETES_MASTER_SYS_PROPERTY_NAME);
-        } else {
+        }
+        if (kubernetesMasterUrl == null || kubernetesMasterUrl.isEmpty()) {
             throw new DeploymentEnvironmentException("Kubernetes master URL not found, set environment variable "
             + KUBERNETES_MASTER_ENV_VAR_NAME + " or system property " + KUBERNETES_MASTER_SYS_PROPERTY_NAME + ".");
         }
