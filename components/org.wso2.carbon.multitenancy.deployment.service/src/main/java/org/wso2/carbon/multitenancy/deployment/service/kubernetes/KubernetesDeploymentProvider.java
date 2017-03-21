@@ -82,7 +82,8 @@ public class KubernetesDeploymentProvider implements DeploymentProvider {
         artifactsPath = System.getenv(ARTIFACTS_PATH_ENV_VAR_NAME);
         if (artifactsPath == null || artifactsPath.isEmpty()) {
             artifactsPath = System.getProperty(ARTIFACTS_PATH_SYS_PROPERTY_NAME);
-        } else {
+        }
+        if (artifactsPath == null || artifactsPath.isEmpty()) {
             throw new DeploymentEnvironmentException("Artifacts path not found, set environment variable "
             + ARTIFACTS_PATH_ENV_VAR_NAME + " or system property " + ARTIFACTS_PATH_SYS_PROPERTY_NAME + ".");
         }
