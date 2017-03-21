@@ -17,7 +17,12 @@
 package org.wso2.carbon.multitenancy.application;
 
 import org.wso2.carbon.multitenancy.deployment.service.DeploymentService;
+import org.wso2.carbon.multitenancy.deployment.service.exceptions.DeploymentNotFoundMapper;
 import org.wso2.carbon.multitenancy.tenant.service.TenantService;
+import org.wso2.carbon.multitenancy.tenant.service.exceptions.BadRequestMapper;
+import org.wso2.carbon.multitenancy.tenant.service.exceptions.DeploymentEnvironmentMapper;
+import org.wso2.carbon.multitenancy.tenant.service.exceptions.TenantCreationFailedMapper;
+import org.wso2.carbon.multitenancy.tenant.service.exceptions.TenantNotFoundMapper;
 import org.wso2.msf4j.MicroservicesRunner;
 
 /**
@@ -29,6 +34,14 @@ public class Application {
         new MicroservicesRunner()
                 .deploy(new DeploymentService())
                 .deploy(new TenantService())
+                .addExceptionMapper(new BadRequestMapper())
+                .addExceptionMapper(new TenantCreationFailedMapper())
+                .addExceptionMapper(new TenantNotFoundMapper())
+                .addExceptionMapper(new DeploymentEnvironmentMapper())
+                .addExceptionMapper(new org.wso2.carbon.multitenancy.deployment.service.exceptions.BadRequestMapper())
+                .addExceptionMapper(
+                        new org.wso2.carbon.multitenancy.deployment.service.exceptions.DeploymentEnvironmentMapper())
+                .addExceptionMapper(new DeploymentNotFoundMapper())
                 .start();
     }
 }
