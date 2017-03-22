@@ -68,29 +68,18 @@ import javax.ws.rs.core.Response;
 @Path("/tenants")
 public class TenantService implements Microservice {
 
-    private static final String DEPLOYMENT_KUBERNETES = "kubernetes";
-    private static final String ENV_DEPLOYMENT_PLATFORM = "WSO2_DEPLOYMENT_PLATFORM";
-
     private TenancyProvider tenancyProvider;
 
     /**
      * Default tenant service constructor.
      */
     public TenantService() {
-        String platform = System.getenv(ENV_DEPLOYMENT_PLATFORM);
-        if (platform == null || platform.isEmpty()) {
-            throw new RuntimeException("Unable to identify the deployment platform");
-        }
-
-        if (DEPLOYMENT_KUBERNETES.equalsIgnoreCase(platform)) {
-            tenancyProvider = new KubernetesTenancyProvider();
-        } else {
-            throw new RuntimeException("Unsupported deployment platform: " + platform);
-        }
+        tenancyProvider = new KubernetesTenancyProvider();
     }
 
     /**
      * Tenant service constructor for implementing tests.
+     *
      * @param tenancyProvider
      */
     public TenantService(TenancyProvider tenancyProvider) {
@@ -190,9 +179,8 @@ public class TenantService implements Microservice {
             @ApiResponse(code = 412, message = "Invalid deployment platform")
     })
     public Response delete(@ApiParam(value = "Tenant name", required = true) @PathParam("name") String name)
-            throws DeploymentEnvironmentException {
+            throws DeploymentEnvironmentException, TenantNotFoundException {
         tenancyProvider.deleteTenant(name);
-        return Response.ok()
-                .build();
+        return Response.ok().build();
     }
 }

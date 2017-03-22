@@ -29,35 +29,50 @@ import java.util.Map;
  */
 public class MockDeploymentProvider implements DeploymentProvider {
 
-    private Map<String, Deployment> deploymentMap = new HashMap<>();
+    private Map<String, Map<String, Deployment>> deploymentMap = new HashMap<>();
 
     @Override
-    public List<Deployment> listDeployments() {
-        return new ArrayList<>(deploymentMap.values());
+    public List<Deployment> listDeployments(String namespace) {
+        if (deploymentMap.get(namespace) == null) {
+            return new ArrayList<>();
+        }
+        return new ArrayList<>(deploymentMap.get(namespace).values());
     }
 
     @Override
-    public Deployment getDeployment(String id) {
-        if (id == null || id.isEmpty()) {
+    public Deployment getDeployment(String namespace, String id) {
+        if (deploymentMap.get(namespace) == null) {
+            return null;
+        } else if (id == null || id.isEmpty()) {
             throw new IllegalArgumentException();
         }
 
-        return deploymentMap.get(id);
+        return deploymentMap.get(namespace).get(id);
     }
 
     @Override
-    public void deploy(Deployment deployment) {
-        if (deployment == null) {
+    public void deploy(String namespace, Deployment deployment) {
+        if (namespace == null || namespace.isEmpty() || deployment == null) {
             throw new IllegalArgumentException();
         }
 
-        deploymentMap.put(deployment.getId(), deployment);
+        Map<String, Deployment> deployments = deploymentMap.get(namespace);
+        if (deployments == null) {
+            deployments = new HashMap<>();
+            deploymentMap.put(namespace, deployments);
+        }
+        deployments.put(deployment.getId(), deployment);
     }
 
     @Override
-    public void undeploy(Deployment deployment) {
-        if (deployment == null) {
+    public void undeploy(String namespace, Deployment deployment) {
+        if (namespace == null || namespace.isEmpty() || deployment == null) {
             throw new IllegalArgumentException();
+        }
+
+        Map<String, Deployment> deployments = deploymentMap.get(namespace);
+        if (deployments == null) {
+            throw new RuntimeException("Deployment [" + deployment + "] not found in namespace " + namespace);
         }
 
         if (deploymentMap.get(deployment.getId()) != null) {
