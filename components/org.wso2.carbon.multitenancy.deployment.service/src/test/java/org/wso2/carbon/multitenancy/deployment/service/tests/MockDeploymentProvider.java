@@ -20,6 +20,7 @@ import org.wso2.carbon.multitenancy.deployment.service.interfaces.DeploymentProv
 import org.wso2.carbon.multitenancy.deployment.service.models.Deployment;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +35,7 @@ public class MockDeploymentProvider implements DeploymentProvider {
     @Override
     public List<Deployment> listDeployments(String namespace) {
         if (namespaceDeploymentsMap.get(namespace) == null) {
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
         return new ArrayList<>(namespaceDeploymentsMap.get(namespace).values());
     }
@@ -75,8 +76,6 @@ public class MockDeploymentProvider implements DeploymentProvider {
             throw new RuntimeException("Deployment [" + deployment + "] not found in namespace " + namespace);
         }
 
-        if (deploymentsMap.get(deployment.getId()) != null) {
-            deploymentsMap.remove(deployment.getId());
-        }
+        deploymentsMap.remove(deployment.getId());
     }
 }

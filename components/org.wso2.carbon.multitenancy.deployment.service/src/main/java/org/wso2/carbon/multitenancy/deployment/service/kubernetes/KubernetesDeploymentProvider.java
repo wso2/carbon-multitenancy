@@ -39,8 +39,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -114,7 +114,7 @@ public class KubernetesDeploymentProvider implements DeploymentProvider {
         DeploymentList list = kubernetesClient.extensions().deployments().inNamespace(namespace)
                 .withLabel(WSO2_DEPLOYMENT_LABEL).list();
         if (list == null || list.getItems() == null || list.getItems().isEmpty()) {
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
 
         return list.getItems().stream()
@@ -185,9 +185,8 @@ public class KubernetesDeploymentProvider implements DeploymentProvider {
                 }
                 setWSO2Labels(labels, deployment, profile);
 
-                logger.debug("Creating deployment: " + kubernetesDeployment.getMetadata().getName());
                 kubernetesClient.extensions().deployments().create(kubernetesDeployment);
-                logger.info("Deployment created: " + kubernetesDeployment.getMetadata().getName());
+                logger.info("Deployment created: {}", kubernetesDeployment.getMetadata().getName());
                 entityFound = true;
             }
             // Add service
@@ -206,9 +205,8 @@ public class KubernetesDeploymentProvider implements DeploymentProvider {
                     moveStringValToIntVal(port.getTargetPort());
                 }
 
-                logger.debug("Creating service: " + service.getMetadata().getName());
                 kubernetesClient.services().create(service);
-                logger.info("Service created: " + service.getMetadata().getName());
+                logger.info("Service created: {}", service.getMetadata().getName());
                 entityFound = true;
             }
             // Add ingress
@@ -235,9 +233,8 @@ public class KubernetesDeploymentProvider implements DeploymentProvider {
                     }
                 }
 
-                logger.debug("Creating ingress: " + ingress.getMetadata().getName());
                 kubernetesClient.extensions().ingresses().create(ingress);
-                logger.info("Ingress created: " + ingress.getMetadata().getName());
+                logger.info("Ingress created: {}", ingress.getMetadata().getName());
                 entityFound = true;
             }
             if (!entityFound) {
