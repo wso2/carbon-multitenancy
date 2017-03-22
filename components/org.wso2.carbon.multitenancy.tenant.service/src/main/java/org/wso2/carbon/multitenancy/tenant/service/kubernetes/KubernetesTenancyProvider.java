@@ -29,7 +29,9 @@ import org.wso2.carbon.multitenancy.tenant.service.exceptions.TenantNotFoundExce
 import org.wso2.carbon.multitenancy.tenant.service.interfaces.TenancyProvider;
 import org.wso2.carbon.multitenancy.tenant.service.models.Tenant;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -41,8 +43,8 @@ public class KubernetesTenancyProvider implements TenancyProvider {
 
     private static final String KUBERNETES_MASTER_ENV_VAR_NAME = "KUBERNETES_MASTER";
     private static final String KUBERNETES_MASTER_SYS_PROPERTY_NAME = "kubernetes.master";
-    private static final String RESERVED_NAMESPACE_DEFAULT = "default";
-    private static final String RESERVED_NAMESPACE_KUBE_SYSTEM = "kube-system";
+    private static final String WSO2_TENANT_LABEL = "WSO2_TENANT";
+    private static final String WSO2_TENANT_LABEL_VALUE = "TRUE";
 
     private final DefaultKubernetesClient kubernetesClient;
 
@@ -73,10 +75,9 @@ public class KubernetesTenancyProvider implements TenancyProvider {
     @Override
     public List<Tenant> getTenants() {
         return kubernetesClient.namespaces().list().getItems().stream()
-                .filter(namespace -> !isReservedNamespace(namespace.getMetadata().getName()))
-                .map(namespace -> {
-                    return new Tenant(namespace.getMetadata().getName());
-                })
+                .filter(namespace -> (namespace.getMetadata().getLabels() != null) &&
+                        (namespace.getMetadata().getLabels().containsKey(WSO2_TENANT_LABEL)))
+                .map(namespace -> new Tenant(namespace.getMetadata().getName()))
                 .collect(Collectors.toList());
     }
 
@@ -89,10 +90,8 @@ public class KubernetesTenancyProvider implements TenancyProvider {
      */
     @Override
     public Tenant getTenant(String name) throws TenantNotFoundException {
-        Namespace namespace = kubernetesClient.namespaces().withName(sanitizeTenantName(name)).get();
-        if (namespace == null) {
-            throw new TenantNotFoundException("Tenant '" + name + "' not found.");
-        }
+        name = sanitizeTenantName(name);
+        Namespace namespace = validateNamespace(name);
         return new Tenant(namespace.getMetadata().getName());
     }
 
@@ -107,19 +106,19 @@ public class KubernetesTenancyProvider implements TenancyProvider {
     @Override
     public void createTenant(Tenant tenant) throws TenantCreationFailedException, BadRequestException {
         String name = sanitizeTenantName(tenant.getName());
-        // Unable to create a tenant with the system namespace name
-        if (isReservedNamespace(name)) {
-            throw new BadRequestException("Tenant name '" + tenant.getName() + "' is unavailable.");
-        }
+
         // Check whether the namespace already exists
         if (isNamespaceExists(name)) {
             throw new TenantCreationFailedException("Tenant '" + tenant.getName() + "' already exists.");
         }
+
+        Map<String, String> labels = new HashMap<>();
+        labels.put(WSO2_TENANT_LABEL, WSO2_TENANT_LABEL_VALUE);
         kubernetesClient.namespaces().create(new NamespaceBuilder()
-                .withMetadata(
-                        new ObjectMetaBuilder()
-                                .withName(name)
-                                .build())
+                .withMetadata(new ObjectMetaBuilder()
+                        .withName(name)
+                        .withLabels(labels)
+                        .build())
                 .build());
     }
 
@@ -130,23 +129,28 @@ public class KubernetesTenancyProvider implements TenancyProvider {
      * @return Status
      */
     @Override
-    public boolean deleteTenant(String name) {
+    public boolean deleteTenant(String name) throws TenantNotFoundException {
         name = sanitizeTenantName(name);
-        // DELETE operation on non-existing resource does not return 404, but 200.
-        if (isReservedNamespace(name)) {
-            return true;
-        }
+        validateNamespace(name);
         return kubernetesClient.namespaces().withName(name).delete();
     }
 
     /**
-     * Check if the namespace is a Kubernetes predefined namespace.
-     *
-     * @param namespace Namespace
-     * @return Status
+     * Validate namespace using tenant name.
+     * @param tenantName tenant name
+     * @return
+     * @throws TenantNotFoundException thrown if a namespace is not found with the given tenant name.
      */
-    private boolean isReservedNamespace(String namespace) {
-        return RESERVED_NAMESPACE_DEFAULT.equals(namespace) || RESERVED_NAMESPACE_KUBE_SYSTEM.equals(namespace);
+    private Namespace validateNamespace(String tenantName) throws TenantNotFoundException {
+        Namespace namespace = kubernetesClient.namespaces().withName(tenantName).get();
+        if (namespace == null) {
+            throw new TenantNotFoundException("Tenant '" + tenantName + "' not found.");
+        }
+        if (!namespace.getMetadata().getLabels().containsKey(WSO2_TENANT_LABEL)) {
+            logger.warn("Trying to access an invalid namespace: " + namespace.getMetadata().getName());
+            throw new TenantNotFoundException("Tenant '" + tenantName + "' not found.");
+        }
+        return namespace;
     }
 
     /**

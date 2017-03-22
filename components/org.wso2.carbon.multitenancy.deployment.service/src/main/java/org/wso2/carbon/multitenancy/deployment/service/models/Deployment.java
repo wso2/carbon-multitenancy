@@ -81,4 +81,10 @@ public class Deployment {
     public void setPattern(int pattern) {
         this.pattern = pattern;
     }
+
+    @Override
+    public String toString() {
+        return String.format("id: %s product: %s version: %s pattern: %d", getId(), getProduct(), getVersion(),
+                getPattern());
+    }
 }

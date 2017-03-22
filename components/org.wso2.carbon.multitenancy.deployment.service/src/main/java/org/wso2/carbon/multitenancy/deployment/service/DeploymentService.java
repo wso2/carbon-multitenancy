@@ -67,29 +67,18 @@ import javax.ws.rs.core.Response;
 @Path("/deployments")
 public class DeploymentService implements Microservice {
 
-    private static final String DEPLOYMENT_KUBERNETES = "kubernetes";
-    private static final String ENV_DEPLOYMENT_PLATFORM = "WSO2_DEPLOYMENT_PLATFORM";
-
     private final DeploymentProvider deploymentProvider;
 
     /**
      * Default deployment service constructor.
      */
     public DeploymentService() {
-        String platform = System.getenv(ENV_DEPLOYMENT_PLATFORM);
-        if (platform == null || platform.isEmpty()) {
-            throw new RuntimeException("Unable to identify the deployment platform.");
-        }
-
-        if (DEPLOYMENT_KUBERNETES.equalsIgnoreCase(platform)) {
-            deploymentProvider = new KubernetesDeploymentProvider();
-        } else {
-            throw new RuntimeException("Unsupported deployment platform: " + platform);
-        }
+        deploymentProvider = new KubernetesDeploymentProvider();
     }
 
     /**
      * Constructor for implementing tests.
+     *
      * @param deploymentProvider
      */
     public DeploymentService(DeploymentProvider deploymentProvider) {
@@ -115,8 +104,10 @@ public class DeploymentService implements Microservice {
             @ApiResponse(code = 412, message = "Invalid deployment platform"),
     })
     public Response getDeployments() throws DeploymentEnvironmentException {
+        // TODO: Find namespace of the user
+        String namespace = "default";
         return Response.ok()
-                .entity(deploymentProvider.listDeployments())
+                .entity(deploymentProvider.listDeployments(namespace))
                 .type(MediaType.APPLICATION_JSON)
                 .build();
     }
@@ -141,8 +132,10 @@ public class DeploymentService implements Microservice {
     })
     public Response getDeployment(@ApiParam(value = "Deployment ID", required = true) @PathParam("id") String id)
             throws DeploymentEnvironmentException, DeploymentNotFoundException {
+        // TODO: Find namespace of the user
+        String namespace = "default";
         return Response.ok()
-                .entity(deploymentProvider.getDeployment(id))
+                .entity(deploymentProvider.getDeployment(namespace, id))
                 .type(MediaType.APPLICATION_JSON)
                 .build();
     }
@@ -167,7 +160,9 @@ public class DeploymentService implements Microservice {
     })
     public Response deploy(@ApiParam(value = "Deployment object", required = true) Deployment deployment)
             throws DeploymentEnvironmentException, BadRequestException {
-        deploymentProvider.deploy(deployment);
+        // TODO: Find namespace of the user
+        String namespace = "default";
+        deploymentProvider.deploy(namespace, deployment);
         return Response.ok()
                 .build();
     }
@@ -192,9 +187,10 @@ public class DeploymentService implements Microservice {
     })
     public Response undeploy(@ApiParam(value = "Deployment object", required = true) Deployment deployment)
             throws DeploymentEnvironmentException, BadRequestException {
-        deploymentProvider.undeploy(deployment);
-        return Response.ok()
-                .build();
+        // TODO: Find namespace of the user
+        String namespace = "default";
+        deploymentProvider.undeploy(namespace, deployment);
+        return Response.ok().build();
     }
 }
 

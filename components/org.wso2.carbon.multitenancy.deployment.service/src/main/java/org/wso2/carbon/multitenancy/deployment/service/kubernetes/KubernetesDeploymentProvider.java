@@ -16,8 +16,13 @@
 
 package org.wso2.carbon.multitenancy.deployment.service.kubernetes;
 
+import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.ServicePort;
+import io.fabric8.kubernetes.api.model.extensions.DeploymentList;
+import io.fabric8.kubernetes.api.model.extensions.HTTPIngressPath;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
+import io.fabric8.kubernetes.api.model.extensions.IngressRule;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import org.slf4j.Logger;
@@ -35,6 +40,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -54,16 +60,19 @@ public class KubernetesDeploymentProvider implements DeploymentProvider {
     private static final String ARTIFACTS_PATH_ENV_VAR_NAME = "WSO2_KUBERNETES_ARTIFACTS_PATH";
     private static final String ARTIFACTS_PATH_SYS_PROPERTY_NAME = "wso2.kubernetes.artifacts.path";
 
-    private static final String KIND_DEPLOYMENT = "deployment";
-    private static final String KIND_SERVICE = "service";
-    private static final String KIND_INGRESS = "ingress";
+    private static final String KIND_DEPLOYMENT = "Deployment";
+    private static final String KIND_SERVICE = "Service";
+    private static final String KIND_INGRESS = "Ingress";
     private static final String LIST = "list";
     private static final String YAML_EXTENSION = ".yaml";
     private static final String KIND = "kind";
     private static final String ITEMS = "items";
-    private static final String PRODUCT = "product";
-    private static final String VERSION = "version";
-    private static final String PATTERN = "pattern";
+    private static final String PRODUCT = "WSO2_PRODUCT";
+    private static final String VERSION = "WSO2_PRODUCT_VERSION";
+    private static final String PATTERN = "WSO2_PRODUCT_PATTERN";
+    private static final String PROFILE = "WSO2_PRODUCT_PROFILE";
+    private static final String WSO2_DEPLOYMENT_LABEL = "WSO2_DEPLOYMENT";
+    private static final String WSO2_DEPLOYMENT_LABEL_VALUE = "TRUE";
 
     private KubernetesClient kubernetesClient;
     private String artifactsPath;
@@ -75,7 +84,8 @@ public class KubernetesDeploymentProvider implements DeploymentProvider {
         }
         if (kubernetesMasterUrl == null || kubernetesMasterUrl.isEmpty()) {
             throw new DeploymentEnvironmentException("Kubernetes master URL not found, set environment variable "
-            + KUBERNETES_MASTER_ENV_VAR_NAME + " or system property " + KUBERNETES_MASTER_SYS_PROPERTY_NAME + ".");
+                    + KUBERNETES_MASTER_ENV_VAR_NAME + " or system property " + KUBERNETES_MASTER_SYS_PROPERTY_NAME
+                    + ".");
         }
         kubernetesClient = new DefaultKubernetesClient(kubernetesMasterUrl);
 
@@ -85,7 +95,7 @@ public class KubernetesDeploymentProvider implements DeploymentProvider {
         }
         if (artifactsPath == null || artifactsPath.isEmpty()) {
             throw new DeploymentEnvironmentException("Artifacts path not found, set environment variable "
-            + ARTIFACTS_PATH_ENV_VAR_NAME + " or system property " + ARTIFACTS_PATH_SYS_PROPERTY_NAME + ".");
+                    + ARTIFACTS_PATH_ENV_VAR_NAME + " or system property " + ARTIFACTS_PATH_SYS_PROPERTY_NAME + ".");
         }
 
         logger.info("Kubernetes deployment provider initialized");
@@ -96,11 +106,18 @@ public class KubernetesDeploymentProvider implements DeploymentProvider {
     /**
      * Get list of deployments.
      *
+     * @param namespace Namespace of the tenant
      * @return Array of deployments
      */
     @Override
-    public List<Deployment> listDeployments() {
-        return kubernetesClient.extensions().deployments().list().getItems().stream()
+    public List<Deployment> listDeployments(String namespace) {
+        DeploymentList list = kubernetesClient.extensions().deployments().inNamespace(namespace)
+                .withLabel(WSO2_DEPLOYMENT_LABEL).list();
+        if (list == null || list.getItems() == null || list.getItems().isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return list.getItems().stream()
                 .map(deployment -> {
                     Map<String, String> labels = deployment.getSpec().getTemplate().getMetadata().getLabels();
                     return new Deployment(
@@ -115,13 +132,16 @@ public class KubernetesDeploymentProvider implements DeploymentProvider {
     /**
      * Get a deployment by ID.
      *
-     * @param id Deployment ID
+     * @param namespace Namespace of the tenant
+     * @param id        Deployment ID
      * @return Deployment
      */
     @Override
-    public Deployment getDeployment(String id) throws DeploymentNotFoundException {
-        Optional<Deployment> filteredDeployments = kubernetesClient.extensions().deployments().list().getItems()
-                .stream().filter(deployment -> deployment.getMetadata().getUid().equals(id))
+    public Deployment getDeployment(String namespace, String id) throws DeploymentNotFoundException {
+        Optional<Deployment> filteredDeployments = kubernetesClient.extensions().deployments()
+                .inNamespace(namespace)
+                .withLabel(WSO2_DEPLOYMENT_LABEL).list().getItems().stream()
+                .filter(deployment -> deployment.getMetadata().getUid().equals(id))
                 .map(deployment -> {
                     Map<String, String> labels = deployment.getSpec().getTemplate().getMetadata().getLabels();
                     return new Deployment(
@@ -144,36 +164,115 @@ public class KubernetesDeploymentProvider implements DeploymentProvider {
      * @throws DeploymentEnvironmentException
      */
     @Override
-    public void deploy(Deployment deployment) throws DeploymentEnvironmentException, BadRequestException {
+    public void deploy(String namespace, Deployment deployment) throws DeploymentEnvironmentException,
+            BadRequestException {
+
         for (String profilePath : getProductProfiles(deployment)) {
+            // File name needs to have the profile name
+            String profile = extractProfileName(profilePath);
             Map<String, String> resources = fetchResources(profilePath);
+            boolean entityFound = false;
             // Add deployment
             if (resources.containsKey(KIND_DEPLOYMENT)) {
                 io.fabric8.kubernetes.api.model.extensions.Deployment kubernetesDeployment = new Yaml().loadAs(
                         resources.get(KIND_DEPLOYMENT), io.fabric8.kubernetes.api.model.extensions.Deployment.class);
+                kubernetesDeployment.getMetadata().setNamespace(namespace);
+
+                Map<String, String> labels = kubernetesDeployment.getSpec().getTemplate().getMetadata().getLabels();
+                if (labels == null) {
+                    labels = new HashMap<>();
+                    kubernetesDeployment.getSpec().getTemplate().getMetadata().setLabels(labels);
+                }
+                setWSO2Labels(labels, deployment, profile);
+
                 kubernetesClient.extensions().deployments().create(kubernetesDeployment);
+                logger.info("Deployment created: {}", kubernetesDeployment.getMetadata().getName());
+                entityFound = true;
             }
             // Add service
             if (resources.containsKey(KIND_SERVICE)) {
                 Service service = new Yaml().loadAs(resources.get(KIND_SERVICE), Service.class);
+                service.getMetadata().setNamespace(namespace);
+                Map<String, String> labels = service.getMetadata().getLabels();
+                if (labels == null) {
+                    labels = new HashMap<>();
+                    service.getMetadata().setLabels(labels);
+                }
+                setWSO2Labels(labels, deployment, profile);
+
+                // Set int value of port if string is set
+                for (ServicePort port : service.getSpec().getPorts()) {
+                    moveStringValToIntVal(port.getTargetPort());
+                }
+
                 kubernetesClient.services().create(service);
+                logger.info("Service created: {}", service.getMetadata().getName());
+                entityFound = true;
             }
             // Add ingress
             if (resources.containsKey(KIND_INGRESS)) {
                 Ingress ingress = new Yaml().loadAs(resources.get(KIND_INGRESS), Ingress.class);
+                ingress.getMetadata().setNamespace(namespace);
+                Map<String, String> labels = ingress.getMetadata().getLabels();
+                if (labels == null) {
+                    labels = new HashMap<>();
+                    ingress.getMetadata().setLabels(labels);
+                }
+                setWSO2Labels(labels, deployment, profile);
+
+                // Set int value of port if string is set
+                if (ingress.getSpec().getRules() != null) {
+                    for (IngressRule rule : ingress.getSpec().getRules()) {
+                        if (rule.getHttp() != null) {
+                            for (HTTPIngressPath path : rule.getHttp().getPaths()) {
+                                if (path.getBackend() != null) {
+                                    moveStringValToIntVal(path.getBackend().getServicePort());
+                                }
+                            }
+                        }
+                    }
+                }
+
                 kubernetesClient.extensions().ingresses().create(ingress);
+                logger.info("Ingress created: {}", ingress.getMetadata().getName());
+                entityFound = true;
             }
+            if (!entityFound) {
+                logger.warn("No deployment, service or ingress found in the file {}", profilePath);
+            }
+        }
+    }
+
+    private String extractProfileName(String profilePath) {
+        String result = profilePath.substring(profilePath.lastIndexOf(File.separator) + 1);
+        return result.substring(0, result.indexOf("."));
+    }
+
+    private void setWSO2Labels(Map<String, String> labels, Deployment deployment, String profile) {
+        labels.put(WSO2_DEPLOYMENT_LABEL, WSO2_DEPLOYMENT_LABEL_VALUE);
+        labels.put(PRODUCT, deployment.getProduct());
+        labels.put(VERSION, deployment.getVersion());
+        labels.put(PATTERN, String.valueOf(deployment.getPattern()));
+        labels.put(PROFILE, profile);
+    }
+
+    private void moveStringValToIntVal(IntOrString intOrString) {
+        if ((intOrString.getStrVal() != null) && (!intOrString.getStrVal().isEmpty())) {
+            intOrString.setIntVal(Integer.parseInt(intOrString.getStrVal()));
         }
     }
 
     /**
      * Undeploy a product from a Kubernetes environment.
      *
+     * @param namespace  Namespace of the tenant
      * @param deployment Deployment details
      * @throws DeploymentEnvironmentException
      */
     @Override
-    public void undeploy(Deployment deployment) throws DeploymentEnvironmentException, BadRequestException {
+    public void undeploy(String namespace, Deployment deployment) throws DeploymentEnvironmentException,
+            BadRequestException {
+
         for (String profilePath : getProductProfiles(deployment)) {
             Map<String, String> resources = fetchResources(profilePath);
             //Remove ingress
@@ -181,15 +280,19 @@ public class KubernetesDeploymentProvider implements DeploymentProvider {
                 Ingress ingress = new Yaml().loadAs(resources.get(KIND_INGRESS), Ingress.class);
                 kubernetesClient.extensions()
                         .ingresses()
+                        .inNamespace(namespace)
                         .withName(ingress.getMetadata().getName())
                         .delete();
+                logger.info("Ingress deleted: " + ingress.getMetadata().getName());
             }
             // Remove service
             if (resources.containsKey(KIND_SERVICE)) {
                 Service service = new Yaml().loadAs(resources.get(KIND_SERVICE), Service.class);
                 kubernetesClient.services()
+                        .inNamespace(namespace)
                         .withName(service.getMetadata().getName())
                         .delete();
+                logger.info("Service deleted: " + service.getMetadata().getName());
             }
             // Remove deployment
             if (resources.containsKey(KIND_DEPLOYMENT)) {
@@ -197,8 +300,10 @@ public class KubernetesDeploymentProvider implements DeploymentProvider {
                         resources.get(KIND_DEPLOYMENT), io.fabric8.kubernetes.api.model.extensions.Deployment.class);
                 kubernetesClient.extensions()
                         .deployments()
+                        .inNamespace(namespace)
                         .withName(kubernetesDeployment.getMetadata().getName())
                         .delete();
+                logger.info("Deployment deleted: " + kubernetesDeployment.getMetadata().getName());
             }
         }
     }
@@ -217,10 +322,16 @@ public class KubernetesDeploymentProvider implements DeploymentProvider {
         if (!patternDir.exists()) {
             throw new BadRequestException("Unable to find the deployment artifacts for given details.");
         }
-        return Arrays.stream(patternDir.listFiles())
+
+        List<String> profiles = Arrays.stream(patternDir.listFiles())
                 .filter(file -> file.getName().endsWith(YAML_EXTENSION))
                 .map(file -> Paths.get(path, file.getName()).toString())
                 .collect(Collectors.toList());
+
+        if (profiles.isEmpty()) {
+            throw new BadRequestException("No profiles found for deployment " + deployment);
+        }
+        return profiles;
     }
 
     /**

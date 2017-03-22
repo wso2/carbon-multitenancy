@@ -31,29 +31,33 @@ public interface DeploymentProvider {
     /**
      * Get all the deployments.
      *
+     * @param namespace Namespace of the tenant
      * @return List of deployments
      */
-    List<Deployment> listDeployments();
+    List<Deployment> listDeployments(String namespace);
 
     /**
      * Get a deployment by ID.
      *
+     * @param namespace Namespace of the tenant
      * @param id Deployment ID
      * @return Deployment
      */
-    Deployment getDeployment(String id) throws DeploymentNotFoundException;
+    Deployment getDeployment(String namespace, String id) throws DeploymentNotFoundException;
 
     /**
      * Deploy a product in a respective environment.
      *
+     * @param namespace Namespace of the tenant
      * @param deployment Deployment details
      */
-    void deploy(Deployment deployment) throws DeploymentEnvironmentException, BadRequestException;
+    void deploy(String namespace, Deployment deployment) throws DeploymentEnvironmentException, BadRequestException;
 
     /**
      * Remove a product deployment.
      *
+     * @param namespace Namespace of the tenant
      * @param deployment Deployment details
      */
-    void undeploy(Deployment deployment) throws DeploymentEnvironmentException, BadRequestException;
+    void undeploy(String namespace, Deployment deployment) throws DeploymentEnvironmentException, BadRequestException;
 }

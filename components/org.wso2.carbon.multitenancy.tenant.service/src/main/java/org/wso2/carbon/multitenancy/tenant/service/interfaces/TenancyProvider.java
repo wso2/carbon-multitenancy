@@ -57,5 +57,5 @@ public interface TenancyProvider {
      * @param name Tenant name
      * @return Status
      */
-    boolean deleteTenant(String name);
+    boolean deleteTenant(String name) throws TenantNotFoundException;
 }
