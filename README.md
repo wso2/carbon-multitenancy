@@ -3,7 +3,7 @@
 ---
 |  Branch       | Build Status |
 | :------------ |:-------------
-| master        | [![Build Status](https://wso2.org/jenkins/job/carbon-multitenancy/badge/icon)](https://wso2.org/jenkins/job/carbon-multitenancy) |
+| master        | [![Build Status](https://wso2.org/jenkins/view/All%20Builds/job/platform-builds/job/carbon-multitenancy/badge/icon)](https://wso2.org/jenkins/view/All%20Builds/job/platform-builds/job/carbon-multitenancy/) |
 ---
 
 Latest Released Version v4.5.0, v4.4.4.
