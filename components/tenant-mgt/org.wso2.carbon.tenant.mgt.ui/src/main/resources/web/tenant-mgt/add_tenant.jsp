@@ -244,14 +244,14 @@ String domainName = request.getParameter("domain");
                                 class="required">*</span></td>
                         <td colspan="2"><input type="text" name="admin-firstname"
                                                id="admin-firstname" style="width:400px"
-                                               value="<%=firstname%>"/></td>
+                                               value="<%=Encode.forHtml(firstname)%>"/></td>
                     </tr>
                     <tr>
                         <td><fmt:message key="admin.lastname"/><span
                                 class="required">*</span></td>
                         <td colspan="2"><input type="text" name="admin-lastname"
                                                id="admin-lastname" style="width:400px"
-                                               value="<%=lastname%>"/></td>
+                                               value="<%=Encode.forHtml(lastname)%>"/></td>
                     </tr>
 
 
