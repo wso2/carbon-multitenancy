@@ -23,14 +23,16 @@ import org.wso2.msf4j.security.basic.AbstractBasicAuthSecurityInterceptor;
  * environment variables or system properties:
  * - CARBON_MULTITENANCY_USERNAME
  * - CARBON_MULTITENANCY_PASSWORD
+ *
+ * @since v5.0.0
  */
 public class BasicAuthInterceptor extends AbstractBasicAuthSecurityInterceptor {
 
     private static final String CARBON_MULTITENANCY_USERNAME = "CARBON_MULTITENANCY_USERNAME";
     private static final String CARBON_MULTITENANCY_PASSWORD = "CARBON_MULTITENANCY_PASSWORD";
 
-    private String username;
-    private String password;
+    private final String username;
+    private final String password;
 
     public BasicAuthInterceptor() {
         username = readInputParameter(CARBON_MULTITENANCY_USERNAME);
@@ -54,6 +56,6 @@ public class BasicAuthInterceptor extends AbstractBasicAuthSecurityInterceptor {
     }
 
     private boolean isEmpty(String value) {
-        return (value == null || value.trim().equals(""));
+        return (value == null || value.trim().isEmpty());
     }
 }
