@@ -34,6 +34,7 @@ public class Application {
         new MicroservicesRunner()
                 .deploy(new DeploymentService())
                 .deploy(new TenantService())
+                .addInterceptor(new BasicAuthInterceptor())
                 .addExceptionMapper(new BadRequestMapper())
                 .addExceptionMapper(new TenantCreationFailedMapper())
                 .addExceptionMapper(new TenantNotFoundMapper())
