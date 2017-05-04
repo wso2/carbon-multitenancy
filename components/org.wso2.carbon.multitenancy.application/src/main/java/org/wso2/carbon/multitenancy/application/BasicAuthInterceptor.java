@@ -21,26 +21,20 @@ import org.wso2.msf4j.security.basic.AbstractBasicAuthSecurityInterceptor;
 /**
  * Basic authentication interceptor: Provide user credentials via the following
  * environment variables or system properties:
- * Environment variables:
  * - CARBON_MULTITENANCY_USERNAME
  * - CARBON_MULTITENANCY_PASSWORD
- * System properties:
- * - carbon.multitenancy.username
- * - carbon.multitenancy.password
  */
 public class BasicAuthInterceptor extends AbstractBasicAuthSecurityInterceptor {
 
-    private static final String ENV_VAR_CARBON_MULTITENANCY_USERNAME = "CARBON_MULTITENANCY_USERNAME";
-    private static final String ENV_VAR_CARBON_MULTITENANCY_PASSWORD = "CARBON_MULTITENANCY_PASSWORD";
-    private static final String SYS_PROPERTY_CARBON_MULTITENANCY_USERNAME = "carbon.multitenancy.username";
-    private static final String SYS_PROPERTY_CARBON_MULTITENANCY_PASSWORD = "carbon.multitenancy.password";
+    private static final String CARBON_MULTITENANCY_USERNAME = "CARBON_MULTITENANCY_USERNAME";
+    private static final String CARBON_MULTITENANCY_PASSWORD = "CARBON_MULTITENANCY_PASSWORD";
 
     private String username;
     private String password;
 
     public BasicAuthInterceptor() {
-        username = readInputParameter(ENV_VAR_CARBON_MULTITENANCY_USERNAME, SYS_PROPERTY_CARBON_MULTITENANCY_USERNAME);
-        password = readInputParameter(ENV_VAR_CARBON_MULTITENANCY_PASSWORD, SYS_PROPERTY_CARBON_MULTITENANCY_PASSWORD);
+        username = readInputParameter(CARBON_MULTITENANCY_USERNAME);
+        password = readInputParameter(CARBON_MULTITENANCY_PASSWORD);
     }
 
     @Override
@@ -48,14 +42,13 @@ public class BasicAuthInterceptor extends AbstractBasicAuthSecurityInterceptor {
         return (this.username.equals(username) && this.password.equals(password));
     }
 
-    private String readInputParameter(String envVarName, String sysPropertyName) {
-        String value = System.getenv(envVarName);
+    private String readInputParameter(String propertyName) {
+        String value = System.getenv(propertyName);
         if (isEmpty(value)) {
-            value = System.getProperty(sysPropertyName);
+            value = System.getProperty(propertyName);
         }
         if (isEmpty(value)) {
-            throw new RuntimeException("Environment variable " + envVarName + " or system property " + sysPropertyName
-                    + " not found");
+            throw new RuntimeException("An environment variable or a system property not found for " + propertyName);
         }
         return value;
     }
