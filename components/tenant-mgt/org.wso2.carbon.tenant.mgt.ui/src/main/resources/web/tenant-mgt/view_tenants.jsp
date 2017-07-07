@@ -116,7 +116,7 @@
                 } else {
                 	   tenantsInfo = client.retrievePaginatedTenants(pageNumber);
                 }
-             
+
 
                 tenantInfoArr = tenantsInfo.getTenantInfoBeans();
                 numberOfPages = tenantsInfo.getNumberOfPages();
@@ -163,7 +163,7 @@
                                 key="admin.email"/></th>
                         <th style="padding-left:5px;text-align:left;"><fmt:message
                                 key="created.date"/></th>
-                        <th style="padding-left:5px;text-align:left;"><fmt:message key="active"/></th>
+                        <th style="padding-left:5px;text-align:left;"><fmt:message key="actions"/></th>
                         <th style="padding-left:5px;text-align:left;"><fmt:message key="edit"/></th>
                     </tr>
                     </thead>
@@ -191,11 +191,19 @@
                     <td style="padding-left:5px;padding-top:3px;text-align:left;"><%=createdDateStr%>
                     </td>
                     <td style="padding-left:5px;padding-top:3px;text-align:left;">
-                        <form id="<%=tenantDomain%>_form" action="view_tenants.jsp" method="post">
-                            <input type="checkbox" name="activate"
-                                   onchange="javascript:activationChanged(this, '<%=tenantDomain%>')"
-                                   <%if (isActive) {%>checked="true"<%}%>/>
-                            <input type="hidden" name="activate.domain" value="<%=tenantDomain%>"/>
+                        <form id="<%=tenantDomain%>_form" action="activate_tenant_ajaxprocessor.jsp" method="post">
+                            <% if (isActive) { %>
+                              <input type="button" id="deactivate"
+                                     onclick="activationChanged(this, '<%=tenantDomain%>'); return false;"
+                                     value="Deactivate" />
+                            <% } else { %>
+                              <input type="button" id="activate"
+                                     onclick="activationChanged(this, '<%=tenantDomain%>'); return false;"
+                                     value="Activate" />
+                            <% } %>
+
+                            <input type="hidden" name="tenant.domain" value="<%=tenantDomain%>"/>
+                            <input type="hidden" name="activate" value="<%=!isActive%>"/>
                         </form>
                     </td>
                     <td style="padding-left:5px;padding-top:3px;text-align:left;"><a
