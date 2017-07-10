@@ -1,5 +1,5 @@
 function addTenant(isUpdating, isPublicCloud, isEmailUser) {
-    
+
     var reason = "";
     var addTenantForm = document.getElementById('addTenantForm');
     var adminPassword = document.getElementById('admin-password');
@@ -35,7 +35,7 @@ function addTenant(isUpdating, isPublicCloud, isEmailUser) {
     else {
         var domain = document.getElementById('domain');
         var adminName = document.getElementById('admin');
-        
+
         if (isEmailUser) {
         	email = adminName;
         }
@@ -113,32 +113,11 @@ function showSuccessUpdateMessage() {
     CARBON.showInfoDialog(message);
     return;
 }
-function activationChanged(cbox, domain) {
-    if (!cbox.checked) {
-        CARBON.showConfirmationDialog("Are you sure you want to deactivate the domain: " +
-                domain + ".", function() {
-            changeTenentActivation(domain);
-        }, function() {
-            cbox.checked = "on";
-        });
-    } else {
-        changeTenentActivation(domain);
-    }
-
-}
-
-function changeTenentActivation (domain){
-    jQuery.ajax({
-        type: "POST",
-        url: "activate_tenant_ajaxprocessor.jsp",
-        headers: {
-            Accept: "text/html"
-        },
-        data: {
-            "activatingDomain": domain
-        },
-        async: false
-    });
+function activationChanged(btn, domain) {
+    CARBON.showConfirmationDialog("Are you sure you want to " + btn.id +
+            " the domain: " + domain + "?", function() {
+        document.forms[domain + '_form'].submit();
+    }, function() { });
 }
 
 function fillAdminValue() {
@@ -218,7 +197,7 @@ function domainAvailability(domain) {
              error = "Error in checking domain availability";
 
         },
-        async: false        
+        async: false
     });
 
     return error;
