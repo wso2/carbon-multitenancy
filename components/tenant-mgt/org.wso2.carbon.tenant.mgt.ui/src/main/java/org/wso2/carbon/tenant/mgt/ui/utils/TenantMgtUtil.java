@@ -121,9 +121,17 @@ public class TenantMgtUtil {
             //update usage plan(subscription) per tenant
             //usagePlanClient.updateUsagePlan(tenantInfoBean);
         } catch (Exception e) {
-            String msg = "Failed to update the tenant config. tenant-domain: "
-                    + tenantInfoBean.getTenantDomain() + ", " + "tenant-admin: "
-                    + tenantInfoBean.getAdmin() + ".";
+            String msg = "Failed to update the tenant '" + tenantInfoBean.getTenantDomain() + "'.";
+
+            String rootCause = ((TenantMgtAdminServiceExceptionException) e).getFaultMessage().
+                    getTenantMgtAdminServiceException().getMessage();
+
+            if (rootCause != null && !rootCause.isEmpty()) {
+                msg = msg + " Root cause : " + rootCause;
+            } else {
+                msg = msg + " Root cause is not available.";
+            }
+
             log.error(msg, e);
             throw new Exception(msg, e);
         }
