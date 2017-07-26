@@ -151,7 +151,8 @@ function validateDomain(fld, isPublicCloudSetup) {
     var indexOfDot = domain.indexOf(".");
     var extension = domain.substring(lastIndexOfDot, domain.length);
 
-    var illegalChars = /([^a-zA-Z0-9\._\-])/; // allow only letters and numbers . - _and period
+    // allow only lowercase letters, numbers, '.', '-' and  '_'
+    var illegalChars = /([^a-z0-9\._\-])/;
     if (extension.indexOf("-trial") >= 0 || extension.indexOf("-unverified") >= 0) {
         // we are not allowing to create a domain with -trial or -unverified is in the extension
         error = "The domain name you entered is not valid. Please enter a valid domain name.";
@@ -163,7 +164,7 @@ function validateDomain(fld, isPublicCloudSetup) {
         error = "Invalid domain, starting with '.'";
     }
     else if (illegalChars.test(fld.value)) {
-        error = "The domain only allows letters, numbers, '.', '-' and '_'. <br />";
+        error = "The domain only allows lowercase letters, numbers, '.', '-' and '_'. <br />";
     } else {
         fld.style.background = 'White';
     }

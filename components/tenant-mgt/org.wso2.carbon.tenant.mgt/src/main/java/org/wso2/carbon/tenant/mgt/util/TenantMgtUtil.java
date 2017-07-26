@@ -62,7 +62,7 @@ import java.util.Map;
 public class TenantMgtUtil {
 
     private static final Log log = LogFactory.getLog(TenantMgtUtil.class);
-    private static final String ILLEGAL_CHARACTERS_FOR_TENANT_DOMAIN = ".*[^a-zA-Z0-9\\._\\-].*";
+    private static final String ILLEGAL_CHARACTERS_FOR_TENANT_DOMAIN = ".*[^a-z0-9\\._\\-].*";
     private static ThreadLocal<Boolean> isTenantAdminCreationOperation = new ThreadLocal<>();
 
     /**
@@ -187,8 +187,8 @@ public class TenantMgtUtil {
         // check the tenant domain contains any illegal characters
         if (domainName.matches(ILLEGAL_CHARACTERS_FOR_TENANT_DOMAIN)) {
             String msg = "The tenant domain ' " + domainName +
-                         " ' contains one or more illegal characters. the valid characters are " +
-                         "letters, numbers, '.', '-' and '_'";
+                         " ' contains one or more illegal characters. The valid characters are " +
+                         "lowercase letters, numbers, '.', '-' and '_'.";
             log.error(msg);
             throw new Exception(msg);
         }
