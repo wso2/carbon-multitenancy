@@ -18,7 +18,6 @@ package org.wso2.carbon.tenant.mgt.util;
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.context.ConfigurationContext;
-import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -47,6 +46,7 @@ import org.wso2.carbon.user.core.config.multitenancy.MultiTenantRealmConfigBuild
 import org.wso2.carbon.user.core.jdbc.JDBCRealmConstants;
 import org.wso2.carbon.user.core.tenant.Tenant;
 import org.wso2.carbon.user.core.tenant.TenantManager;
+import org.wso2.carbon.user.core.util.DatabaseUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.naming.InitialContext;
@@ -478,14 +478,7 @@ public class TenantMgtUtil {
     public static void deleteTenantUMData(int tenantId) throws Exception {
         RealmConfiguration realmConfig = TenantMgtServiceComponent.getRealmService().
                 getBootstrapRealmConfiguration();
-        BasicDataSource dataSource = new BasicDataSource();
-        dataSource.setDriverClassName(realmConfig.getRealmProperty(JDBCRealmConstants.DRIVER_NAME));
-        dataSource.setUrl(realmConfig.getRealmProperty(JDBCRealmConstants.URL));
-        dataSource.setUsername(realmConfig.getRealmProperty(JDBCRealmConstants.USER_NAME));
-        dataSource.setPassword(realmConfig.getRealmProperty(JDBCRealmConstants.PASSWORD));
-        dataSource.setMaxActive(Integer.parseInt(realmConfig.getRealmProperty(JDBCRealmConstants.MAX_ACTIVE)));
-        dataSource.setMinIdle(Integer.parseInt(realmConfig.getRealmProperty(JDBCRealmConstants.MIN_IDLE)));
-        dataSource.setMaxWait(Integer.parseInt(realmConfig.getRealmProperty(JDBCRealmConstants.MAX_WAIT)));
+        DataSource dataSource = DatabaseUtil.getRealmDataSource(realmConfig);
 
         TenantUMDataDeletionUtil.deleteTenantUMData(tenantId, dataSource.getConnection());
     }
@@ -502,12 +495,14 @@ public class TenantMgtUtil {
         ConfigurationContext configContext = TenantMgtServiceComponent.getConfigurationContext();
         ClusteringAgent agent = configContext.getAxisConfiguration()
                 .getClusteringAgent();
-        try {
-            agent.sendMessage(clustermessage, true);
-        } catch (ClusteringFault e) {
-            log.error("Error occurred while broadcasting TenantDeleteClusterMessage : " + e.getMessage());
+        if (agent != null) {
+            // The server is part of a cluster. Notify all other nodes of tenant deletion
+            try {
+                agent.sendMessage(clustermessage, true);
+            } catch (ClusteringFault e) {
+                log.error("Error occurred while broadcasting TenantDeleteClusterMessage : " + e.getMessage());
+            }
         }
-
     }
 
 

@@ -570,7 +570,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
 
                 String tenantDelete = TenantMgtServiceComponent.getServerConfigurationService().getFirstProperty("TenantDelete");
 
-                if ((tenantDelete == null)
+                if ((tenantDelete != null)
                     && (tenantDelete.equals("true"))) {
                     log.info("Tenant Delete Flag is True");
                     if (TenantMgtServiceComponent.getBillingService() != null) {
