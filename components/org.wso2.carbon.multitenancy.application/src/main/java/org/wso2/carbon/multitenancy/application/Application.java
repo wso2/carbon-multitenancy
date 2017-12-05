@@ -16,6 +16,8 @@
 
 package org.wso2.carbon.multitenancy.application;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.multitenancy.deployment.service.DeploymentService;
 import org.wso2.carbon.multitenancy.deployment.service.exceptions.DeploymentNotFoundMapper;
 import org.wso2.carbon.multitenancy.tenant.service.TenantService;
@@ -23,17 +25,36 @@ import org.wso2.carbon.multitenancy.tenant.service.exceptions.BadRequestMapper;
 import org.wso2.carbon.multitenancy.tenant.service.exceptions.DeploymentEnvironmentMapper;
 import org.wso2.carbon.multitenancy.tenant.service.exceptions.TenantCreationFailedMapper;
 import org.wso2.carbon.multitenancy.tenant.service.exceptions.TenantNotFoundMapper;
+import org.wso2.msf4j.Interceptor;
 import org.wso2.msf4j.MicroservicesRunner;
+import org.wso2.msf4j.security.oauth2.OAuth2SecurityInterceptor;
+import org.wso2.msf4j.util.SystemVariableUtil;
 
 /**
  * Multitenancy services application class.
  */
 public class Application {
 
+    private static final Logger logger = LoggerFactory.getLogger(Application.class);
+
+    private static final String AUTH_SERVER_URL = "AUTH_SERVER_URL";
+
     public static void main(String[] args) {
+        logger.info("Starting Carbon Multitenancy API...");
+
+        Interceptor authInterceptor;
+        if (SystemVariableUtil.getValue(AUTH_SERVER_URL, null) != null) {
+            authInterceptor = new OAuth2SecurityInterceptor();
+            logger.info("OAuth2 authentication interceptor initialized");
+        } else {
+            authInterceptor = new BasicAuthInterceptor();
+            logger.info("Basic authentication interceptor initialized");
+        }
+
         new MicroservicesRunner()
                 .deploy(new DeploymentService())
                 .deploy(new TenantService())
+                .addInterceptor(authInterceptor)
                 .addExceptionMapper(new BadRequestMapper())
                 .addExceptionMapper(new TenantCreationFailedMapper())
                 .addExceptionMapper(new TenantNotFoundMapper())
