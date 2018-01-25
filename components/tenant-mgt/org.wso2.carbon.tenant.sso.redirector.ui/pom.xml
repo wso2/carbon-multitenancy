@@ -18,13 +18,13 @@
     <parent>
         <groupId>org.wso2.carbon.multitenancy</groupId>
         <artifactId>tenant-mgt-parent</artifactId>
-        <version>4.6.7-SNAPSHOT</version>
+        <version>4.6.7</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.tenant.sso.redirector.ui</artifactId>
-    <version>4.6.7-SNAPSHOT</version>
+    <version>4.6.7</version>
     <packaging>bundle</packaging>
     <name>WSO2 Stratos - SSO redirector UI component</name>
 
