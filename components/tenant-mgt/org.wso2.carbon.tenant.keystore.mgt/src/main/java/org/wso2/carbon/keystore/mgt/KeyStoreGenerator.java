@@ -20,8 +20,14 @@ package org.wso2.carbon.keystore.mgt;
 import org.apache.axiom.om.util.UUIDGenerator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.jce.X509V3CertificateGenerator;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.wso2.carbon.core.RegistryResources;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.keystore.mgt.KeyStoreMgtException;
@@ -151,16 +157,18 @@ public class KeyStoreGenerator {
             String commonName = "CN=" + tenantDomain + ", OU=None, O=None L=None, C=None";
 
             //generate certificates
-            X509V3CertificateGenerator v3CertGen = new X509V3CertificateGenerator();
-            v3CertGen.setSerialNumber(BigInteger.valueOf(new SecureRandom().nextInt()));
-            v3CertGen.setIssuerDN(new X509Principal(commonName));
-            v3CertGen.setNotBefore(new Date(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 30));
-            v3CertGen.setNotAfter(new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 365 * 10)));
-            v3CertGen.setSubjectDN(new X509Principal(commonName));
-            v3CertGen.setPublicKey(keyPair.getPublic());
-            v3CertGen.setSignatureAlgorithm("MD5WithRSAEncryption");
-            X509Certificate PKCertificate = v3CertGen.generateX509Certificate(keyPair.getPrivate());
-
+            X500Name name = new X500Name(commonName);
+            X509v3CertificateBuilder certificateBuilder = new X509v3CertificateBuilder(name,
+                    BigInteger.valueOf(new SecureRandom().nextInt()),
+                    new Date(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 30),
+                    new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 365 * 10)), name,
+                    SubjectPublicKeyInfo.getInstance(keyPair.getPublic().getEncoded()));            
+            ContentSigner signer = new JcaContentSignerBuilder("MD5WithRSAEncryption")
+                    .setProvider(new BouncyCastleProvider()).build(keyPair.getPrivate());
+            X509CertificateHolder holder = certificateBuilder.build(signer);
+            X509Certificate PKCertificate = new JcaX509CertificateConverter().setProvider(new BouncyCastleProvider())
+                    .getCertificate(holder);
+            
             //add private key to KS
             keyStore.setKeyEntry(tenantDomain, keyPair.getPrivate(), password.toCharArray(),
                                  new java.security.cert.Certificate[]{PKCertificate});
