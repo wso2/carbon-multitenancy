@@ -1,12 +1,12 @@
 /*
  * Copyright (c) 2008, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -109,6 +109,9 @@ public class TenantMgtAdminService extends AbstractAdmin {
 
         // For the super tenant tenant creation, tenants are always activated as they are created.
         TenantMgtUtil.activateTenantInitially(tenantInfoBean, tenantId);
+        log.info("Added the tenant '" + tenantDomain + " [" + tenantId +
+            "]' by '" + PrivilegedCarbonContext.getThreadLocalCarbonContext().
+            getUsername() + "'");
 
         return TenantMgtUtil.prepareStringToShowThemeMgtPage(tenant.getId());
     }
@@ -211,7 +214,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
         }
         return tenantList;
     }
-    
+
     /**
      * Get the list of the tenants
      *
@@ -248,7 +251,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
         List<TenantInfoBean> tenantList = getAllTenants();
         return tenantList.toArray(new TenantInfoBean[tenantList.size()]);
     }
-    
+
     /**
      * Retrieve all the tenants which matches the partial search domain
      *
@@ -275,7 +278,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
         DataPaginator.doPaging(pageNumber, tenantList, paginatedTenantInfoBean);
         return paginatedTenantInfoBean;
     }
-    
+
     /**
      * Method to retrieve all the tenants paginated
      *
@@ -468,7 +471,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
             log.error(msg, e);
             throw new Exception(msg, e);
         }
-        
+
         //Notify tenant update to all listeners
         try {
             TenantMgtUtil.triggerUpdateTenant(tenantInfoBean);
@@ -478,6 +481,9 @@ public class TenantMgtAdminService extends AbstractAdmin {
             throw new Exception(msg, e);
         }
 
+        log.info("Updated the tenant '" + tenantDomain + " [" + tenantId +
+            "]' by '" + PrivilegedCarbonContext.getThreadLocalCarbonContext().
+            getUsername() + "'");
         //updating the usage plan
         /*try{
             if(TenantMgtServiceComponent.getBillingService() != null){
@@ -520,6 +526,9 @@ public class TenantMgtAdminService extends AbstractAdmin {
             throw new Exception(msg, e);
         }
 
+        log.info("Activated the tenant '" + tenantDomain + " [" + tenantId +
+            "]' by '" + PrivilegedCarbonContext.getThreadLocalCarbonContext().
+            getUsername() + "'");
     }
 
     /**
@@ -551,6 +560,10 @@ public class TenantMgtAdminService extends AbstractAdmin {
             log.error(msg, e);
             throw new Exception(msg, e);
         }
+
+        log.info("Deactivated the tenant '" + tenantDomain + " [" + tenantId +
+            "]' by '" + PrivilegedCarbonContext.getThreadLocalCarbonContext().
+            getUsername() + "'");
     }
 
     /**

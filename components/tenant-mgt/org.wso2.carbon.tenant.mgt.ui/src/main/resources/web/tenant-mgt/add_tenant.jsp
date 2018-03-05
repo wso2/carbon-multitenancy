@@ -88,11 +88,11 @@ String domainName = request.getParameter("domain");
     String isCloudDeployment =  ServerConfiguration.getInstance().getFirstProperty("IsCloudDeployment");
     String enableEmailUserName =  ServerConfiguration.getInstance().getFirstProperty("EnableEmailUserName");
     boolean isEmailUserNameEnabled = false;
-    
+
     if (enableEmailUserName != null && enableEmailUserName.equalsIgnoreCase("true")){
     	isEmailUserNameEnabled = true;
     }
-    
+
     String email = "";
     if (domainName != null && !domainName.equals("")) {
         try {
@@ -373,8 +373,8 @@ String domainName = request.getParameter("domain");
                 <% } else { %> value="<fmt:message key="activate.account.btn"/>" <% } %>/>
             </td>
 
-            <input type="hidden" name="activatingDomain" id="activatingDomain" value="<%=Encode.forHtml(domainName)%>"/>
-
+            <input type="hidden" name="tenant.domain" id="tenant.domain" value="<%=Encode.forHtml(domainName)%>"/>
+            <input type="hidden" name="activate" value="<%=!isActive%>"/>
         </tr>
         </tbody>
     </table>

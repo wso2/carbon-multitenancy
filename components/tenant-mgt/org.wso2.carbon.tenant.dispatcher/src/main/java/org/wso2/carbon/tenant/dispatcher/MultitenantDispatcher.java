@@ -46,13 +46,21 @@ public class MultitenantDispatcher extends AbstractDispatcher {
         if (service == null) {
             String to = mc.getTo().getAddress();
 
-            int tenantDelimiterIndex = to.indexOf("/t/");
-            if (tenantDelimiterIndex != -1) {
-                AxisConfiguration ac = mc.getConfigurationContext().getAxisConfiguration();
-                return ac.getService(MultitenantConstants.MULTITENANT_DISPATCHER_SERVICE);
+            if (to.startsWith(mc.getConfigurationContext().getServiceContextPath())) {
+                int tenantDelimiterIndex = to.indexOf("/t/");
+                if (tenantDelimiterIndex != -1) {
+                    getService(mc);
+                }
+            } else if (to.startsWith("/t/")) {
+                getService(mc);
             }
         }
         return service;
+    }
+
+    private static AxisService getService(MessageContext mc) throws AxisFault {
+        AxisConfiguration ac = mc.getConfigurationContext().getAxisConfiguration();
+        return ac.getService(MultitenantConstants.MULTITENANT_DISPATCHER_SERVICE);
     }
 
     public AxisOperation findOperation(AxisService svc, MessageContext mc) throws AxisFault {

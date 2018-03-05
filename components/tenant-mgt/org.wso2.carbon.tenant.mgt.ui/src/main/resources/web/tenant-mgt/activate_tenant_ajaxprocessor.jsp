@@ -37,17 +37,17 @@
 
     String error = "Error in updating the tenant activation status.";
     String tenantDomain = "";
-    Boolean activated = (Boolean)session.getAttribute("isActivatedTenant");
 
     TenantServiceClient serviceClient = new TenantServiceClient(config, session);
-
     try {
-        tenantDomain = request.getParameter("activatingDomain");
+        tenantDomain = request.getParameter("tenant.domain");
+        String activateStr = request.getParameter("activate");
+        Boolean activate = activateStr == null ? null : Boolean.valueOf(activateStr);
 
-        if(activated){
-            serviceClient.deactivateTenant(tenantDomain);
-        } else if (!activated){
+        if (activate != null && activate){
             serviceClient.activateTenant(tenantDomain);
+        } else if (activate != null && !activate){
+            serviceClient.deactivateTenant(tenantDomain);
         }
 
         response.sendRedirect("../tenant-mgt/view_tenants.jsp");
