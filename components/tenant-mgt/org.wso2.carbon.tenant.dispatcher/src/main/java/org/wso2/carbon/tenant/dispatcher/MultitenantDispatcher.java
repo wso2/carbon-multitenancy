@@ -50,10 +50,10 @@ public class MultitenantDispatcher extends AbstractDispatcher {
             if (to.startsWith(mc.getConfigurationContext().getServiceContextPath())) {
                 int tenantDelimiterIndex = to.indexOf(TENANT_PATH);
                 if (tenantDelimiterIndex != -1) {
-                    getService(mc);
+                    return getService(mc);
                 }
             } else if (to.startsWith(TENANT_PATH)) {
-                getService(mc);
+                return getService(mc);
             }
         }
         return service;
