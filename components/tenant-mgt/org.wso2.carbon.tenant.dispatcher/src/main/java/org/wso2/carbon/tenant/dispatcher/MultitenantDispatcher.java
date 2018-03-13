@@ -34,7 +34,6 @@ import javax.xml.namespace.QName;
 public class MultitenantDispatcher extends AbstractDispatcher {
 
     public static final String NAME = "MultitenantDispatcher";
-    private static final String TENANT_PATH = "/t/";
 
     public void initDispatcher() {
         QName qn = new QName("http://wso2.org/projects/carbon", NAME);
@@ -48,20 +47,14 @@ public class MultitenantDispatcher extends AbstractDispatcher {
             String to = mc.getTo().getAddress();
 
             if (to.startsWith(mc.getConfigurationContext().getServiceContextPath())) {
-                int tenantDelimiterIndex = to.indexOf(TENANT_PATH);
+                int tenantDelimiterIndex = to.indexOf("/t/");
                 if (tenantDelimiterIndex != -1) {
-                    getService(mc);
+                    AxisConfiguration ac = mc.getConfigurationContext().getAxisConfiguration();
+                    return ac.getService(MultitenantConstants.MULTITENANT_DISPATCHER_SERVICE);
                 }
-            } else if (to.startsWith(TENANT_PATH)) {
-                getService(mc);
             }
         }
         return service;
-    }
-
-    private static AxisService getService(MessageContext mc) throws AxisFault {
-        AxisConfiguration ac = mc.getConfigurationContext().getAxisConfiguration();
-        return ac.getService(MultitenantConstants.MULTITENANT_DISPATCHER_SERVICE);
     }
 
     public AxisOperation findOperation(AxisService svc, MessageContext mc) throws AxisFault {
