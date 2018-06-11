@@ -20,7 +20,7 @@
    Subscription types and the respective limits of parameters for each of the packages.
   -->
 
-<packages xmlns="http://wso2.com/carbon/multitenancy/billing/pacakges">
+<packages xmlns="http://wso2.com/carbon/multitenancy/billing/packages">
     <package name="Demo">
         <subscriptionCharge>0</subscriptionCharge> <!-- $ per month -->
         <users>
