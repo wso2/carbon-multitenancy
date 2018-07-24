@@ -164,7 +164,7 @@ function validateDomain(fld, isPublicCloudSetup) {
         error = "Invalid domain, starting with '.'";
     }
     else if (illegalChars.test(fld.value)) {
-        error = "The domain only allows lowercase letters, numbers, '.', '-' and '_'. <br />";
+        error = "The domain only allows lowercase letters, numbers, '.', '-' and '_'. ";
     } else {
         fld.style.background = 'White';
     }
