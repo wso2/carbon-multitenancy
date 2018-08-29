@@ -652,9 +652,14 @@
             </dependency>
 
             <dependency>
-                <groupId>bouncycastle</groupId>
-                <artifactId>bcprov-jdk15</artifactId>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk15on</artifactId>
                 <version>${bcprov-jdk15.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcpkix-jdk15on</artifactId>
+                <version>${bcpkix-jdk15.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.identity</groupId>
@@ -1036,7 +1041,8 @@
 
         <log4j.version>1.2.13</log4j.version>
 
-        <bcprov-jdk15.version>132</bcprov-jdk15.version>
+        <bcprov-jdk15.version>1.60</bcprov-jdk15.version>
+        <bcpkix-jdk15.version>1.60</bcpkix-jdk15.version>
 
         <!-- Jasper Reports Version -->
         <version.jasper>2.2.2.v201205150955</version.jasper>

@@ -20,11 +20,20 @@ package org.wso2.carbon.keystore.mgt;
 import org.apache.axiom.om.util.UUIDGenerator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.jce.X509V3CertificateGenerator;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
+import org.bouncycastle.crypto.util.PrivateKeyFactory;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
 import org.wso2.carbon.core.RegistryResources;
 import org.wso2.carbon.core.util.CryptoUtil;
-import org.wso2.carbon.keystore.mgt.KeyStoreMgtException;
 import org.wso2.carbon.keystore.mgt.util.RealmServiceHolder;
 import org.wso2.carbon.keystore.mgt.util.RegistryServiceHolder;
 import org.wso2.carbon.registry.core.Resource;
@@ -151,15 +160,21 @@ public class KeyStoreGenerator {
             String commonName = "CN=" + tenantDomain + ", OU=None, O=None L=None, C=None";
 
             //generate certificates
-            X509V3CertificateGenerator v3CertGen = new X509V3CertificateGenerator();
-            v3CertGen.setSerialNumber(BigInteger.valueOf(new SecureRandom().nextInt()));
-            v3CertGen.setIssuerDN(new X509Principal(commonName));
-            v3CertGen.setNotBefore(new Date(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 30));
-            v3CertGen.setNotAfter(new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 365 * 10)));
-            v3CertGen.setSubjectDN(new X509Principal(commonName));
-            v3CertGen.setPublicKey(keyPair.getPublic());
-            v3CertGen.setSignatureAlgorithm("MD5WithRSAEncryption");
-            X509Certificate PKCertificate = v3CertGen.generateX509Certificate(keyPair.getPrivate());
+            AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find("MD5WithRSAEncryption");
+            AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
+            AsymmetricKeyParameter privateKeyAsymKeyParam = PrivateKeyFactory.createKey(keyPair.getPrivate().getEncoded());
+            SubjectPublicKeyInfo subPubKeyInfo = SubjectPublicKeyInfo.getInstance(keyPair.getPublic().getEncoded());
+            ContentSigner sigGen = new BcRSAContentSignerBuilder(sigAlgId, digAlgId).build(privateKeyAsymKeyParam);
+
+            Date notBefore = new Date(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 30);
+            Date notAfter = new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 365 * 10));
+
+            X509v3CertificateBuilder v3CertBuilder = new X509v3CertificateBuilder(new X500Name(commonName),
+                    BigInteger.valueOf(new SecureRandom().nextInt()),
+                    notBefore, notAfter, new X500Name(commonName), subPubKeyInfo);
+
+            X509CertificateHolder certificateHolder = v3CertBuilder.build(sigGen);
+            X509Certificate PKCertificate = new JcaX509CertificateConverter().setProvider("BC").getCertificate(certificateHolder);
 
             //add private key to KS
             keyStore.setKeyEntry(tenantDomain, keyPair.getPrivate(), password.toCharArray(),
