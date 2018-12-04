@@ -18,7 +18,6 @@ package org.wso2.carbon.tenant.mgt.util;
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.context.ConfigurationContext;
-import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -44,17 +43,17 @@ import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.config.multitenancy.MultiTenantRealmConfigBuilder;
-import org.wso2.carbon.user.core.jdbc.JDBCRealmConstants;
 import org.wso2.carbon.user.core.tenant.Tenant;
 import org.wso2.carbon.user.core.tenant.TenantManager;
+import org.wso2.carbon.user.core.util.DatabaseUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import javax.naming.InitialContext;
-import javax.sql.DataSource;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import javax.naming.InitialContext;
+import javax.sql.DataSource;
 
 /**
  * Utility methods for tenant management.
@@ -478,32 +477,41 @@ public class TenantMgtUtil {
     public static void deleteTenantUMData(int tenantId) throws Exception {
         RealmConfiguration realmConfig = TenantMgtServiceComponent.getRealmService().
                 getBootstrapRealmConfiguration();
-        BasicDataSource dataSource = new BasicDataSource();
-        dataSource.setDriverClassName(realmConfig.getRealmProperty(JDBCRealmConstants.DRIVER_NAME));
-        dataSource.setUrl(realmConfig.getRealmProperty(JDBCRealmConstants.URL));
-        dataSource.setUsername(realmConfig.getRealmProperty(JDBCRealmConstants.USER_NAME));
-        dataSource.setPassword(realmConfig.getRealmProperty(JDBCRealmConstants.PASSWORD));
-        dataSource.setMaxActive(Integer.parseInt(realmConfig.getRealmProperty(JDBCRealmConstants.MAX_ACTIVE)));
-        dataSource.setMinIdle(Integer.parseInt(realmConfig.getRealmProperty(JDBCRealmConstants.MIN_IDLE)));
-        dataSource.setMaxWait(Integer.parseInt(realmConfig.getRealmProperty(JDBCRealmConstants.MAX_WAIT)));
+        TenantUMDataDeletionUtil.deleteTenantUMData(tenantId, DatabaseUtil.getRealmDataSource(realmConfig).
+                getConnection());
 
-        TenantUMDataDeletionUtil.deleteTenantUMData(tenantId, dataSource.getConnection());
+    }
+
+    /**
+     * Delete the IDN table entries.
+     *
+     * @param tenantId Tenant Id
+     * @throws Exception thrown if an error occurs while executing the queries.
+     */
+    public static void deleteTenantIDNData(int tenantId) throws Exception {
+        RealmConfiguration realmConfig = TenantMgtServiceComponent.getRealmService().
+                getBootstrapRealmConfiguration();
+        TenantIDNDataDeletionUtil.deleteTenantIDNData(tenantId, DatabaseUtil.getRealmDataSource(realmConfig).
+                getConnection());
+
     }
 
     /**
      * Broadcast TenantDeleteClusterMessage to all worker nodes
      *
-     * @param tenantId
-     * @throws Exception
+     * @param tenantId tenant id
      */
-    public static void deleteWorkernodesTenant(int tenantId) throws Exception {
+    public static void deleteWorkernodesTenant(int tenantId) {
         TenantDeleteClusterMessage clustermessage = new TenantDeleteClusterMessage(
                 tenantId);
         ConfigurationContext configContext = TenantMgtServiceComponent.getConfigurationContext();
         ClusteringAgent agent = configContext.getAxisConfiguration()
                 .getClusteringAgent();
         try {
-            agent.sendMessage(clustermessage, true);
+            // Check whether agent is null or not, before send the message.
+            if (agent != null) {
+                agent.sendMessage(clustermessage, true);
+            }
         } catch (ClusteringFault e) {
             log.error("Error occurred while broadcasting TenantDeleteClusterMessage : " + e.getMessage());
         }
@@ -514,9 +522,9 @@ public class TenantMgtUtil {
     /**
      * Delete tenant data specific to product from database.
      *
-     * @param dataSourceName
-     * @param tableName
-     * @param tenantId
+     * @param dataSourceName data source name
+     * @param tableName table name
+     * @param tenantId tenant id
      */
     public static void deleteProductSpecificTenantData(String dataSourceName, String tableName, int tenantId) {
         try {

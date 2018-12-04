@@ -27,14 +27,14 @@ import java.sql.SQLException;
 
 public class TenantRegistryDataDeletionUtil {
     public static final Log log = LogFactory.getLog(TenantRegistryDataDeletionUtil.class);
-    
+
     /**
      * Delete all tenant information related to tenant stored in REG tables
      * @param tenantId id of tenant whose data should be deleted
      * @param conn database connection object
      * @throws SQLException thrown if an error occurs while executing the queries 
      */
-    public static void deleteTenantRegistryData(int tenantId, Connection conn) throws Exception {
+    protected static void deleteTenantRegistryData(int tenantId, Connection conn) throws Exception {
         try {
             conn.setAutoCommit(false);
             String deleteClusterLockSql = "DELETE FROM REG_CLUSTER_LOCK WHERE REG_TENANT_ID = ?";
@@ -88,6 +88,13 @@ public class TenantRegistryDataDeletionUtil {
             String deletePathSql = "DELETE FROM REG_PATH WHERE REG_TENANT_ID = ?";
             executeDeleteQuery(conn, deletePathSql, tenantId);
 
+            String deleteAdminResourceSql = "DELETE FROM REG_RESOURCE WHERE REG_PATH_ID IN " +
+                    "(SELECT DISTINCT REG_PATH_ID FROM REG_PATH WHERE REG_PATH_VALUE LIKE ?)";
+            executeDeleteQueryWithLikeOperator(conn,deleteAdminResourceSql,tenantId);
+
+            String deleteAdminRegistryPathSql = "DELETE FROM REG_PATH WHERE REG_PATH_VALUE LIKE ?";
+            executeDeleteQueryWithLikeOperator(conn, deleteAdminRegistryPathSql, tenantId);
+
             conn.commit();
         } catch (SQLException e) {
             conn.rollback();
@@ -105,6 +112,34 @@ public class TenantRegistryDataDeletionUtil {
         try {
             ps = conn.prepareStatement(query);
             ps.setInt(1, tenantId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            String errMsg = "Error executing query " + query + " for tenant: " + tenantId;
+            log.error(errMsg, e);
+            throw new Exception(errMsg, e);
+        } finally {
+            if (ps != null) {
+                ps.close();
+            }
+        }
+    }
+
+    /**
+     *  Initialise prepared statements for given query and execute the prepared statement.
+     *
+     * @param conn database connection object
+     * @param query query for prepared statement
+     * @param tenantId tenant id
+     * @throws Exception thrown if an error occurs while executing the query.
+     */
+    private static void executeDeleteQueryWithLikeOperator(Connection conn, String query, int tenantId)
+            throws Exception {
+
+        PreparedStatement ps = null;
+        try {
+            ps = conn.prepareStatement(query);
+            String param = "%/" + String.valueOf(tenantId) + "/%";
+            ps.setNString(1, param);
             ps.executeUpdate();
         } catch (SQLException e) {
             String errMsg = "Error executing query " + query + " for tenant: " + tenantId;
