@@ -26,15 +26,18 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public class TenantRegistryDataDeletionUtil {
+
     public static final Log log = LogFactory.getLog(TenantRegistryDataDeletionUtil.class);
 
     /**
-     * Delete all tenant information related to tenant stored in REG tables
+     * Delete all tenant information related to tenant stored in REG tables.
+     *
      * @param tenantId id of tenant whose data should be deleted
-     * @param conn database connection object
-     * @throws SQLException thrown if an error occurs while executing the queries 
+     * @param conn     database connection object
+     * @throws SQLException thrown if an error occurs while executing the queries
      */
     protected static void deleteTenantRegistryData(int tenantId, Connection conn) throws Exception {
+
         try {
             conn.setAutoCommit(false);
             String deleteClusterLockSql = "DELETE FROM REG_CLUSTER_LOCK WHERE REG_TENANT_ID = ?";
@@ -90,7 +93,7 @@ public class TenantRegistryDataDeletionUtil {
 
             String deleteAdminResourceSql = "DELETE FROM REG_RESOURCE WHERE REG_PATH_ID IN " +
                     "(SELECT DISTINCT REG_PATH_ID FROM REG_PATH WHERE REG_PATH_VALUE LIKE ?)";
-            executeDeleteQueryWithLikeOperator(conn,deleteAdminResourceSql,tenantId);
+            executeDeleteQueryWithLikeOperator(conn, deleteAdminResourceSql, tenantId);
 
             String deleteAdminRegistryPathSql = "DELETE FROM REG_PATH WHERE REG_PATH_VALUE LIKE ?";
             executeDeleteQueryWithLikeOperator(conn, deleteAdminRegistryPathSql, tenantId);

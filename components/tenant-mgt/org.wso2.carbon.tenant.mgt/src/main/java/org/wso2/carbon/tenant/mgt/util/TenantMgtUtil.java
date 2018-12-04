@@ -461,6 +461,12 @@ public class TenantMgtUtil {
         }*/
     }
 
+    /**
+     * Delete Registry table entries.
+     *
+     * @param tenantId tenant id
+     * @throws Exception throws if any error occurred while deleting Registry table entries.
+     */
     public static void deleteTenantRegistryData(int tenantId) throws Exception {
         // delete data from mounted config registry database
         JDBCDataAccessManager configMgr = (JDBCDataAccessManager) TenantMgtServiceComponent.getRegistryService().
@@ -474,7 +480,14 @@ public class TenantMgtUtil {
 
     }
 
+    /**
+     * Delete UM table entries.
+     *
+     * @param tenantId tenant id
+     * @throws Exception throws if any error occurred while deleting UM table entries.
+     */
     public static void deleteTenantUMData(int tenantId) throws Exception {
+
         RealmConfiguration realmConfig = TenantMgtServiceComponent.getRealmService().
                 getBootstrapRealmConfiguration();
         TenantUMDataDeletionUtil.deleteTenantUMData(tenantId, DatabaseUtil.getRealmDataSource(realmConfig).
@@ -483,12 +496,13 @@ public class TenantMgtUtil {
     }
 
     /**
-     * Delete the IDN table entries.
+     * Delete IDN table entries.
      *
      * @param tenantId Tenant Id
      * @throws Exception thrown if an error occurs while executing the queries.
      */
     public static void deleteTenantIDNData(int tenantId) throws Exception {
+
         RealmConfiguration realmConfig = TenantMgtServiceComponent.getRealmService().
                 getBootstrapRealmConfiguration();
         TenantIDNDataDeletionUtil.deleteTenantIDNData(tenantId, DatabaseUtil.getRealmDataSource(realmConfig).
@@ -502,8 +516,8 @@ public class TenantMgtUtil {
      * @param tenantId tenant id
      */
     public static void deleteWorkernodesTenant(int tenantId) {
-        TenantDeleteClusterMessage clustermessage = new TenantDeleteClusterMessage(
-                tenantId);
+
+        TenantDeleteClusterMessage clustermessage = new TenantDeleteClusterMessage(tenantId);
         ConfigurationContext configContext = TenantMgtServiceComponent.getConfigurationContext();
         ClusteringAgent agent = configContext.getAxisConfiguration()
                 .getClusteringAgent();
@@ -515,7 +529,6 @@ public class TenantMgtUtil {
         } catch (ClusteringFault e) {
             log.error("Error occurred while broadcasting TenantDeleteClusterMessage : " + e.getMessage());
         }
-
     }
 
 

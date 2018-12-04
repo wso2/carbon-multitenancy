@@ -91,8 +91,9 @@ public class TenantIDNDataDeletionUtil {
 
     /**
      * Initialise prepared statements for given query and execute the prepared statement.
-     * @param conn database connection object
-     * @param query query for prepared statement
+     *
+     * @param conn     database connection object
+     * @param query    query for prepared statement
      * @param tenantId tenant id
      * @throws Exception thrown if an error occurs while executing the query.
      */
@@ -103,8 +104,7 @@ public class TenantIDNDataDeletionUtil {
         try {
             ps = conn.prepareStatement(query);
             ps.setInt(1, tenantId);
-            int i=ps.executeUpdate();
-            System.out.print(i+"\n");
+            ps.executeUpdate();
         } catch (SQLException e) {
             String errMsg = "Error executing query " + query + " for tenant: " + tenantId;
             log.error(errMsg, e);
