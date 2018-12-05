@@ -77,7 +77,6 @@ public class TenantIDNDataDeletionUtil {
             conn.close();
         }
     }
-
     /**
      * Initialise prepared statements for given query and execute the prepared statement.
      *
@@ -88,7 +87,6 @@ public class TenantIDNDataDeletionUtil {
      */
     private static void executeDeleteQuery(Connection conn, String query, int tenantId)
             throws SQLException {
-
         try (PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setInt(1, tenantId);
             ps.executeUpdate();
