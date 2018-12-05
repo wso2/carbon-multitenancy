@@ -99,7 +99,6 @@ public class TenantRegistryDataDeletionUtil {
             ps.executeUpdate();
         } catch (SQLException e) {
             String errMsg = "Error executing query " + query + " for tenant: " + tenantId;
-            log.error(errMsg, e);
             throw new SQLException(errMsg, e);
         }
     }
@@ -121,7 +120,6 @@ public class TenantRegistryDataDeletionUtil {
             ps.executeUpdate();
         } catch (SQLException e) {
             String errMsg = "Error executing query " + query + " for tenant: " + tenantId;
-            log.error(errMsg, e);
             throw new SQLException(errMsg, e);
         }
     }
