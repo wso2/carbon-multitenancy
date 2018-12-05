@@ -90,10 +90,16 @@ public class TenantRegistryDataDeletionUtil {
             conn.close();
         }
     }
-
+    /**
+     * Initialise prepared statements for given query and execute the prepared statement.
+     *
+     * @param conn     database connection object
+     * @param query    query for prepared statement
+     * @param tenantId tenant id
+     * @throws SQLException thrown if an error occurs while executing the query.
+     */
     private static void executeDeleteQuery(Connection conn, String query, int tenantId)
             throws SQLException {
-
         try (PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setInt(1, tenantId);
             ps.executeUpdate();
@@ -102,18 +108,16 @@ public class TenantRegistryDataDeletionUtil {
             throw new SQLException(errMsg, e);
         }
     }
-
     /**
      * Initialise prepared statements for given query and execute the prepared statement.
      *
      * @param conn     database connection object
      * @param query    query for prepared statement
      * @param tenantId tenant id
-     * @throws Exception thrown if an error occurs while executing the query.
+     * @throws SQLException thrown if an error occurs while executing the query.
      */
     private static void executeDeleteQueryWithLikeOperator(Connection conn, String query, int tenantId)
             throws SQLException {
-
         try (PreparedStatement ps = conn.prepareStatement(query)) {
             String param = "%/" + String.valueOf(tenantId) + "/%";
             ps.setNString(1, param);
