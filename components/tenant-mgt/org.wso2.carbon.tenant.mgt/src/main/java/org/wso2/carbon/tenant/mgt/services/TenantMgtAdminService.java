@@ -587,12 +587,14 @@ public class TenantMgtAdminService extends AbstractAdmin {
                 // Deactivation also used to clear the tenant configuration context for that particular tenant.
                 deactivateTenant(tenantDomain);
                 TenantMgtUtil.deleteWorkernodesTenant(tenantId);
-
+                // Checks whether tenant deletion property is set as true or not.
+                // Property can be configured in conf/carbon.xml.
+                // <TenantDelete>true</TenantDelete> with in <server> tag.
                 String tenantDelete = TenantMgtServiceComponent.getServerConfigurationService()
                         .getFirstProperty("TenantDelete");
 
-                if ((tenantDelete == null)
-                    || (tenantDelete.equals("true"))) {
+                if ((tenantDelete != null)
+                    && (tenantDelete.equals("true"))) {
                     log.info("Tenant Delete Flag is True");
                     if (TenantMgtServiceComponent.getBillingService() != null) {
                         TenantMgtServiceComponent.getBillingService().deleteBillingData(tenantId);
