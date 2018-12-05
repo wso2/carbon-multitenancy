@@ -119,7 +119,7 @@ public class TenantRegistryDataDeletionUtil {
     private static void executeDeleteQueryWithLikeOperator(Connection conn, String query, int tenantId)
             throws SQLException {
         try (PreparedStatement ps = conn.prepareStatement(query)) {
-            String param = "%/" + String.valueOf(tenantId) + "/%";
+            String param = "%/cloud-services/" + String.valueOf(tenantId) + "/%";
             ps.setNString(1, param);
             ps.executeUpdate();
         } catch (SQLException e) {
