@@ -49,6 +49,8 @@ import java.util.List;
 public class TenantMgtAdminService extends AbstractAdmin {
     private static final Log log = LogFactory.getLog(TenantMgtAdminService.class);
     private static final Log audit_log = CarbonConstants.AUDIT_LOG;
+    private static final String CARBON_HOME = "carbon.home";
+    private static final String DEPLOYMENT_FOLDER_PATH = "/repository/tenants/";
 
     /**
      * super admin adds a tenant
@@ -574,7 +576,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
      *
      * @param tenantDomain The domain name of the tenant that needs to be deleted
      */
-    public void deleteTenant(String tenantDomain) throws TenantManagementException, org.wso2.carbon.user.api.UserStoreException {
+    public void deleteTenant(String tenantDomain) throws StratosException, org.wso2.carbon.user.api.UserStoreException {
         TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
         if (tenantManager != null) {
             int tenantId = tenantManager.getTenantId(tenantDomain);
@@ -596,19 +598,40 @@ public class TenantMgtAdminService extends AbstractAdmin {
                     TenantMgtUtil.deleteWorkernodesTenant(tenantId);
                     // Invalidate the realm in cache.
                     TenantMgtServiceComponent.getRealmService().clearCachedUserRealm(tenantId);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Realm in Cache Invalidated.");
+                    }
                     // Clear Caches and  shutdown Cache Managers.
                     tenantManager.deleteTenant(tenantId);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Caches Cleared.");
+                    }
                     // Clear the Registry table entries.
                     TenantMgtUtil.deleteTenantRegistryData(tenantId);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Registry table entries deleted.");
+                    }
                     // Clear the UserManagement table entries.
                     TenantMgtUtil.deleteTenantUMData(tenantId);
+                    if (log.isDebugEnabled()) {
+                        log.debug("UM table entries deleted.");
+                    }
                     // Clear the IDN table entries.
                     TenantMgtUtil.deleteTenantIDNData(tenantId);
+                    if (log.isDebugEnabled()) {
+                        log.debug("IDN table entries deleted.");
+                    }
                     // Delete the Deployment Folder
-                    File deploymentFolder = new File(System.getProperty("carbon.home") + "/repository/tenants/"
+                    File deploymentFolder = new File(System.getProperty(CARBON_HOME) + DEPLOYMENT_FOLDER_PATH
                             + String.valueOf(tenantId));
                     if (deploymentFolder.exists()) {
                         FileUtils.forceDelete(deploymentFolder);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Deployment folder was exist and successfully deleted");
+                        }
+                    }
+                    if (log.isDebugEnabled()) {
+                        log.debug("Tenant Successfully deleted.");
                     }
                     log.info("Deleted tenant with domain: " + tenantDomain + " and tenant id: " + tenantId +
                             " from the system.");
@@ -621,7 +644,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
                 String msg = "Error deleting tenant with domain: " + tenantDomain + " and tenant id: " +
                         tenantId + ".";
                 log.error(msg, e);
-                throw new TenantManagementException(msg, e);
+                throw new StratosException(msg, e);
             }
         }
 
