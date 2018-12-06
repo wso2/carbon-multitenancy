@@ -25,7 +25,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 /**
- * This Util executes queries to delete particular tenant entries in Registry Tables. 
+ * This Util class executes queries to delete particular tenant entries in Registry Tables. 
  */
 public class TenantRegistryDataDeletionUtil {
 
