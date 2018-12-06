@@ -51,7 +51,6 @@ public class TenantIDNDataDeletionUtil {
      * @throws SQLException thrown if an error occurs while executing the queries
      */
     protected static void deleteTenantIDNData(int tenantId, Connection conn) throws SQLException {
-
         try {
             conn.setAutoCommit(false);
             executeDeleteQuery(conn, DELETE_CM_PURPOSE_CATEGORY, tenantId);
@@ -71,12 +70,12 @@ public class TenantIDNDataDeletionUtil {
         } catch (Exception e) {
             conn.rollback();
             String errorMsg = "An error occurred while deleting identity data for tenant: " + tenantId;
-            log.error(errorMsg, e);
             throw new SQLException(errorMsg, e);
         } finally {
             conn.close();
         }
     }
+    
     /**
      * Initialise prepared statements for given query and execute the prepared statement.
      *
