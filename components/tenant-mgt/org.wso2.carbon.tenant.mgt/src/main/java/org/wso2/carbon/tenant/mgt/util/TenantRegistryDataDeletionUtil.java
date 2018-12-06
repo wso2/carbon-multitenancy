@@ -58,7 +58,6 @@ public class TenantRegistryDataDeletionUtil {
      * @throws SQLException thrown if an error occurs while executing the queries
      */
     protected static void deleteTenantRegistryData(int tenantId, Connection conn) throws SQLException {
-
         try {
             conn.setAutoCommit(false);
             executeDeleteQuery(conn, DELETE_CLUSTER_LOCK, tenantId);
@@ -84,12 +83,12 @@ public class TenantRegistryDataDeletionUtil {
         } catch (SQLException e) {
             conn.rollback();
             String errorMsg = "An error occurred while deleting registry data for tenant: " + tenantId;
-            log.error(errorMsg, e);
             throw new SQLException(errorMsg, e);
         } finally {
             conn.close();
         }
     }
+    
     /**
      * Initialise prepared statements for given query and execute the prepared statement.
      *
@@ -108,6 +107,7 @@ public class TenantRegistryDataDeletionUtil {
             throw new SQLException(errMsg, e);
         }
     }
+    
     /**
      * Initialise prepared statements for given query and execute the prepared statement.
      *
