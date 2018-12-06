@@ -574,7 +574,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
      *
      * @param tenantDomain The domain name of the tenant that needs to be deleted
      */
-    public void deleteTenant(String tenantDomain) throws StratosException, org.wso2.carbon.user.api.UserStoreException {
+    public void deleteTenant(String tenantDomain) throws TenantManagementException, org.wso2.carbon.user.api.UserStoreException {
         TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
         if (tenantManager != null) {
             int tenantId = tenantManager.getTenantId(tenantDomain);
@@ -621,7 +621,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
                 String msg = "Error deleting tenant with domain: " + tenantDomain + " and tenant id: " +
                         tenantId + ".";
                 log.error(msg, e);
-                throw new StratosException(msg, e);
+                throw new TenantManagementException(msg, e);
             }
         }
 
