@@ -24,7 +24,9 @@ import org.apache.commons.logging.LogFactory;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-
+/**
+ * This Util executes queries to delete particular tenant entries in Registry Tables. 
+ */
 public class TenantRegistryDataDeletionUtil {
 
     public static final Log log = LogFactory.getLog(TenantRegistryDataDeletionUtil.class);
@@ -57,7 +59,7 @@ public class TenantRegistryDataDeletionUtil {
      * @param conn     database connection object
      * @throws SQLException thrown if an error occurs while executing the queries
      */
-    protected static void deleteTenantRegistryData(int tenantId, Connection conn) throws SQLException {
+    public static void deleteTenantRegistryData(int tenantId, Connection conn) throws SQLException {
         try {
             conn.setAutoCommit(false);
             executeDeleteQuery(conn, DELETE_CLUSTER_LOCK, tenantId);
@@ -80,6 +82,9 @@ public class TenantRegistryDataDeletionUtil {
             executeDeleteQueryWithLikeOperator(conn, DELETE_ADMIN_REGISTRY_RESORUCE, tenantId);
             executeDeleteQueryWithLikeOperator(conn, DELETE_ADMIN_REGISTRY_PATH, tenantId);
             conn.commit();
+            if (log.isDebugEnabled()) {
+                log.debug("Registry table entries deleted for tenant :" + tenantId);
+            }
         } catch (SQLException e) {
             conn.rollback();
             String errorMsg = "An error occurred while deleting registry data for tenant: " + tenantId;
@@ -102,6 +107,9 @@ public class TenantRegistryDataDeletionUtil {
         try (PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setInt(1, tenantId);
             ps.executeUpdate();
+            if (log.isDebugEnabled()) {
+                log.debug("Deletion query : " + query + "executed for tenant :" + tenantId);
+            }
         } catch (SQLException e) {
             String errMsg = "Error executing query " + query + " for tenant: " + tenantId;
             throw new SQLException(errMsg, e);
@@ -122,6 +130,9 @@ public class TenantRegistryDataDeletionUtil {
             String param = "%/cloud-services/" + String.valueOf(tenantId) + "/%";
             ps.setNString(1, param);
             ps.executeUpdate();
+            if (log.isDebugEnabled()) {
+                log.debug("Deletion query : " + query + "executed for tenant :" + tenantId);
+            }
         } catch (SQLException e) {
             String errMsg = "Error executing query " + query + " for tenant: " + tenantId;
             throw new SQLException(errMsg, e);
