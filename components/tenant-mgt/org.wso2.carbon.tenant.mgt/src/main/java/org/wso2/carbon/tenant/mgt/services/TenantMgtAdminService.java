@@ -590,7 +590,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
                     if (TenantMgtServiceComponent.getBillingService() != null) {
                         TenantMgtServiceComponent.getBillingService().deleteBillingData(tenantId);
                     }
-                     // Before deleting the tenant deactivate the tenant from the system.
+                    // Before deleting the tenant deactivate the tenant from the system.
                     // Deactivation also used to clear the tenant configuration context for that particular tenant.
                     deactivateTenant(tenantDomain);
                     TenantMgtUtil.deleteWorkernodesTenant(tenantId);
