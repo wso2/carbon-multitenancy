@@ -50,7 +50,7 @@ public class TenantIDNDataDeletionUtil {
      * @param conn     database connection object
      * @throws SQLException thrown if an error occurs while executing the queries
      */
-    protected static void deleteTenantIDNData(int tenantId, Connection conn) throws SQLException {
+    public static void deleteTenantIDNData(int tenantId, Connection conn) throws SQLException {
         try {
             conn.setAutoCommit(false);
             executeDeleteQuery(conn, DELETE_CM_PURPOSE_CATEGORY, tenantId);
@@ -67,6 +67,9 @@ public class TenantIDNDataDeletionUtil {
             executeDeleteQuery(conn, DELETE_IDP_PROVISIONING_CONFIG, tenantId);
             executeDeleteQuery(conn, DELETE_IDP_PROV_CONFIG_PROPERTY, tenantId);
             conn.commit();
+            if (log.isDebugEnabled()) {
+                log.debug("IDN table entries deleted for tenant :" + tenantId);
+            }
         } catch (Exception e) {
             conn.rollback();
             String errorMsg = "An error occurred while deleting identity data for tenant: " + tenantId;
@@ -89,6 +92,9 @@ public class TenantIDNDataDeletionUtil {
         try (PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setInt(1, tenantId);
             ps.executeUpdate();
+            if (log.isDebugEnabled()) {
+                log.debug("Deletion query : " + query + "executed for tenant :" + tenantId);
+            }
         } catch (SQLException e) {
             String errMsg = "Error executing query " + query + " for tenant: " + tenantId;
             throw new SQLException(errMsg, e);
