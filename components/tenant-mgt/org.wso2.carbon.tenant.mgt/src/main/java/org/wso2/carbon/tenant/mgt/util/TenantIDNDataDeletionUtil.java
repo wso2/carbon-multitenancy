@@ -25,6 +25,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+/**
+ * This Util class executes queries to delete particular tenant entries in IDN Tables. 
+ */
 public class TenantIDNDataDeletionUtil {
 
     public static final Log log = LogFactory.getLog(TenantIDNDataDeletionUtil.class);
