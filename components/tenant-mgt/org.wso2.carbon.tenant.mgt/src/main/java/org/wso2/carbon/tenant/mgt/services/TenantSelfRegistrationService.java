@@ -175,15 +175,25 @@ public class TenantSelfRegistrationService {
             throw new AxisFault(msg);
         }
         log.info("initializing tenant ");
-        // persists the tenant.
-        Tenant tenant = TenantMgtUtil.initializeTenant(tenantInfoBean);
-        TenantPersistor  persistor = new TenantPersistor();
-        int tenantId = persistor.persistTenant(tenant, true, tenantInfoBean.getSuccessKey(),
-                tenantInfoBean.getOriginatedService(),false);
-        log.info("Setting  tenant id "+tenantId);
-        tenantInfoBean.setTenantId(tenantId);
-        log.info("adding claims for "+tenantId);
-        TenantMgtUtil.addClaimsToUserStoreManager(tenant);
+
+        int tenantId;
+        Tenant tenant;
+        // Set a thread local variable to identify the operations triggered for a tenant admin user
+        TenantMgtUtil.setTenantAdminCreationOperation(true);
+
+        try {
+            // Persists the tenant
+            tenant = TenantMgtUtil.initializeTenant(tenantInfoBean);
+            TenantPersistor persistor = new TenantPersistor();
+            tenantId = persistor.persistTenant(tenant, true, tenantInfoBean.getSuccessKey(),
+                    tenantInfoBean.getOriginatedService(), false);
+            log.info("Setting  tenant id " + tenantId);
+            tenantInfoBean.setTenantId(tenantId);
+            log.info("adding claims for " + tenantId);
+            TenantMgtUtil.addClaimsToUserStoreManager(tenant);
+        } finally {
+            TenantMgtUtil.clearTenantAdminCreationOperation();
+        }
 
         //Notify tenant addition
         try {
