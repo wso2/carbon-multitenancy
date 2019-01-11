@@ -12,12 +12,12 @@
 	<parent>
 		<groupId>org.wso2.carbon.multitenancy</groupId>
 		<artifactId>tenant-mgt-parent</artifactId>
-		<version>4.6.16</version>
+		<version>4.6.17-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>org.wso2.carbon.client.configcontext.provider</artifactId>
-	<version>4.6.16</version>
+	<version>4.6.17-SNAPSHOT</version>
 	<name>WSO2 Carbon - Client Configuration Context Provider</name>
 	<url>http://wso2.org</url>
 	<packaging>bundle</packaging>
