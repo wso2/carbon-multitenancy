@@ -18,6 +18,7 @@ package org.wso2.carbon.tenant.mgt.services;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -27,7 +28,6 @@ import org.wso2.carbon.stratos.common.util.ClaimsMgtUtil;
 import org.wso2.carbon.stratos.common.util.CommonUtil;
 import org.wso2.carbon.tenant.mgt.beans.PaginatedTenantInfoBean;
 import org.wso2.carbon.tenant.mgt.core.TenantPersistor;
-import org.wso2.carbon.tenant.mgt.core.internal.TenantMgtCoreServiceComponent;
 import org.wso2.carbon.tenant.mgt.internal.TenantMgtServiceComponent;
 import org.wso2.carbon.tenant.mgt.util.TenantMgtUtil;
 import org.wso2.carbon.user.core.UserRealm;
@@ -559,34 +559,40 @@ public class TenantMgtAdminService extends AbstractAdmin {
      * @param tenantDomain The domain name of the tenant that needs to be deleted
      */
     public void deleteTenant(String tenantDomain) throws StratosException, org.wso2.carbon.user.api.UserStoreException {
+
         TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
         if (tenantManager != null) {
             int tenantId = tenantManager.getTenantId(tenantDomain);
+
             try {
-                log.info("Starting Tenant Deletion process...");
+                log.info(String.format("Starting tenant deletion for domain: %s and tenant id: %d from the system", tenantDomain, tenantId));
 
-                notifyTenantDeletion(tenantId);
-                TenantMgtUtil.deleteWorkernodesTenant(tenantId);
+                ServerConfigurationService serverConfigurationService = TenantMgtServiceComponent.getServerConfigurationService();
 
-                String tenantDelete = TenantMgtServiceComponent.getServerConfigurationService().getFirstProperty("TenantDelete");
+                if (Boolean.parseBoolean(serverConfigurationService.getFirstProperty("Tenant.TenantDelete"))) {
+                    // TODO: 2/7/19 We need to fix listeners to enable this by default
+                    // Refer - https://github.com/wso2-support/carbon-multitenancy/issues/35
+                    if (Boolean.parseBoolean(serverConfigurationService.getFirstProperty("Tenant.ListenerInvocationPolicy.InvokeOnDelete"))) {
+                        notifyTenantDeletion(tenantId);
+                    } else {
+                        log.info("Tenant.ListenerInvocationPolicy.InvokeOnDelete flag not set to true. Listener invocation ignored.");
+                    }
 
-                if ((tenantDelete == null)
-                    && (tenantDelete.equals("true"))) {
-                    log.info("Tenant Delete Flag is True");
+                    TenantMgtUtil.deleteWorkernodesTenant(tenantId);
+
                     if (TenantMgtServiceComponent.getBillingService() != null) {
                         TenantMgtServiceComponent.getBillingService().deleteBillingData(tenantId);
                     }
+
+                    TenantMgtUtil.unloadTenantConfigurations(tenantDomain, tenantId);
                     TenantMgtUtil.deleteTenantRegistryData(tenantId);
-                    TenantMgtUtil.deleteTenantUMData(tenantId);
                     tenantManager.deleteTenant(tenantId);
-                    log.info("Deleted tenant with domain: " + tenantDomain + " and tenant id: " + tenantId +
-                             " from the system.");
+                    log.info(String.format("Deleted tenant with domain: %s and tenant id: %d from the system.", tenantDomain, tenantId));
                 } else {
-                    log.info("Tenant Delete Flag is false");
+                    log.info("TenantDelete flag not set to true. Tenant will not be deleted.");
                 }
             } catch (Exception e) {
-                String msg = "Error deleting tenant with domain: " + tenantDomain + " and tenant id: " +
-                             tenantId + ".";
+                String msg = String.format("Deleted tenant with domain: %s and tenant id: %d from the system.", tenantDomain, tenantId);
                 log.error(msg, e);
                 throw new StratosException(msg, e);
             }
