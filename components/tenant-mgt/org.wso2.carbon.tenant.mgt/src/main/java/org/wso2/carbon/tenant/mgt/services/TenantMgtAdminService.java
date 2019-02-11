@@ -565,17 +565,19 @@ public class TenantMgtAdminService extends AbstractAdmin {
             int tenantId = tenantManager.getTenantId(tenantDomain);
 
             try {
-                log.info(String.format("Starting tenant deletion for domain: %s and tenant id: %d from the system", tenantDomain, tenantId));
+                log.debug(String.format("Starting tenant deletion for domain: %s and tenant id: %d from the system", tenantDomain, tenantId));
 
                 ServerConfigurationService serverConfigurationService = TenantMgtServiceComponent.getServerConfigurationService();
 
                 if (Boolean.parseBoolean(serverConfigurationService.getFirstProperty("Tenant.TenantDelete"))) {
-                    // TODO: 2/7/19 We need to fix listeners to enable this by default
-                    // Refer - https://github.com/wso2-support/carbon-multitenancy/issues/35
+                    /*
+                     * TODO: 2/7/19 We need to fix listeners to enable this by default
+                     * Refer - https://github.com/wso2-support/carbon-multitenancy/issues/35
+                     */
                     if (Boolean.parseBoolean(serverConfigurationService.getFirstProperty("Tenant.ListenerInvocationPolicy.InvokeOnDelete"))) {
                         notifyTenantDeletion(tenantId);
                     } else {
-                        log.info("Tenant.ListenerInvocationPolicy.InvokeOnDelete flag not set to true. Listener invocation ignored.");
+                        log.debug("Tenant.ListenerInvocationPolicy.InvokeOnDelete flag not set to true carbon.xml. Listener invocation ignored.");
                     }
 
                     TenantMgtUtil.deleteWorkernodesTenant(tenantId);
@@ -589,7 +591,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
                     tenantManager.deleteTenant(tenantId);
                     log.info(String.format("Deleted tenant with domain: %s and tenant id: %d from the system.", tenantDomain, tenantId));
                 } else {
-                    log.info("TenantDelete flag not set to true. Tenant will not be deleted.");
+                    log.debug("Tenant.TenantDelete flag not set to true in carbon.xml. Tenant will not be deleted.");
                 }
             } catch (Exception e) {
                 String msg = String.format("Deleted tenant with domain: %s and tenant id: %d from the system.", tenantDomain, tenantId);
