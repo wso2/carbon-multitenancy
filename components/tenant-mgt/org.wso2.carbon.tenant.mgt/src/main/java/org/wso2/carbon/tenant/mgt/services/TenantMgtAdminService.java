@@ -590,7 +590,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
                     if (Boolean.parseBoolean(serverConfigurationService.getFirstProperty("Tenant.ListenerInvocationPolicy.InvokeOnDelete"))) {
                         notifyTenantDeletion(tenantId);
                     } else {
-                        log.debug("Tenant.ListenerInvocationPolicy.InvokeOnDelete flag not set to true carbon.xml. Listener invocation ignored.");
+                        log.debug("Tenant.ListenerInvocationPolicy.InvokeOnDelete flag is not set to true in carbon.xml. Listener invocation ignored.");
                     }
 
                     TenantMgtUtil.deleteWorkernodesTenant(tenantId);
@@ -604,7 +604,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
                     tenantManager.deleteTenant(tenantId);
                     log.info(String.format("Deleted tenant with domain: %s and tenant id: %d from the system.", tenantDomain, tenantId));
                 } else {
-                    log.debug("Tenant.TenantDelete flag not set to true in carbon.xml. Tenant will not be deleted.");
+                    log.debug("Tenant.TenantDelete flag is not set to true in carbon.xml. Tenant will not be deleted.");
                 }
             } catch (Exception e) {
                 String msg = String.format("Deleted tenant with domain: %s and tenant id: %d from the system.", tenantDomain, tenantId);
