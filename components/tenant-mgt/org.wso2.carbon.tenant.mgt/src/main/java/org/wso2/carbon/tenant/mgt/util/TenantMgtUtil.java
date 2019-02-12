@@ -451,7 +451,7 @@ public class TenantMgtUtil {
      * @param tenantDomain tenant domain
      * @param tenantId tenant Id
      * */
-    public static void unloadTenantConfigurations(String tenantDomain, int tenantId){
+    public static void unloadTenantConfigurations(String tenantDomain, int tenantId) {
 
         Map<String, ConfigurationContext> tenantConfigContexts = TenantAxisUtils.getTenantConfigurationContexts(
                 TenantMgtServiceComponent.getConfigurationContext());
