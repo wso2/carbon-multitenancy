@@ -652,12 +652,12 @@
             </dependency>
 
             <dependency>
-                <groupId>org.bouncycastle</groupId>
+                <groupId>org.wso2.orbit.org.bouncycastle</groupId>
                 <artifactId>bcprov-jdk15on</artifactId>
                 <version>${bcprov-jdk15.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.bouncycastle</groupId>
+                <groupId>org.wso2.orbit.org.bouncycastle</groupId>
                 <artifactId>bcpkix-jdk15on</artifactId>
                 <version>${bcpkix-jdk15.version}</version>
             </dependency>
@@ -1041,8 +1041,9 @@
 
         <log4j.version>1.2.13</log4j.version>
 
-        <bcprov-jdk15.version>1.60</bcprov-jdk15.version>
-        <bcpkix-jdk15.version>1.60</bcpkix-jdk15.version>
+        <bcprov-jdk15.version>1.52.0.wso2v1</bcprov-jdk15.version>
+        <bcpkix-jdk15.version>1.60.0.wso2v1</bcpkix-jdk15.version>
+        <org.bouncycastle.imp.pkg.version.range>[1.52.0,2.0.0)</org.bouncycastle.imp.pkg.version.range>
 
         <!-- Jasper Reports Version -->
         <version.jasper>2.2.2.v201205150955</version.jasper>

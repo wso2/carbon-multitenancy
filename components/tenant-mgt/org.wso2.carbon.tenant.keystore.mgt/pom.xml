@@ -54,11 +54,12 @@
                             javax.servlet;version="${imp.pkg.version.javax.servlet}",
                             javax.servlet.http;version="${imp.pkg.version.javax.servlet}",
                             org.wso2.carbon.security.*,
+                            org.bouncycastle.*;version="${org.bouncycastle.imp.pkg.version.range}",
                             org.apache.lucene.*,
                             *;resolution:=optional
                         </Import-Package>
                         <Embed-Dependency>
-                            bcprov-jdk15on|bcpkix-jdk15on|naming-factory|naming-resources|commons-collections;scope=compile|runtime;inline=false
+                            naming-factory|naming-resources|commons-collections;scope=compile|runtime;inline=false
                         </Embed-Dependency>
                         <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
@@ -98,7 +99,7 @@
             <artifactId>org.wso2.carbon.tenant.common</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.bouncycastle</groupId>
+            <groupId>org.wso2.orbit.org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
         </dependency>
         <dependency>
@@ -106,7 +107,7 @@
             <artifactId>org.wso2.carbon.security.mgt</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.bouncycastle</groupId>
+            <groupId>org.wso2.orbit.org.bouncycastle</groupId>
             <artifactId>bcpkix-jdk15on</artifactId>
         </dependency>
     </dependencies>
