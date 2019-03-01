@@ -578,7 +578,9 @@ public class TenantMgtAdminService extends AbstractAdmin {
             int tenantId = tenantManager.getTenantId(tenantDomain);
 
             try {
-                log.debug(String.format("Starting tenant deletion for domain: %s and tenant id: %d from the system", tenantDomain, tenantId));
+                if (log.isDebugEnabled()) {
+                    log.debug(String.format("Starting tenant deletion for domain: %s and tenant id: %d from the system", tenantDomain, tenantId));
+                }
 
                 ServerConfigurationService serverConfigurationService = TenantMgtServiceComponent.getServerConfigurationService();
 
@@ -590,7 +592,9 @@ public class TenantMgtAdminService extends AbstractAdmin {
                     if (Boolean.parseBoolean(serverConfigurationService.getFirstProperty("Tenant.ListenerInvocationPolicy.InvokeOnDelete"))) {
                         notifyTenantDeletion(tenantId);
                     } else {
-                        log.debug("Tenant.ListenerInvocationPolicy.InvokeOnDelete flag is not set to true in carbon.xml. Listener invocation ignored.");
+                        if (log.isDebugEnabled()) {
+                            log.debug("Tenant.ListenerInvocationPolicy.InvokeOnDelete flag is not set to true in carbon.xml. Listener invocation ignored.");
+                        }
                     }
 
                     TenantMgtUtil.deleteWorkernodesTenant(tenantId);
@@ -604,7 +608,9 @@ public class TenantMgtAdminService extends AbstractAdmin {
                     tenantManager.deleteTenant(tenantId);
                     log.info(String.format("Deleted tenant with domain: %s and tenant id: %d from the system.", tenantDomain, tenantId));
                 } else {
-                    log.debug("Tenant.TenantDelete flag is not set to true in carbon.xml. Tenant will not be deleted.");
+                    if (log.isDebugEnabled()) {
+                        log.debug("Tenant.TenantDelete flag is not set to true in carbon.xml. Tenant will not be deleted.");
+                    }
                 }
             } catch (Exception e) {
                 String msg = String.format("Deleted tenant with domain: %s and tenant id: %d from the system.", tenantDomain, tenantId);
