@@ -18,6 +18,7 @@ package org.wso2.carbon.tenant.mgt.util;
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -49,12 +50,12 @@ import org.wso2.carbon.user.core.tenant.Tenant;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import javax.naming.InitialContext;
-import javax.sql.DataSource;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import javax.naming.InitialContext;
+import javax.sql.DataSource;
 
 /**
  * Utility methods for tenant management.
@@ -425,25 +426,7 @@ public class TenantMgtUtil {
                                         int tenantId) throws Exception {
         try {
             tenantManager.deactivateTenant(tenantId);
-
-            //unloading the deactivated tenant in order to avoid serving requests to the tenant.
-            Map<String, ConfigurationContext> tenantConfigContexts = TenantAxisUtils.getTenantConfigurationContexts(
-                    TenantMgtServiceComponent.getConfigurationContext());
-            ConfigurationContext tenantConfigurationContext = tenantConfigContexts.get(tenantDomain);
-
-            if (tenantConfigurationContext != null && tenantConfigurationContext.getAxisConfiguration() != null) {
-                try {
-                    PrivilegedCarbonContext.startTenantFlow();
-                    PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-                    carbonContext.setTenantDomain(tenantDomain);
-                    carbonContext.setTenantId(tenantId);
-
-                    TenantAxisUtils.terminateTenantConfigContext(tenantConfigurationContext);
-                } finally {
-                    PrivilegedCarbonContext.endTenantFlow();
-                }
-                tenantConfigContexts.remove(tenantDomain);
-            }
+            unloadTenantConfigurations(tenantDomain, tenantId);
         } catch (UserStoreException e) {
             String msg = "Error in deactivating tenant for tenant domain: " + tenantDomain + ".";
             log.error(msg, e);
@@ -460,6 +443,33 @@ public class TenantMgtUtil {
             log.error(msg, e);
             throw new Exception(msg, e);
         }*/
+    }
+
+    /**
+     * Unloading the deactivated tenant in order to avoid serving requests to the tenant.
+     *
+     * @param tenantDomain tenant domain
+     * @param tenantId tenant Id
+     * */
+    public static void unloadTenantConfigurations(String tenantDomain, int tenantId) {
+
+        Map<String, ConfigurationContext> tenantConfigContexts = TenantAxisUtils.getTenantConfigurationContexts(
+                TenantMgtServiceComponent.getConfigurationContext());
+        ConfigurationContext tenantConfigurationContext = tenantConfigContexts.get(tenantDomain);
+
+        if (tenantConfigurationContext != null && tenantConfigurationContext.getAxisConfiguration() != null) {
+            try {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                carbonContext.setTenantDomain(tenantDomain);
+                carbonContext.setTenantId(tenantId);
+
+                TenantAxisUtils.terminateTenantConfigContext(tenantConfigurationContext);
+            } finally {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+            tenantConfigContexts.remove(tenantDomain);
+        }
     }
 
     public static void deleteTenantRegistryData(int tenantId) throws Exception {
@@ -497,17 +507,22 @@ public class TenantMgtUtil {
      * @throws Exception
      */
     public static void deleteWorkernodesTenant(int tenantId) throws Exception {
-        TenantDeleteClusterMessage clustermessage = new TenantDeleteClusterMessage(
-                tenantId);
-        ConfigurationContext configContext = TenantMgtServiceComponent.getConfigurationContext();
-        ClusteringAgent agent = configContext.getAxisConfiguration()
-                .getClusteringAgent();
-        try {
-            agent.sendMessage(clustermessage, true);
-        } catch (ClusteringFault e) {
-            log.error("Error occurred while broadcasting TenantDeleteClusterMessage : " + e.getMessage());
-        }
 
+        TenantDeleteClusterMessage clustermessage = new TenantDeleteClusterMessage(tenantId);
+        ConfigurationContext configContext = TenantMgtServiceComponent.getConfigurationContext();
+
+        if (configContext != null) {
+            AxisConfiguration axisConfiguration = configContext.getAxisConfiguration();
+            ClusteringAgent agent = axisConfiguration.getClusteringAgent();
+
+            if (agent != null) {
+                try {
+                    agent.sendMessage(clustermessage, true);
+                } catch (ClusteringFault e) {
+                    log.error("Error occurred while broadcasting TenantDeleteClusterMessage : " + e.getMessage());
+                }
+            }
+        }
     }
 
 
