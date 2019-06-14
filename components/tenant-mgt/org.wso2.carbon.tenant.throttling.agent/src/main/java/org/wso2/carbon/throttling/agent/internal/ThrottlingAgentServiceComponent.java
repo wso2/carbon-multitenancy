@@ -40,34 +40,33 @@ import org.wso2.carbon.stratos.common.util.StratosConfiguration;
 
 import java.util.ArrayList;
 
-/**
- * @scr.component name="org.wso2.carbon.throttling.agent"
- * immediate="true"
- * @scr.reference name="registry.service"
- * interface="org.wso2.carbon.registry.core.service.RegistryService" cardinality="1..1"
- * policy="dynamic" bind="setRegistryService" unbind="unsetRegistryService"
- * @scr.reference name="user.realmservice.default"
- * interface="org.wso2.carbon.user.core.service.RealmService"
- * cardinality="1..1" policy="dynamic" bind="setRealmService"
- * unbind="unsetRealmService"
- * @scr.reference name="config.context.service"
- * interface="org.wso2.carbon.utils.ConfigurationContextService"
- * cardinality="1..1" policy="dynamic"  bind="setConfigurationContextService"
- * unbind="unsetConfigurationContextService"
- * @scr.reference name="stratos.config.service"
- * interface="org.wso2.carbon.stratos.common.util.StratosConfiguration" cardinality="1..1"
- * policy="dynamic" bind="setStratosConfigurationService" unbind="unsetStratosConfigurationService"
- */
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+
+@Component(
+        name = "org.wso2.carbon.throttling.agent",
+        immediate = true)
 public class ThrottlingAgentServiceComponent {
+
     private static Log log = LogFactory.getLog(ThrottlingAgentServiceComponent.class);
 
     private static ThrottlingAgent throttlingAgent;
+
     private static RealmService realmService;
+
     private static RegistryService registryService;
+
     private static ConfigurationContextService contextService;
+
     private static StratosConfiguration stratosConfiguration;
 
+    @Activate
     protected void activate(ComponentContext context) {
+
         try {
             BundleContext bundleContext = context.getBundleContext();
             throttlingAgent = new ThrottlingAgent(bundleContext);
@@ -75,7 +74,6 @@ public class ThrottlingAgentServiceComponent {
             throttlingAgent.setRealmService(realmService);
             throttlingAgent.setRegistryService(registryService);
             throttlingAgent.setStratosConfiguration(stratosConfiguration);
-
             try {
                 // Throttling agent initialization require registry service.
                 throttlingAgent.init();
@@ -84,32 +82,28 @@ public class ThrottlingAgentServiceComponent {
                 log.error(errMessage, e);
                 throw new RuntimeException(errMessage, e);
             }
-
-            if("true".equals(ServerConfiguration.getInstance().getFirstProperty("EnableMetering"))){
+            if ("true".equals(ServerConfiguration.getInstance().getFirstProperty("EnableMetering"))) {
                 // Register the Tomcat Valve
                 ArrayList<CarbonTomcatValve> valves = new ArrayList<CarbonTomcatValve>();
                 valves.add(new WebAppRequestListener(throttlingAgent));
                 TomcatValveContainer.addValves(valves);
-
                 registerAxis2ConfigurationContextObserver(bundleContext, throttlingAgent.getThrottlingInfoCache());
-            }else{
-                log.debug("WebAppRequestListener valve was not added because metering is disabled in the configuration");
+            } else {
+                log.debug("WebAppRequestListener valve was not added because metering is disabled in the " +
+                        "configuration");
                 log.debug("Axis2ConfigurationContextObserver was not registered because metering is disabled");
             }
-
             registerThrottlingAgent(bundleContext);
-
             log.debug("Multitenancy Throttling Agent bundle is activated.");
         } catch (Throwable e) {
             log.error("Multitenancy Throttling Agent bundle failed activating.", e);
         }
-
     }
 
     private void registerAxis2ConfigurationContextObserver(BundleContext bundleContext, ThrottlingInfoCache cache) {
-        bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(),
-                new Axis2ConfigurationContextObserverImpl(cache),
-                null);
+
+        bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), new
+                Axis2ConfigurationContextObserverImpl(cache), null);
     }
 
     /**
@@ -119,46 +113,66 @@ public class ThrottlingAgentServiceComponent {
      * @param bundleContext bundle context that need to initialize throttling agent
      */
     public void registerThrottlingAgent(BundleContext bundleContext) {
-        try {
-            bundleContext.registerService(ThrottlingAgent.class.getName(),
-                    throttlingAgent,
-                    null);
-        }
-        catch (Exception e) {
 
+        try {
+            bundleContext.registerService(ThrottlingAgent.class.getName(), throttlingAgent, null);
+        } catch (Exception e) {
         }
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext context) {
-        //Util.uninitializeThrottlingRuleInvokerTracker();
+        // Util.uninitializeThrottlingRuleInvokerTracker();
         log.debug("******* Multitenancy Throttling Agent bundle is deactivated ******* ");
     }
 
+    @Reference(
+            name = "registry.service",
+            service = org.wso2.carbon.registry.core.service.RegistryService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRegistryService")
     protected void setRegistryService(RegistryService registryService) {
+
         ThrottlingAgentServiceComponent.registryService = registryService;
     }
 
     protected void unsetRegistryService(RegistryService registryService) {
+
         ThrottlingAgentServiceComponent.registryService = null;
         throttlingAgent.setRegistryService(null);
     }
 
+    @Reference(
+            name = "user.realmservice.default",
+            service = org.wso2.carbon.user.core.service.RealmService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRealmService")
     protected void setRealmService(RealmService realmService) {
+
         ThrottlingAgentServiceComponent.realmService = realmService;
     }
 
     protected void unsetRealmService(RealmService realmService) {
+
         ThrottlingAgentServiceComponent.realmService = null;
         throttlingAgent.setRealmService(null);
     }
 
+    @Reference(
+            name = "config.context.service",
+            service = org.wso2.carbon.utils.ConfigurationContextService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetConfigurationContextService")
     protected void setConfigurationContextService(ConfigurationContextService contextService) {
+
         ThrottlingAgentServiceComponent.contextService = contextService;
-        
-        //this module is not necessary when we have the WebAppRequestListerner.
-        //It takes care of webapps and services. But this is not working for ESb
-        //When a solution for ESB is found, this module can be engaged again
-        /*try {
+        // this module is not necessary when we have the WebAppRequestListerner.
+        // It takes care of webapps and services. But this is not working for ESb
+        // When a solution for ESB is found, this module can be engaged again
+    /*try {
             contextService.getServerConfigContext().getAxisConfiguration().engageModule(
                     "usagethrottling");
         } catch (AxisFault e) {
@@ -179,14 +193,23 @@ public class ThrottlingAgentServiceComponent {
     }
 
     public static ThrottlingAgent getThrottlingAgent() {
+
         return throttlingAgent;
     }
 
+    @Reference(
+            name = "stratos.config.service",
+            service = org.wso2.carbon.stratos.common.util.StratosConfiguration.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetStratosConfigurationService")
     protected void setStratosConfigurationService(StratosConfiguration stratosConfigService) {
-        ThrottlingAgentServiceComponent.stratosConfiguration=stratosConfigService;
+
+        ThrottlingAgentServiceComponent.stratosConfiguration = stratosConfigService;
     }
 
     protected void unsetStratosConfigurationService(StratosConfiguration ccService) {
+
         ThrottlingAgentServiceComponent.stratosConfiguration = null;
         throttlingAgent.setStratosConfiguration(null);
     }
