@@ -88,7 +88,7 @@
             <artifactId>org.wso2.carbon.registry.core</artifactId>
         </dependency>
         <dependency>
-           <groupId>org.wso2.carbon.identity</groupId>
+           <groupId>org.wso2.carbon.identity.user.ws</groupId>
             <artifactId>org.wso2.carbon.um.ws.api</artifactId>
         </dependency>
         <dependency>
