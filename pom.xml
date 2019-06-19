@@ -958,16 +958,16 @@
         <carbon.commons.imp.pkg.version>[4.7.0, 5.0.0)</carbon.commons.imp.pkg.version>
 
         <!-- Carbon Analytics Commons version -->
-        <carbon.analytics-common.version>5.0.11</carbon.analytics-common.version>
+        <carbon.analytics-common.version>5.2.0</carbon.analytics-common.version>
 
         <!-- Carbon Registry version-->
-        <carbon.registry.version>4.6.46</carbon.registry.version>
+        <carbon.registry.version>4.7.0</carbon.registry.version>
         <carbon.registry.import.feature.version>${carbon.registry.version}</carbon.registry.import.feature.version>
         <carbon.registry.imp.pkg.version>[4.4.0, 5.0.0)</carbon.registry.imp.pkg.version>
 
         <!-- Carbon Identity version-->
         <carbon.identity.version>5.13.0</carbon.identity.version>
-        <carbon.identity.um.ws.api.version>5.1.11</carbon.identity.um.ws.api.version>
+        <carbon.identity.um.ws.api.version>5.2.0</carbon.identity.um.ws.api.version>
         <carbon.identity.import.feature.version>5.13.0</carbon.identity.import.feature.version>
         <carbon.identity.imp.pkg.version>[5.13.0, 6.0.0)</carbon.identity.imp.pkg.version>
 
@@ -1007,7 +1007,7 @@
         <!-- Axis2 Version -->
         <axis2.wso2.version>1.6.1-wso2v37</axis2.wso2.version>
         <orbit.version.axis2>${axis2.wso2.version}</orbit.version.axis2>
-        <axis2.osgi.version.range>[1.6.1-wso2v35, 1.7.0)</axis2.osgi.version.range>
+        <axis2.osgi.version.range>[1.6.1-wso2v37, 1.7.0)</axis2.osgi.version.range>
         <axis2.wso2.version.aar.plugin>1.6.2</axis2.wso2.version.aar.plugin>
         <neethi.osgi.version>2.0.4.wso2v5</neethi.osgi.version>
         <neethi.osgi.version.range>[2.0.4.wso2v4, 3.1.0)</neethi.osgi.version.range>
