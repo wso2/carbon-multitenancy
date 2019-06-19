@@ -29,23 +29,20 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.activation.service.ActivationService;
 import org.wso2.carbon.activation.utils.ActivationManager;
 import org.wso2.carbon.activation.utils.Util;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 
 /**
  * The Declarative Service Component for the Service Activation Module for Tenants.
- *
- * @scr.component name="org.wso2.carbon.metering" immediate="true"
- * @scr.reference name="registry.service"
- * interface="org.wso2.carbon.registry.core.service.RegistryService"
- * cardinality="1..1" policy="dynamic" bind="setRegistryService" unbind="unsetRegistryService"
- * @scr.reference name="user.realmservice.default"
- * interface="org.wso2.carbon.user.core.service.RealmService"
- * cardinality="1..1" policy="dynamic" bind="setRealmService" unbind="unsetRealmService"
- * @scr.reference name="config.context.service"
- * interface="org.wso2.carbon.utils.ConfigurationContextService"
- * cardinality="0..1" policy="dynamic"  bind="setConfigurationContextService"
- * unbind="unsetConfigurationContextService"
  */
 @SuppressWarnings({"JavaDoc", "unused"})
+@Component(
+        name = "org.wso2.carbon.metering",
+        immediate = true)
 public class ActivationServiceComponent {
 
     private static final Log log = LogFactory.getLog(ActivationServiceComponent.class);
@@ -57,12 +54,14 @@ public class ActivationServiceComponent {
      *
      * @param context the OSGi component context.
      */
+    @Activate
     protected void activate(ComponentContext context) {
+
         try {
             ActivationManager.startCacheCleaner();
             if (registration == null) {
-                registration = context.getBundleContext().registerService(
-                        ActivationService.class.getName(), new ActivationService(), null);
+                registration = context.getBundleContext().registerService(ActivationService.class.getName(), new
+                        ActivationService(), null);
             }
             log.debug("******* Stratos Activation bundle is activated ******* ");
         } catch (Exception e) {
@@ -75,7 +74,9 @@ public class ActivationServiceComponent {
      *
      * @param context the OSGi component context.
      */
+    @Deactivate
     protected void deactivate(ComponentContext context) {
+
         registration.unregister();
         registration = null;
         ActivationManager.stopCacheCleaner();
@@ -88,7 +89,14 @@ public class ActivationServiceComponent {
      *
      * @param registryService the registry service.
      */
+    @Reference(
+            name = "registry.service",
+            service = org.wso2.carbon.registry.core.service.RegistryService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRegistryService")
     protected void setRegistryService(RegistryService registryService) {
+
         Util.setRegistryService(registryService);
     }
 
@@ -99,6 +107,7 @@ public class ActivationServiceComponent {
      *                        cleaning-up.
      */
     protected void unsetRegistryService(RegistryService registryService) {
+
         Util.setRegistryService(null);
     }
 
@@ -108,7 +117,14 @@ public class ActivationServiceComponent {
      *
      * @param realmService the realm service.
      */
+    @Reference(
+            name = "user.realmservice.default",
+            service = org.wso2.carbon.user.core.service.RealmService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRealmService")
     protected void setRealmService(RealmService realmService) {
+
         Util.setRealmService(realmService);
     }
 
@@ -118,6 +134,7 @@ public class ActivationServiceComponent {
      * @param realmService the current realm service instance, to be used for any cleaning-up.
      */
     protected void unsetRealmService(RealmService realmService) {
+
         Util.setRealmService(null);
     }
 
@@ -127,12 +144,18 @@ public class ActivationServiceComponent {
      *
      * @param contextService the configuration context service.
      */
+    @Reference(
+            name = "config.context.service",
+            service = org.wso2.carbon.utils.ConfigurationContextService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetConfigurationContextService")
     protected void setConfigurationContextService(ConfigurationContextService contextService) {
+
         try {
-            if (contextService.getServerConfigContext() != null &&
-                    contextService.getServerConfigContext().getAxisConfiguration() != null) {
-                contextService.getServerConfigContext().getAxisConfiguration().engageModule(
-                        "activation");
+            if (contextService.getServerConfigContext() != null && contextService.getServerConfigContext()
+                    .getAxisConfiguration() != null) {
+                contextService.getServerConfigContext().getAxisConfiguration().engageModule("activation");
             } else {
                 log.error("Failed to engage Activation Module.");
             }
@@ -148,5 +171,6 @@ public class ActivationServiceComponent {
      *                       cleaning-up.
      */
     protected void unsetConfigurationContextService(ConfigurationContextService contextService) {
+
     }
 }
