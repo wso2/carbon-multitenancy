@@ -77,7 +77,7 @@
             <artifactId>org.wso2.carbon.tenant.mgt.core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.identity</groupId>
+            <groupId>org.wso2.carbon.identity.framework</groupId>
             <artifactId>org.wso2.carbon.captcha.mgt</artifactId>
         </dependency>
         <dependency>
@@ -160,7 +160,7 @@
                                 <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.keystore.mgt</bundleDef>
                                 <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.mgt.core:${carbon.multitenancy.version}
                                 </bundleDef>
-                                <bundleDef>org.wso2.carbon.identity:org.wso2.carbon.captcha.mgt</bundleDef>
+                                <bundleDef>org.wso2.carbon.identity.framework:org.wso2.carbon.captcha.mgt</bundleDef>
                                 <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.theme.mgt:${carbon.multitenancy.version}</bundleDef>
                                 <!-- End Tenant Mgmt -->
 
