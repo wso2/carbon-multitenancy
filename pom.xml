@@ -966,9 +966,9 @@
         <carbon.registry.imp.pkg.version>[4.4.0, 5.0.0)</carbon.registry.imp.pkg.version>
 
         <!-- Carbon Identity version-->
-        <carbon.identity.version>5.13.4</carbon.identity.version>
+        <carbon.identity.version>5.13.5</carbon.identity.version>
         <carbon.identity.um.ws.api.version>5.2.0</carbon.identity.um.ws.api.version>
-        <carbon.identity.import.feature.version>5.13.0</carbon.identity.import.feature.version>
+        <carbon.identity.import.feature.version>5.1.0</carbon.identity.import.feature.version>
         <carbon.identity.imp.pkg.version>[5.13.0, 6.0.0)</carbon.identity.imp.pkg.version>
 
         <!-- Carbon Multi-tenancy version-->
