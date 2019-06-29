@@ -32,10 +32,6 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
                 <configuration>
@@ -51,8 +47,8 @@
                             org.wso2.carbon.throttling.agent.*,
                         </Export-Package>
                         <Private-Package>
-                            !org.wso2.carbon.throttling.agent.client,
                             org.wso2.carbon.throttling.agent.*,
+                            !org.wso2.carbon.throttling.agent.client
                         </Private-Package>
                         <Import-Package>
                             org.wso2.carbon.throttling.agent.stub.*;

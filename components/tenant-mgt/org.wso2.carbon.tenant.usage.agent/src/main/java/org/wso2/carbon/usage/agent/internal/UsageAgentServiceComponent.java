@@ -219,12 +219,12 @@ public class UsageAgentServiceComponent {
             cardinality = ReferenceCardinality.OPTIONAL,
             policy = ReferencePolicy.DYNAMIC,
             unbind = "unsetSystemStatisticsUtil")
-    public static void setSystemStatisticsUtil(SystemStatisticsUtil systemStatisticsUtil) {
+    protected void setSystemStatisticsUtil(SystemStatisticsUtil systemStatisticsUtil) {
 
         Util.setSystemStatisticsUtil(systemStatisticsUtil);
     }
 
-    public static void unsetSystemStatisticsUtil(SystemStatisticsUtil systemStatisticsUtil) {
+    protected void unsetSystemStatisticsUtil(SystemStatisticsUtil systemStatisticsUtil) {
 
         Util.setSystemStatisticsUtil(null);
     }
