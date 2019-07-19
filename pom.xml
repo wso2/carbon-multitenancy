@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.wso2</groupId>
         <artifactId>wso2</artifactId>
-        <version>1</version>
+        <version>1.2</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -67,9 +67,9 @@
                 <version>${carbon.kernel.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.logging</artifactId>
-                <version>${carbon.kernel.version}</version>
+                <groupId>org.ops4j.pax.logging</groupId>
+                <artifactId>pax-logging-api</artifactId>
+                <version>${pax.logging.api.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
@@ -383,11 +383,6 @@
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
                 <version>${commons-codec.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-logging</groupId>
-                <artifactId>commons-logging</artifactId>
-                <version>${commons-logging.version}</version>
             </dependency>
             <dependency>
                 <groupId>log4j</groupId>
@@ -769,16 +764,6 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.1</version>
-                <configuration>
-                    <encoding>UTF-8</encoding>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
                 <configuration>
                     <preparationGoals>clean install</preparationGoals>
@@ -789,6 +774,26 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
+            </plugin>
+            <!-- disable the doclint since jenkins parameter not supported to disable-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <!--This parameter disables doclint-->
+                            <doclint>none</doclint>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
         <pluginManagement>
@@ -910,28 +915,28 @@
 
     <properties>
         <!-- Carbon kernel version-->
-        <carbon.kernel.version>4.5.0-m1</carbon.kernel.version>
+        <carbon.kernel.version>4.5.0-m3</carbon.kernel.version>
         <carbon.kernel.imp.pkg.version>[4.5.0, 5.0.0)</carbon.kernel.imp.pkg.version>
         <carbon.kernel.registry.imp.pkg.version>[1.0.1, 2.0.0)</carbon.kernel.registry.imp.pkg.version>
 
         <!-- Carbon Commons version-->
-        <carbon.commons.version>4.7.0</carbon.commons.version>
-        <carbon.commons.import.feature.version>4.7.0</carbon.commons.import.feature.version>
+        <carbon.commons.version>4.7.2</carbon.commons.version>
+        <carbon.commons.import.feature.version>4.7.2</carbon.commons.import.feature.version>
         <carbon.commons.imp.pkg.version>[4.7.0, 5.0.0)</carbon.commons.imp.pkg.version>
 
         <!-- Carbon Analytics Commons version -->
-        <carbon.analytics-common.version>5.2.1</carbon.analytics-common.version>
+        <carbon.analytics-common.version>5.2.2</carbon.analytics-common.version>
 
         <!-- Carbon Registry version-->
-        <carbon.registry.version>4.7.0</carbon.registry.version>
+        <carbon.registry.version>4.7.3</carbon.registry.version>
         <carbon.registry.import.feature.version>${carbon.registry.version}</carbon.registry.import.feature.version>
         <carbon.registry.imp.pkg.version>[4.4.0, 5.0.0)</carbon.registry.imp.pkg.version>
 
         <!-- Carbon Identity version-->
-        <carbon.identity.version>5.13.5</carbon.identity.version>
-        <carbon.identity.um.ws.api.version>5.2.0</carbon.identity.um.ws.api.version>
-        <carbon.identity.import.feature.version>5.1.0</carbon.identity.import.feature.version>
-        <carbon.identity.imp.pkg.version>[5.13.0, 6.0.0)</carbon.identity.imp.pkg.version>
+        <carbon.identity.version>5.14.0</carbon.identity.version>
+        <carbon.identity.um.ws.api.version>5.3.0</carbon.identity.um.ws.api.version>
+        <carbon.identity.import.feature.version>5.6.1</carbon.identity.import.feature.version>
+        <carbon.identity.imp.pkg.version>[5.14.0, 6.0.0)</carbon.identity.imp.pkg.version>
 
         <!-- Carbon Multi-tenancy version-->
         <carbon.multitenancy.version>4.7.4-SNAPSHOT</carbon.multitenancy.version>
@@ -1051,6 +1056,7 @@
         <project.scm.id>my-scm-server</project.scm.id>
         <apache.felix.scr.ds.annotations.version>1.2.4</apache.felix.scr.ds.annotations.version>
         <maven.scr.plugin.version>1.26.0</maven.scr.plugin.version>
+        <pax.logging.api.version>1.10.1</pax.logging.api.version>
     </properties>
 
     <repositories>
