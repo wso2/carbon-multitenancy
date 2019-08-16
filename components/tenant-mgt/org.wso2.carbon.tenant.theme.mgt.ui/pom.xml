@@ -53,6 +53,7 @@
                             javax.servlet.http;version="${imp.pkg.version.javax.servlet}",
                             org.apache.lucene.*,
                             org.apache.batik.*,
+                            org.osgi.service.component.*;version="${imp.package.version.osgi.services}",
                             org.wso2.carbon.theme.mgt.stub.*; version="${carbon.multitenancy.imp.pkg.version}",
                             *;resolution:=optional
                         </Import-Package>

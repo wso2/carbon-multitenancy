@@ -52,6 +52,7 @@
                             org.wso2.carbon.security.*,
                             org.bouncycastle.*;version="${org.bouncycastle.imp.pkg.version.range}",
                             org.apache.lucene.*,
+                            org.osgi.service.component.*;version="${imp.package.version.osgi.services}",
                             *;resolution:=optional
                         </Import-Package>
                         <Embed-Dependency>

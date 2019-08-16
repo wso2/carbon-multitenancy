@@ -70,7 +70,8 @@
 						</Export-Package>
 						<Import-Package>
 							org.apache.axis2.context.*,
-							org.wso2.carbon.utils.*
+							org.wso2.carbon.utils.*,
+							org.osgi.service.component.*;version="${imp.package.version.osgi.services}"
 						</Import-Package>
 						<DynamicImport-Package>*</DynamicImport-Package>
 						<Bundle-Activator>org.wso2.carbon.client.configcontext.provider.listener.Axis2ConfigurationContextActivator</Bundle-Activator>

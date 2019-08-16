@@ -50,6 +50,7 @@
                             org.wso2.carbon.redirector.servlet.stub.*;
                             version="${carbon.multitenancy.imp.pkg.version}",
                             javax.servlet;version="${imp.pkg.version.javax.servlet}",
+                            org.osgi.service.component.*;version="${imp.package.version.osgi.services}",
                             javax.servlet.http;version="${imp.pkg.version.javax.servlet}",
                             org.apache.lucene.*,
                             *;resolution:=optional
