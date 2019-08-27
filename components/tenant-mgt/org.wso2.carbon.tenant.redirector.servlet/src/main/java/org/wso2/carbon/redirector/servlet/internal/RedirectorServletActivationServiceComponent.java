@@ -20,14 +20,9 @@ package org.wso2.carbon.redirector.servlet.internal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.activation.service.ActivationService;
-import org.wso2.carbon.redirector.servlet.util.Util;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 
 @Component(
         name = "org.wso2.carbon.redirector.servlet.activation",
@@ -50,21 +45,5 @@ public class RedirectorServletActivationServiceComponent {
     protected void deactivate(ComponentContext context) {
 
         log.debug("******* Multitenancy Redirector Servlet admin service bundle is deactivated ******* ");
-    }
-
-    @Reference(
-            name = "activation.service",
-            service = org.wso2.carbon.activation.service.ActivationService.class,
-            cardinality = ReferenceCardinality.OPTIONAL,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetActivationService")
-    protected void setActivationService(ActivationService activationService) {
-
-        Util.setActivationService(activationService);
-    }
-
-    protected void unsetActivationService(ActivationService activationService) {
-
-        Util.setActivationService(null);
     }
 }
