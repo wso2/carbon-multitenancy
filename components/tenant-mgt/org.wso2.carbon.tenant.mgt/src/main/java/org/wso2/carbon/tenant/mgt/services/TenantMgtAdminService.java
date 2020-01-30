@@ -116,6 +116,30 @@ public class TenantMgtAdminService extends AbstractAdmin {
         return TenantMgtUtil.prepareStringToShowThemeMgtPage(tenant.getId());
     }
 
+    /**
+     * Check if the selected domain is available to register.
+     *
+     * @param domainName Domain name.
+     * @return true, if the domain is available to register.
+     * @throws Exception, If unable to get the tenant manager, or get the tenant id from manager.
+     */
+    public boolean checkDomainAvailability(String domainName) throws Exception {
+
+        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(domainName)) {
+            return false;
+        }
+        TenantMgtUtil.validateDomain(domainName);
+        TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
+        int tenantId = tenantManager.getTenantId(domainName);
+        if (tenantId == -1) {
+            if (log.isDebugEnabled()) {
+                log.debug("Tenant Domain " + domainName + " is available to register.");
+            }
+            return true;
+        }
+        return false;
+    }
+
     private void notifyTenantAddition(TenantInfoBean tenantInfoBean) throws Exception {
         //Notify tenant addition
         try {
