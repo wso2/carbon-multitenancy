@@ -17,8 +17,8 @@
 -->
 <%@page import="org.wso2.carbon.core.security.AuthenticatorsConfiguration"%>
 <%@page import="org.wso2.carbon.core.security.AuthenticatorsConfiguration.AuthenticatorConfig"%>
-<%@page import="org.opensaml.saml2.core.AuthnRequest" %>
-<%@page import="org.opensaml.saml2.core.LogoutRequest" %>
+<%@page import="org.opensaml.saml.saml2.core.AuthnRequest" %>
+<%@page import="org.opensaml.saml.saml2.core.LogoutRequest" %>
 <%@ page
         import="org.wso2.carbon.identity.authenticator.saml2.sso.common.SAML2SSOAuthenticatorConstants" %>
 <%@ page import="org.wso2.carbon.identity.authenticator.saml2.sso.common.SSOSessionManager" %>
