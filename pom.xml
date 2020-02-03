@@ -936,7 +936,7 @@
         <carbon.identity.imp.pkg.version>[5.14.0, 6.0.0)</carbon.identity.imp.pkg.version>
 
         <!-- Carbon Multi-tenancy version-->
-        <carbon.multitenancy.version>${project.version}</carbon.multitenancy.version>
+        <carbon.multitenancy.version>4.8.0-SNAPSHOT</carbon.multitenancy.version>
         <carbon.multitenancy.exp.pkg.version>${carbon.multitenancy.version}</carbon.multitenancy.exp.pkg.version>
         <carbon.multitenancy.imp.pkg.version>[4.7.0, 5.0.0)</carbon.multitenancy.imp.pkg.version>
 
