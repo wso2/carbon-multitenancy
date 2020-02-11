@@ -1,0 +1,13 @@
+{
+  "tenant_manager.jdbc.enabled": true,
+  "tenant_manager.jdbc.class": "org.wso2.carbon.user.core.tenant.JDBCTenantManager",
+  "tenant_manager.jdbc.properties.MultiTenantRealmConfigBuilder": "org.wso2.carbon.user.core.config.multitenancy.SimpleRealmConfigBuilder",
+  "tenant_manager.ldap.class": "org.wso2.carbon.user.core.tenant.CommonHybridLDAPTenantManager",
+  "tenant_manager.ldap.properties.MultiTenantRealmConfigBuilder": "org.wso2.carbon.user.core.config.multitenancy.CommonLDAPRealmConfigBuilder",
+  "tenant_manager.ldap.properties.RootPartition": "dc=wso2,dc=org",
+  "tenant_manager.ldap.properties.OrganizationalObjectClass": "organizationalUnit",
+  "tenant_manager.ldap.properties.OrganizationalAttribute": "ou",
+  "tenant_manager.ldap.properties.OrganizationalSubContextObjectClass": "organizationalUnit",
+  "tenant_manager.ldap.properties.OrganizationalSubContextAttribute": "ou",
+  "tenant_manager.ldap.enabled": true
+}

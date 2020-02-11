@@ -1,0 +1,45 @@
+<!--
+ ~ Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ ~
+ ~ WSO2 Inc. licenses this file to you under the Apache License,
+ ~ Version 2.0 (the "License"); you may not use this file except
+ ~ in compliance with the License.
+ ~ You may obtain a copy of the License at
+ ~
+ ~    http://www.apache.org/licenses/LICENSE-2.0
+ ~
+ ~ Unless required by applicable law or agreed to in writing,
+ ~ software distributed under the License is distributed on an
+ ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ ~ KIND, either express or implied.  See the License for the
+ ~ specific language governing permissions and limitations
+ ~ under the License.
+ -->
+<TenantManagers>
+    {% if tenant_manager.jdbc.enabled %}
+    <TenantManager class="{{tenant_manager.jdbc.class}}">
+      {% for property_name,property_value in tenant_manager.jdbc.properties.items() %}
+        <Property name="{{property_name}}">{{property_value}}</Property>
+      {% endfor %}
+    </TenantManager>
+    {% endif %}
+
+    <!--When the primary user store is using LDAP user store, in MT mode following tenant manager will be used.-->
+    {% if tenant_manager.ldap.enabled %}
+    <TenantManager class="{{tenant_manager.ldap.class}}">
+      {% for property_name,property_value in tenant_manager.ldap.properties.items() %}
+        <Property name="{{property_name}}">{{property_value}}</Property>
+      {% endfor %}
+    </TenantManager>
+    {% endif %}
+    <!-- To add custom tenant managers -->
+   {% for tenant_manager in tenant_manager.custom %}
+   <TenantManager class="{{tenant_manager.class}}">
+      {% for property_name,property_value in tenant_manager.properties.items() %}
+        <Property name="{{property_name}}">{{property_value}}</Property>
+      {% endfor %}
+    </TenantManager>
+   {% endfor %}
+
+</TenantManagers>
+
