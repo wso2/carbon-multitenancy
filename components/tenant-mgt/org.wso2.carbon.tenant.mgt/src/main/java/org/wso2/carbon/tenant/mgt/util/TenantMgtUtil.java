@@ -20,6 +20,7 @@ import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -36,6 +37,9 @@ import org.wso2.carbon.stratos.common.exception.StratosException;
 import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
 import org.wso2.carbon.stratos.common.util.ClaimsMgtUtil;
 import org.wso2.carbon.stratos.common.util.CommonUtil;
+import org.wso2.carbon.tenant.mgt.core.exception.TenantManagementClientException;
+import org.wso2.carbon.tenant.mgt.core.exception.TenantManagementServerException;
+import org.wso2.carbon.tenant.mgt.core.exception.TenantMgtException;
 import org.wso2.carbon.tenant.mgt.internal.TenantMgtServiceComponent;
 import org.wso2.carbon.tenant.mgt.message.TenantDeleteClusterMessage;
 import org.wso2.carbon.user.api.RealmConfiguration;
@@ -54,8 +58,15 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
+
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
+
+import static org.wso2.carbon.tenant.mgt.core.constants.TenantMgtConstants.ErrorMessage.ERROR_CODE_EMPTY_DOMAIN_NAME;
+import static org.wso2.carbon.tenant.mgt.core.constants.TenantMgtConstants.ErrorMessage.ERROR_CODE_EMPTY_EXTENSION;
+import static org.wso2.carbon.tenant.mgt.core.constants.TenantMgtConstants.ErrorMessage.ERROR_CODE_ILLEGAL_CHARACTERS_IN_DOMAIN;
+import static org.wso2.carbon.tenant.mgt.core.constants.TenantMgtConstants.ErrorMessage.ERROR_CODE_INVALID_DOMAIN;
 
 /**
  * Utility methods for tenant management.
@@ -64,7 +75,42 @@ public class TenantMgtUtil {
 
     private static final Log log = LogFactory.getLog(TenantMgtUtil.class);
     private static final String ILLEGAL_CHARACTERS_FOR_TENANT_DOMAIN = ".*[^a-z0-9\\._\\-].*";
+    private static final String DOT = ".";
     private static ThreadLocal<Boolean> isTenantAdminCreationOperation = new ThreadLocal<>();
+    private static final String ILLEGAL_CHARACTERS_FOR_EMAIL =
+            ".*[\\(\\)\\<\\>\\,\\;\\:\\\\\\\"\\[\\]].*";
+    private static Pattern illegalCharactersPatternForEmail = Pattern
+            .compile(ILLEGAL_CHARACTERS_FOR_EMAIL);
+    private static final String EMAIL_FILTER_STRING = "^[^@]+@[^@.]+\\.[^@]*\\w\\w$";
+    private static Pattern emailFilterPattern = Pattern.compile(EMAIL_FILTER_STRING);
+
+    /**
+     * Prepares string to show theme management page.
+     *
+     * @param tenantId - tenant id
+     * @return UUID
+     * @throws TenantMgtException, if failed.
+     */
+    public static void prepareStringToShowThemeMgtPage(int tenantId, String resourceId) throws
+            TenantMgtException {
+
+        try {
+            UserRegistry systemRegistry =
+                    TenantMgtServiceComponent.getRegistryService().getGovernanceSystemRegistry();
+            // store it in the registry.
+            Resource resource = systemRegistry.newResource();
+            String tenantIdStr = Integer.toString(tenantId);
+            resource.setProperty(MultitenantConstants.TENANT_ID, tenantIdStr);
+            String uuidPath = StratosConstants.TENANT_CREATION_THEME_PAGE_TOKEN
+                    + RegistryConstants.PATH_SEPARATOR + resourceId;
+            systemRegistry.put(uuidPath, resource);
+
+            // restrict access
+            CommonUtil.denyAnonAuthorization(uuidPath, systemRegistry.getUserRealm());
+        } catch (RegistryException e) {
+            throw new TenantManagementServerException("Error while creating the path for theme page.", e);
+        }
+    }
 
     /**
      * Prepares string to show theme management page.
@@ -158,40 +204,30 @@ public class TenantMgtUtil {
     }
 
     /**
-     * Validate the tenant domain
+     * Validate the tenant domain.
      *
-     * @param domainName tenant domain
-     * @throws Exception , if invalid tenant domain name is given
+     * @param domainName tenant domain name.
+     * @throws Exception if invalid tenant domain name is given.
      */
     public static void validateDomain(String domainName) throws Exception {
-        if (domainName == null || domainName.equals("")) {
-            String msg = "Provided domain name is empty.";
-            log.error(msg);
-            throw new Exception(msg);
+
+        if (StringUtils.isBlank(domainName)) {
+            throw new TenantManagementClientException(ERROR_CODE_EMPTY_DOMAIN_NAME);
         }
-        // ensures the .ext for the public clouds.
-        if (CommonUtil.isPublicCloudSetup()) {
-            int lastIndexOfDot = domainName.lastIndexOf(".");
-            if (lastIndexOfDot <= 0) {
-                String msg = "You should have an extension to your domain.";
-                log.error(msg);
-                throw new Exception(msg);
-            }
+
+        int lastIndexOfDot = domainName.lastIndexOf(DOT);
+        if (lastIndexOfDot <= 0) {
+            throw new TenantManagementClientException(ERROR_CODE_EMPTY_EXTENSION);
         }
-        int indexOfDot = domainName.indexOf(".");
+        int indexOfDot = domainName.indexOf(DOT);
         if (indexOfDot == 0) {
-            // can't start a domain starting with ".";
-            String msg = "Invalid domain, starting with '.'";
-            log.error(msg);
-            throw new Exception(msg);
+            // Can't start a domain with ".".
+            throw new TenantManagementClientException(ERROR_CODE_INVALID_DOMAIN);
         }
-        // check the tenant domain contains any illegal characters
+        // Check tenant domain contains any illegal characters.
         if (domainName.matches(ILLEGAL_CHARACTERS_FOR_TENANT_DOMAIN)) {
-            String msg = "The tenant domain ' " + domainName +
-                         " ' contains one or more illegal characters. The valid characters are " +
-                         "lowercase letters, numbers, '.', '-' and '_'.";
-            log.error(msg);
-            throw new Exception(msg);
+            throw new TenantManagementClientException(ERROR_CODE_ILLEGAL_CHARACTERS_IN_DOMAIN.getCode(),
+                    String.format(ERROR_CODE_ILLEGAL_CHARACTERS_IN_DOMAIN.getMessage(), domainName));
         }
     }
 
@@ -291,10 +327,15 @@ public class TenantMgtUtil {
      */
     public static TenantInfoBean initializeTenantInfoBean(
             int tenantId, Tenant tenant) throws Exception {
+
         TenantInfoBean bean = getTenantInfoBeanfromTenant(tenantId, tenant);
         if (tenant != null) {
-            bean.setAdmin(ClaimsMgtUtil.getAdminUserNameFromTenantId(
-                    TenantMgtServiceComponent.getRealmService(), tenantId));
+            try {
+                bean.setAdmin(ClaimsMgtUtil.getAdminUserNameFromTenantId(
+                        TenantMgtServiceComponent.getRealmService(), tenantId));
+            } catch (Exception e) {
+                throw new TenantManagementServerException("Error while getting admin username from tenant id.", e);
+            }
         }
         return bean;
     }
@@ -342,18 +383,20 @@ public class TenantMgtUtil {
             claimsMap.put(UserCoreConstants.ClaimTypeURIs.GIVEN_NAME, tenant.getAdminFirstName());
             claimsMap.put(UserCoreConstants.ClaimTypeURIs.SURNAME, tenant.getAdminLastName());
             claimsMap.put(UserCoreConstants.ClaimTypeURIs.EMAIL_ADDRESS, tenant.getEmail());
+            for (Map.Entry<String, String> entry : tenant.getClaimsMap().entrySet()) {
+                claimsMap.put(entry.getKey(), entry.getValue());
+            }
 
-            // can be extended to store other user information.
+            // Can be extended to store other user information.
             UserStoreManager userStoreManager =
                     (UserStoreManager) TenantMgtServiceComponent.getRealmService().
                             getTenantUserRealm(tenant.getId()).getUserStoreManager();
             userStoreManager.setUserClaimValues(tenant.getAdminName(), claimsMap,
                                                 UserCoreConstants.DEFAULT_PROFILE);
 
-        } catch (Exception e) {
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Error in adding claims to the user.";
-            log.error(msg, e);
-            throw new Exception(msg, e);
+            throw new TenantManagementServerException(msg, e);
         }
     }
 
@@ -361,26 +404,28 @@ public class TenantMgtUtil {
      * Activate a tenant during the time of the tenant creation.
      *
      * @param tenantInfoBean tenant information
-     * @param tenantId tenant Id
+     * @param tenantId       tenant Id
      * @throws Exception UserStoreException.
      */
     public static void activateTenantInitially(TenantInfoBean tenantInfoBean,
                                                int tenantId) throws Exception {
+
         TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
         String tenantDomain = tenantInfoBean.getTenantDomain();
 
-        TenantMgtUtil.activateTenant(tenantDomain, tenantManager, tenantId);
-        if (log.isDebugEnabled()) {
-            log.debug("Activated the tenant " + tenantDomain + " at the time of tenant creation");
-        }
-
-        //Notify tenant activation
         try {
+            TenantMgtUtil.activateTenant(tenantDomain, tenantManager, tenantId);
+            if (log.isDebugEnabled()) {
+                log.debug("Activated the tenant " + tenantDomain + " at the time of tenant creation");
+            }
+            // Notify tenant activation
             TenantMgtUtil.triggerTenantInitialActivation(tenantInfoBean);
         } catch (StratosException e) {
             String msg = "Error in notifying tenant initial activation.";
-            log.error(msg, e);
-            throw new Exception(msg, e);
+            throw new TenantManagementServerException(msg, e);
+        } catch (Exception e) {
+            String msg = "Error while activating the tenant.";
+            throw new TenantManagementServerException(msg, e);
         }
     }
 
@@ -397,9 +442,9 @@ public class TenantMgtUtil {
         try {
             tenantManager.activateTenant(tenantId);
         } catch (UserStoreException e) {
-            String msg = "Error in activating the tenant for tenant domain: " + tenantDomain + ".";
+            String msg = "Error in activating the tenant for tenant domain: " + tenantDomain + DOT;
             log.error(msg, e);
-            throw new Exception(msg, e);
+            throw new TenantManagementServerException(msg, e);
         }
 
         //activating the subscription
@@ -428,9 +473,9 @@ public class TenantMgtUtil {
             tenantManager.deactivateTenant(tenantId);
             unloadTenantConfigurations(tenantDomain, tenantId);
         } catch (UserStoreException e) {
-            String msg = "Error in deactivating tenant for tenant domain: " + tenantDomain + ".";
+            String msg = "Error in deactivating tenant for tenant domain: " + tenantDomain + DOT;
             log.error(msg, e);
-            throw new Exception(msg, e);
+            throw new TenantManagementServerException(msg, e);
         }
 
         //deactivating the subscription

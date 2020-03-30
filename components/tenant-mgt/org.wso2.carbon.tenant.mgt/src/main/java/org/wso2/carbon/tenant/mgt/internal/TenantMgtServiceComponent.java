@@ -32,7 +32,9 @@ import org.wso2.carbon.stratos.common.TenantBillingService;
 import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
 import org.wso2.carbon.stratos.common.util.CommonUtil;
 import org.wso2.carbon.stratos.common.util.StratosConfiguration;
+import org.wso2.carbon.tenant.mgt.TenantMgtService;
 import org.wso2.carbon.tenant.mgt.internal.util.TenantMgtRampartUtil;
+import org.wso2.carbon.tenant.mgt.services.TenantMgtAdminService;
 import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
@@ -70,6 +72,8 @@ public class TenantMgtServiceComponent {
     private static List<TenantMgtListener> tenantMgtListeners = new ArrayList<TenantMgtListener>();
 
     private static TenantBillingService billingService = null;
+
+    private static TenantMgtService tenantMgtService;
 
     @Activate
     protected void activate(ComponentContext context) {
@@ -112,6 +116,22 @@ public class TenantMgtServiceComponent {
     protected void deactivate(ComponentContext context) {
 
         log.debug("******* Governance Tenant Config bundle is deactivated ******* ");
+    }
+
+    @Reference(
+            name = "org.wso2.carbon.tenant.mgt.service",
+            service = org.wso2.carbon.tenant.mgt.TenantMgtService.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetTenantMgtService")
+    protected void setTenantMgtService(TenantMgtService tenantMgtService) {
+
+        TenantMgtServiceComponent.tenantMgtService = tenantMgtService;
+    }
+
+    protected void unsetTenantMgtService(TenantMgtService tenantMgtService) {
+
+        setTenantMgtService(null);
     }
 
     @Reference(
@@ -299,5 +319,10 @@ public class TenantMgtServiceComponent {
     public static TenantBillingService getBillingService() {
 
         return billingService;
+    }
+
+    public static TenantMgtService getTenantMgtService() {
+
+        return tenantMgtService;
     }
 }
