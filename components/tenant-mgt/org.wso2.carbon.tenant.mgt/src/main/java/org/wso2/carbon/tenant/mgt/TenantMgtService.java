@@ -34,15 +34,6 @@ public interface TenantMgtService {
     String addTenant(Tenant tenant) throws Exception;
 
     /**
-     * Check if the selected domain is available to register.
-     *
-     * @param domainName Domain name.
-     * @return true, if the domain is available to register.
-     * @throws Exception, If unable to get the tenant manager, or get the tenant id from manager.
-     */
-    boolean checkDomainAvailability(String domainName) throws Exception;
-
-    /**
      * Retrieve all the tenants
      *
      * @return tenantInfoBean[]

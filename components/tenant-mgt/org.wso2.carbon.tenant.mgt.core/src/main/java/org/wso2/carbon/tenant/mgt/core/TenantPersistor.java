@@ -61,86 +61,72 @@ public class TenantPersistor {
     private static final String ADD_ADMIN_TRUE = "true";
 
     /**
-     * Persists the given tenant.
-     *
-     * @param tenant                tenant to be persisted.
-     * @param checkDomainValidation True, if domain is validated.
-     * @param successKey            SuccessKey.
-     * @param originatedService     The Service that the tenant registration was originated.
+     * Persists the given tenant
+     * @param tenant - tenant to be persisted
+     * @param checkDomainValidation - true, if domain is validated.
+     * @param successKey - successKey
+     * @param originatedService - The Service that the tenant registration was originated.
      * @return tenant Id - the tenant id
-     * @throws Exception If persisting tenant failed.
+     * @throws Exception, if persisting tenant failed.
      */
     public int persistTenant(Tenant tenant, boolean checkDomainValidation, String successKey,
-                             String originatedService, boolean isSkeleton) throws Exception {
-
-        int tenantId;
-        if (!isSkeleton) {
-            tenantId = persistTenantInUserStore(tenant, checkDomainValidation, successKey);
-        } else {
-            tenantId = tenant.getId();
+                             String originatedService,boolean isSkeleton) throws Exception {
+        int tenantId = 0;
+        if(!isSkeleton){
+           tenantId=persistTenantInUserStore(tenant,checkDomainValidation,successKey);
+        }else {
+           tenantId=tenant.getId();
         }
-        doPostTenantCreationActions(tenant, originatedService);
+        try {
+            doPostTenantCreationActions(tenant, originatedService);
+        } catch (Exception e) {
+            String msg = "Error performing post tenant creation actions";
+            throw new Exception(msg, e);
+        }
+
         return tenantId;
     }
 
-    private int persistTenantInUserStore(Tenant tenant, boolean checkDomainValidation, String successKey)
-            throws TenantMgtException {
-
+    private int persistTenantInUserStore(Tenant tenant, boolean checkDomainValidation, String successKey) throws Exception {
         int tenantId;
         validateAdminUserName(tenant);
         String tenantDomain = tenant.getDomain();
 
-        boolean isDomainAvailable;
-        try {
-            isDomainAvailable = CommonUtil.isDomainNameAvailable(tenantDomain);
-        } catch (Exception e) {
-            if (e instanceof TenantClientException) {
-                throw new TenantManagementClientException(((TenantClientException) e).getErrorCode(), e.getMessage());
-            } else if (e instanceof TenantServerException) {
-                throw new TenantManagementServerException(e.getMessage(), e);
-            }
-            throw new TenantMgtException(e.getMessage(), e);
-        }
+        boolean isDomainAvailable = CommonUtil.isDomainNameAvailable(tenantDomain);
         if (!isDomainAvailable) {
-            throw new TenantManagementClientException(TenantMgtConstants.ErrorMessage.ERROR_CODE_EXISTING_DOMAIN);
+            throw new Exception("Domain is not available to register");
         }
 
         RealmService realmService = TenantMgtCoreServiceComponent.getRealmService();
         RealmConfiguration realmConfig = realmService.getBootstrapRealmConfiguration();
         TenantMgtConfiguration tenantMgtConfiguration = realmService.getTenantMgtConfiguration();
-        try {
-            MultiTenantRealmConfigBuilder builder = TenantMgtCoreServiceComponent.
-                    getRealmService().getMultiTenantRealmConfigBuilder();
-            RealmConfiguration realmConfigToPersist =
-                    builder.getRealmConfigForTenantToPersist(realmConfig, tenantMgtConfiguration,
-                            tenant, -1);
-            tenant.setRealmConfig(realmConfigToPersist);
-            // Make AddAdmin true since user creation should happen even AddAdmin false
-            realmService.getBootstrapRealm().getRealmConfiguration().setAddAdmin(ADD_ADMIN_TRUE);
-            tenantId = addTenant(tenant);
-            tenant.setId(tenantId);
+        MultiTenantRealmConfigBuilder builder = TenantMgtCoreServiceComponent.
+                getRealmService().getMultiTenantRealmConfigBuilder();
+        RealmConfiguration realmConfigToPersist =
+                builder.getRealmConfigForTenantToPersist(realmConfig, tenantMgtConfiguration,
+                        tenant, -1);
+        tenant.setRealmConfig(realmConfigToPersist);
+        // Make AddAdmin true since user creation should happen even AddAdmin false
+        realmService.getBootstrapRealm().getRealmConfiguration().setAddAdmin(ADD_ADMIN_TRUE);
+        tenantId = addTenant(tenant);
+        tenant.setId(tenantId);
 
-            if (checkDomainValidation) {
-                if (successKey != null) {
-                    if (CommonUtil.validateDomainFromSuccessKey(TenantMgtCoreServiceComponent.
-                                    getGovernanceSystemRegistry(MultitenantConstants.SUPER_TENANT_ID),
-                            tenant.getDomain(), successKey)) {
-                        storeDomainValidationFlagToRegistry(tenant);
-                    } else {
-                        String msg = "Failed to validate domain";
-                        throw new TenantManagementServerException(msg);
-                    }
+        if (checkDomainValidation) {
+            if (successKey != null) {
+                if (CommonUtil.validateDomainFromSuccessKey(TenantMgtCoreServiceComponent.
+                        getGovernanceSystemRegistry(MultitenantConstants.SUPER_TENANT_ID),
+                        tenant.getDomain(), successKey)) {
+                    storeDomainValidationFlagToRegistry(tenant);
+                } else {
+                    String msg = "Failed to validate domain";
+                    throw new Exception(msg);
                 }
-            } else {
-                storeDomainValidationFlagToRegistry(tenant);
             }
-
-            addTenantAdminUser(tenant);
-        } catch (UserStoreException e) {
-            throw new TenantMgtException("Error while getting the realm config.", e);
-        } catch (RegistryException e) {
-            throw new TenantMgtException("Error while storing validation flag to registry.", e);
+        } else {
+            storeDomainValidationFlagToRegistry(tenant);
         }
+
+        addTenantAdminUser(tenant);
         return tenantId;
     }
 
@@ -154,11 +140,10 @@ public class TenantPersistor {
             TenantCoreUtil.setOriginatedService(tenant.getId(), originatedService);
             setActivationFlags(tenant.getId(), originatedService);
         } catch (Exception ex) {
-            throw new TenantManagementServerException(ex.getMessage(), ex);
+            throw new TenantManagementServerException("Error performing post tenant creation actions.", ex);
         }
 
         TenantCoreUtil.initializeRegistry(tenant.getId());
-
     }
 
     /**
@@ -191,12 +176,13 @@ public class TenantPersistor {
 
     /**
      * Adds a tenant to the tenant manager
-     * 
+     *
      * @param tenant - the tenant
      * @return tenantId - the tenant id
      * @throws Exception - UserStoreException
      */
     private int addTenant(Tenant tenant) throws TenantManagementServerException {
+
         int tenantId;
         TenantManager tenantManager = TenantMgtCoreServiceComponent.getTenantManager();
         try {
@@ -218,17 +204,13 @@ public class TenantPersistor {
      * @param tenant - the tenant
      * @throws Exception - UserStoreException
      */
-    private void addTenantAdminUser(Tenant tenant) throws TenantManagementServerException {
+    private void addTenantAdminUser(Tenant tenant) throws Exception {
         
         RealmService realmService = TenantMgtCoreServiceComponent.getRealmService();
-        try {
-            realmService.getTenantManager().getTenant(tenant.getId()).getRealmConfig()
-                    .setAdminPassword(tenant.getAdminPassword());
-            // Here when get the user realm it create admin user and group.
-            realmService.getTenantUserRealm(tenant.getId());
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            throw new TenantManagementServerException("Error while adding tenant admin user.", e);
-        }
+        realmService.getTenantManager().getTenant(tenant.getId()).getRealmConfig().
+                setAdminPassword(tenant.getAdminPassword());
+        //Here when get the user realm it create admin user and group.
+        realmService.getTenantUserRealm(tenant.getId());
     }
 
     /**
@@ -324,31 +306,35 @@ public class TenantPersistor {
 
     /**
      * Persists the given tenant
+     *
      * @param tenant - tenant to be persisted
      * @return tenant Id
      * @throws Exception, if persisting tenant failed.
      */
     public int persistTenant(Tenant tenant) throws Exception {
-        String tenantDomain = tenant.getDomain();
-        int tenantId;
+
         validateAdminUserName(tenant);
-        boolean isDomainAvailable = CommonUtil.isDomainNameAvailable(tenantDomain);
+        boolean isDomainAvailable;
+        String tenantDomain = tenant.getDomain();
+        try {
+            isDomainAvailable = CommonUtil.isDomainNameAvailable(tenantDomain);
+        } catch (Exception e) {
+            if (e instanceof TenantClientException) {
+                throw new TenantManagementClientException(((TenantClientException) e).getErrorCode(), e.getMessage());
+            } else if (e instanceof TenantServerException) {
+                throw new TenantManagementServerException(e.getMessage(), e);
+            }
+            throw new TenantMgtException(e.getMessage(), e);
+        }
         if (!isDomainAvailable) {
-            throw new Exception("Domain is not available to register");
+            throw new TenantManagementClientException(TenantMgtConstants.ErrorMessage.ERROR_CODE_EXISTING_DOMAIN);
         }
 
-        tenantId = addTenant(tenant);
+        int tenantId = addTenant(tenant);
         tenant.setId(tenantId);
 
-        try {
-            doPostTenantCreationActions(tenant, null);
-        } catch (Exception e) {
-            String msg = "Error performing post tenant creation actions";
-            if(log.isDebugEnabled()) {
-                log.debug(msg, e);
-            }
-            throw new Exception(msg);
-        }
+        doPostTenantCreationActions(tenant, null);
+
         return tenantId;
     }
 }

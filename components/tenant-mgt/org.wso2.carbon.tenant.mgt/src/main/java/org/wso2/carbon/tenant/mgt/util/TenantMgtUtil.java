@@ -58,7 +58,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
@@ -77,19 +76,13 @@ public class TenantMgtUtil {
     private static final String ILLEGAL_CHARACTERS_FOR_TENANT_DOMAIN = ".*[^a-z0-9\\._\\-].*";
     private static final String DOT = ".";
     private static ThreadLocal<Boolean> isTenantAdminCreationOperation = new ThreadLocal<>();
-    private static final String ILLEGAL_CHARACTERS_FOR_EMAIL =
-            ".*[\\(\\)\\<\\>\\,\\;\\:\\\\\\\"\\[\\]].*";
-    private static Pattern illegalCharactersPatternForEmail = Pattern
-            .compile(ILLEGAL_CHARACTERS_FOR_EMAIL);
-    private static final String EMAIL_FILTER_STRING = "^[^@]+@[^@.]+\\.[^@]*\\w\\w$";
-    private static Pattern emailFilterPattern = Pattern.compile(EMAIL_FILTER_STRING);
 
     /**
      * Prepares string to show theme management page.
      *
-     * @param tenantId - tenant id
-     * @return UUID
-     * @throws TenantMgtException, if failed.
+     * @param tenantId tenant id
+     * @return UUID uniques id to refer the tenant.
+     * @throws TenantMgtException if failed.
      */
     public static void prepareStringToShowThemeMgtPage(int tenantId, String resourceId) throws
             TenantMgtException {
@@ -377,6 +370,7 @@ public class TenantMgtUtil {
      * @throws Exception if error in adding claims to the user.
      */
     public static void addClaimsToUserStoreManager(Tenant tenant) throws Exception {
+
         try {
             Map<String, String> claimsMap = new HashMap<String, String>();
 
@@ -392,7 +386,7 @@ public class TenantMgtUtil {
                     (UserStoreManager) TenantMgtServiceComponent.getRealmService().
                             getTenantUserRealm(tenant.getId()).getUserStoreManager();
             userStoreManager.setUserClaimValues(tenant.getAdminName(), claimsMap,
-                                                UserCoreConstants.DEFAULT_PROFILE);
+                    UserCoreConstants.DEFAULT_PROFILE);
 
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Error in adding claims to the user.";
@@ -435,16 +429,15 @@ public class TenantMgtUtil {
      * @param tenantDomain tenant domain
      * @param tenantManager TenantManager object
      * @param tenantId tenant Id
-     * @throws Exception UserStoreException.
+     * @throws Exception if tenant activation fails.
      */
     public static void activateTenant(String tenantDomain, TenantManager tenantManager,
                                       int tenantId) throws Exception {
         try {
             tenantManager.activateTenant(tenantId);
         } catch (UserStoreException e) {
-            String msg = "Error in activating the tenant for tenant domain: " + tenantDomain + DOT;
-            log.error(msg, e);
-            throw new TenantManagementServerException(msg, e);
+            throw new TenantManagementServerException("Error in activating the tenant for tenant domain: " +
+                    tenantDomain + DOT, e);
         }
 
         //activating the subscription
@@ -465,7 +458,7 @@ public class TenantMgtUtil {
      * @param tenantDomain tenant domain
      * @param tenantManager TenantManager object
      * @param tenantId tenant Id
-     * @throws Exception UserStoreException.
+     * @throws Exception if tenant deactivation fails.
      */
     public static void deactivateTenant(String tenantDomain, TenantManager tenantManager,
                                         int tenantId) throws Exception {
