@@ -24,13 +24,11 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.UUIDGenerator;
 import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
 import org.wso2.carbon.stratos.common.exception.StratosException;
-import org.wso2.carbon.stratos.common.exception.TenantClientException;
-import org.wso2.carbon.stratos.common.exception.TenantServerException;
+import org.wso2.carbon.stratos.common.exception.TenantManagementClientException;
+import org.wso2.carbon.stratos.common.exception.TenantManagementServerException;
+import org.wso2.carbon.stratos.common.exception.TenantMgtException;
 import org.wso2.carbon.stratos.common.util.CommonUtil;
 import org.wso2.carbon.tenant.mgt.core.TenantPersistor;
-import org.wso2.carbon.tenant.mgt.core.exception.TenantManagementClientException;
-import org.wso2.carbon.tenant.mgt.core.exception.TenantManagementServerException;
-import org.wso2.carbon.tenant.mgt.core.exception.TenantMgtException;
 import org.wso2.carbon.tenant.mgt.core.internal.TenantMgtCoreServiceComponent;
 import org.wso2.carbon.tenant.mgt.internal.TenantMgtServiceComponent;
 import org.wso2.carbon.tenant.mgt.util.TenantMgtUtil;
@@ -40,6 +38,7 @@ import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
+import org.wso2.carbon.user.core.common.User;
 import org.wso2.carbon.user.core.config.multitenancy.MultiTenantRealmConfigBuilder;
 import org.wso2.carbon.user.core.constants.UserCoreClaimConstants;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -60,61 +59,22 @@ import static org.wso2.carbon.tenant.mgt.util.TenantMgtUtil.initializeTenantInfo
 public class TenantMgtImpl implements TenantMgtService {
 
     private static final Log log = LogFactory.getLog(TenantMgtImpl.class);
-    private static final String ADD_ADMIN_TRUE = "true";
 
-    /**
-     * super admin adds a tenant.
-     *
-     * @param tenant tenant information.
-     * @return UUID uuid used to represent the tenant.
-     * @throws TenantMgtException if error in adding new tenant.
-     */
     public String addTenant(Tenant tenant) throws TenantMgtException {
 
-        try {
-            CommonUtil.validateEmail(tenant.getEmail());
-        } catch (Exception e) {
-            if (e instanceof TenantClientException) {
-                throw new TenantManagementClientException(((TenantClientException) e).getErrorCode(), e.getMessage());
-            } else if (e instanceof TenantServerException) {
-                throw new TenantManagementServerException(e.getMessage(), e);
-            }
-        }
-
         String tenantDomain = tenant.getDomain();
-        String resourceId;
         int tenantId;
-        TenantPersistor persistor = new TenantPersistor();
-        try {
-            TenantMgtUtil.validateDomain(tenantDomain);
-            checkIsSuperTenantInvoking();
 
+        validateInputs(tenant);
+        try {
             // Set a thread local variable to identify the operations triggered for a tenant admin user.
             TenantMgtUtil.setTenantAdminCreationOperation(true);
 
-            tenant.setCreatedDate(createDate());
-            resourceId = UUIDGenerator.generateUUID();
-            tenant.setResourceId(resourceId);
-
-            tenant = addRealmConfigToTenant(tenant);
-
-            tenantId = persistor.persistTenant(tenant);
-            tenant.setId(tenantId);
-
+            addAttributeValues(tenant);
+            createTenant(tenant);
             addTenantAdminUser(tenant);
-
-            try {
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-                carbonContext.setTenantDomain(tenantDomain);
-                carbonContext.setTenantId(tenantId);
-
-                TenantMgtUtil.addClaimsToUserStoreManager(tenant);
-            } finally {
-                // Remove thread local variable set to identify operation triggered for a tenant admin user.
-                TenantMgtUtil.clearTenantAdminCreationOperation();
-                PrivilegedCarbonContext.endTenantFlow();
-            }
+            tenantId = tenant.getId();
+            addClaimsToUserStore(tenant, tenantDomain, tenantId);
 
             TenantInfoBean tenantInfoBean = initializeTenantInfoBean(tenantId, tenant);
             notifyTenantAddition(tenantInfoBean);
@@ -122,8 +82,9 @@ public class TenantMgtImpl implements TenantMgtService {
             // For the super tenant tenant creation, tenants are always activated as they are created.
             TenantMgtUtil.activateTenantInitially(tenantInfoBean, tenantId);
         } catch (Exception e) {
-            if (e instanceof TenantClientException) {
-                throw new TenantManagementClientException(((TenantClientException) e).getErrorCode(), e.getMessage());
+            if (e instanceof TenantManagementClientException) {
+                throw new TenantManagementClientException(((TenantManagementClientException) e).getErrorCode(),
+                        e.getMessage());
             } else {
                 throw new TenantManagementServerException(e.getMessage(), e);
             }
@@ -131,12 +92,59 @@ public class TenantMgtImpl implements TenantMgtService {
         log.info("Added the tenant '" + tenantDomain + " [" + tenantId +
                 "]' by '" + PrivilegedCarbonContext.getThreadLocalCarbonContext().
                 getUsername() + "'");
-        TenantMgtUtil.prepareStringToShowThemeMgtPage(tenant.getId(), resourceId);
+        TenantMgtUtil.prepareStringToShowThemeMgtPage(tenant.getId(), tenant.getUUID());
 
-        return resourceId;
+        return tenant.getUUID();
     }
 
-    private Tenant addRealmConfigToTenant(Tenant tenant) throws TenantMgtException {
+    private void createTenant(Tenant tenant) throws Exception {
+
+        TenantPersistor persistor = new TenantPersistor();
+        persistor.persistTenant(tenant);
+    }
+
+    private void addClaimsToUserStore(Tenant tenant, String tenantDomain, int tenantId) throws Exception {
+
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            carbonContext.setTenantDomain(tenantDomain);
+            carbonContext.setTenantId(tenantId);
+
+            TenantMgtUtil.addClaimsToUserStoreManager(tenant);
+        } finally {
+            // Remove thread local variable set to identify operation triggered for a tenant admin user.
+            TenantMgtUtil.clearTenantAdminCreationOperation();
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+    }
+
+    private void validateInputs(Tenant tenant) throws TenantManagementClientException, TenantManagementServerException {
+
+        try {
+            CommonUtil.validateEmail(tenant.getEmail());
+            TenantMgtUtil.validateDomain(tenant.getDomain());
+            checkIsSuperTenantInvoking();
+        } catch (Exception e) {
+            if (e instanceof TenantManagementClientException) {
+                throw new TenantManagementClientException(((TenantManagementClientException) e).getErrorCode(),
+                        e.getMessage());
+            } else {
+                throw new TenantManagementServerException(e.getMessage(), e);
+            }
+        }
+    }
+
+    private void addAttributeValues(Tenant tenant) throws TenantMgtException {
+
+        tenant.setCreatedDate(createDate());
+        tenant.setUUID(UUIDGenerator.generateUUID());
+
+        RealmConfiguration realmConfiguration = getRealmConfigForTenant(tenant);
+        tenant.setRealmConfig(realmConfiguration);
+    }
+
+    private RealmConfiguration getRealmConfigForTenant(Tenant tenant) throws TenantMgtException {
 
         RealmService realmService = TenantMgtCoreServiceComponent.getRealmService();
         RealmConfiguration realmConfig = realmService.getBootstrapRealmConfiguration();
@@ -147,10 +155,9 @@ public class TenantMgtImpl implements TenantMgtService {
             RealmConfiguration realmConfigToPersist =
                     builder.getRealmConfigForTenantToPersist(realmConfig, tenantMgtConfiguration,
                             tenant, -1);
-            tenant.setRealmConfig(realmConfigToPersist);
             // Make AddAdmin true since user creation should happen even AddAdmin false
-            realmService.getBootstrapRealm().getRealmConfiguration().setAddAdmin(ADD_ADMIN_TRUE);
-            return tenant;
+            realmService.getBootstrapRealm().getRealmConfiguration().setAddAdmin("true");
+            return realmConfigToPersist;
 
         } catch (UserStoreException e) {
             throw new TenantMgtException("Error while getting the realm config.", e);
@@ -208,13 +215,8 @@ public class TenantMgtImpl implements TenantMgtService {
         }
     }
 
-    /**
-     * Get the list of the tenants.
-     *
-     * @return List<Tenant>
-     * @throws TenantManagementServerException if getting tenant failed.
-     */
-    private List<Tenant> getAllTenants() throws TenantManagementServerException {
+    public List<Tenant> listTenants(Integer limit, Integer offset, String filter, String sortOrder, String sortBy)
+            throws TenantMgtException {
 
         TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
         Tenant[] tenants;
@@ -225,6 +227,11 @@ public class TenantMgtImpl implements TenantMgtService {
             throw new TenantManagementServerException(msg, e);
         }
 
+        return getTenantsWithUserId(tenants);
+    }
+
+    private List<Tenant> getTenantsWithUserId(Tenant[] tenants) throws TenantManagementServerException {
+
         List<Tenant> tenantList = Arrays.asList(tenants);
         List<Tenant> tenantListWithUserId = new ArrayList<>();
         for (Tenant tenant : tenantList) {
@@ -233,28 +240,9 @@ public class TenantMgtImpl implements TenantMgtService {
             tenant.setAdminUserId(userId);
             tenantListWithUserId.add(tenant);
         }
-
         return tenantListWithUserId;
     }
 
-    /**
-     * Retrieve all the tenants.
-     *
-     * @return List<Tenant>
-     * @throws TenantMgtException if failed to get the tenants.
-     */
-    public List<Tenant> retrieveTenants() throws TenantMgtException {
-
-        return getAllTenants();
-    }
-
-    /**
-     * Get a specific tenant.
-     *
-     * @param tenantDomain tenant domain.
-     * @return Tenant
-     * @throws TenantMgtException if getting the tenant fails.
-     */
     public Tenant getTenant(String tenantDomain) throws TenantMgtException {
 
         TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
@@ -270,6 +258,36 @@ public class TenantMgtImpl implements TenantMgtService {
         String userId = getClaimValue(tenant.getAdminName(), UserCoreClaimConstants.USER_ID_CLAIM_URI, tenantId);
         tenant.setAdminUserId(userId);
 
+        return tenant;
+    }
+
+    public User getOwner(String tenantDomain) throws TenantMgtException {
+
+        Tenant tenant = getTenantFromTenantManager(tenantDomain);
+        return createOwner(tenant);
+    }
+
+    private User createOwner(Tenant tenant) throws TenantManagementServerException {
+
+        String userId = getClaimValue(tenant.getAdminName(), UserCoreClaimConstants.USER_ID_CLAIM_URI, tenant.getId());
+        User owner = new User();
+        owner.setUsername(tenant.getAdminName());
+        owner.setUserID(userId);
+
+        return owner;
+    }
+
+    private Tenant getTenantFromTenantManager(String tenantDomain) throws TenantManagementServerException {
+
+        TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
+        int tenantId;
+        Tenant tenant;
+        try {
+            tenantId = tenantManager.getTenantId(tenantDomain);
+            tenant = (Tenant) tenantManager.getTenant(tenantId);
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            throw new TenantManagementServerException("Error while getting the tenant: " + tenantDomain + " .", e);
+        }
         return tenant;
     }
 
@@ -292,12 +310,6 @@ public class TenantMgtImpl implements TenantMgtService {
         return claimValue;
     }
 
-    /**
-     * Activate a deactivated tenant, by the super tenant.
-     *
-     * @param tenantDomain tenant domain
-     * @throws TenantMgtException if the tenant activation fails.
-     */
     public void activateTenant(String tenantDomain) throws TenantMgtException {
 
         TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
@@ -322,12 +334,6 @@ public class TenantMgtImpl implements TenantMgtService {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername() + "'");
     }
 
-    /**
-     * Deactivate the given tenant.
-     *
-     * @param tenantDomain tenant domain
-     * @throws TenantMgtException if tenant deactivation fails.
-     */
     public void deactivateTenant(String tenantDomain) throws TenantMgtException {
 
         TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
@@ -350,6 +356,4 @@ public class TenantMgtImpl implements TenantMgtService {
                 "]' by '" + PrivilegedCarbonContext.getThreadLocalCarbonContext().
                 getUsername() + "'");
     }
-
-
 }

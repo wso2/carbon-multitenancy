@@ -34,12 +34,12 @@ import org.wso2.carbon.registry.core.utils.UUIDGenerator;
 import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
 import org.wso2.carbon.stratos.common.constants.StratosConstants;
 import org.wso2.carbon.stratos.common.exception.StratosException;
+import org.wso2.carbon.stratos.common.exception.TenantManagementClientException;
+import org.wso2.carbon.stratos.common.exception.TenantManagementServerException;
+import org.wso2.carbon.stratos.common.exception.TenantMgtException;
 import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
 import org.wso2.carbon.stratos.common.util.ClaimsMgtUtil;
 import org.wso2.carbon.stratos.common.util.CommonUtil;
-import org.wso2.carbon.tenant.mgt.core.exception.TenantManagementClientException;
-import org.wso2.carbon.tenant.mgt.core.exception.TenantManagementServerException;
-import org.wso2.carbon.tenant.mgt.core.exception.TenantMgtException;
 import org.wso2.carbon.tenant.mgt.internal.TenantMgtServiceComponent;
 import org.wso2.carbon.tenant.mgt.message.TenantDeleteClusterMessage;
 import org.wso2.carbon.user.api.RealmConfiguration;
@@ -62,10 +62,10 @@ import java.util.Map;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
-import static org.wso2.carbon.tenant.mgt.core.constants.TenantMgtConstants.ErrorMessage.ERROR_CODE_EMPTY_DOMAIN_NAME;
-import static org.wso2.carbon.tenant.mgt.core.constants.TenantMgtConstants.ErrorMessage.ERROR_CODE_EMPTY_EXTENSION;
-import static org.wso2.carbon.tenant.mgt.core.constants.TenantMgtConstants.ErrorMessage.ERROR_CODE_ILLEGAL_CHARACTERS_IN_DOMAIN;
-import static org.wso2.carbon.tenant.mgt.core.constants.TenantMgtConstants.ErrorMessage.ERROR_CODE_INVALID_DOMAIN;
+import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_EMPTY_DOMAIN_NAME;
+import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_EMPTY_EXTENSION;
+import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_ILLEGAL_CHARACTERS_IN_DOMAIN;
+import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_INVALID_DOMAIN;
 
 /**
  * Utility methods for tenant management.
@@ -208,9 +208,11 @@ public class TenantMgtUtil {
             throw new TenantManagementClientException(ERROR_CODE_EMPTY_DOMAIN_NAME);
         }
 
-        int lastIndexOfDot = domainName.lastIndexOf(DOT);
-        if (lastIndexOfDot <= 0) {
-            throw new TenantManagementClientException(ERROR_CODE_EMPTY_EXTENSION);
+        if (CommonUtil.isPublicCloudSetup()) {
+            int lastIndexOfDot = domainName.lastIndexOf(DOT);
+            if (lastIndexOfDot <= 0) {
+                throw new TenantManagementClientException(ERROR_CODE_EMPTY_EXTENSION);
+            }
         }
         int indexOfDot = domainName.indexOf(DOT);
         if (indexOfDot == 0) {

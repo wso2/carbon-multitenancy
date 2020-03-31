@@ -25,14 +25,11 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.stratos.common.config.CloudServiceConfigParser;
 import org.wso2.carbon.stratos.common.config.CloudServicesDescConfig;
 import org.wso2.carbon.stratos.common.constants.StratosConstants;
-import org.wso2.carbon.stratos.common.exception.TenantClientException;
-import org.wso2.carbon.stratos.common.exception.TenantServerException;
+import org.wso2.carbon.stratos.common.exception.TenantManagementClientException;
+import org.wso2.carbon.stratos.common.exception.TenantManagementServerException;
+import org.wso2.carbon.stratos.common.exception.TenantMgtException;
 import org.wso2.carbon.stratos.common.util.CloudServicesUtil;
 import org.wso2.carbon.stratos.common.util.CommonUtil;
-import org.wso2.carbon.tenant.mgt.core.constants.TenantMgtConstants;
-import org.wso2.carbon.tenant.mgt.core.exception.TenantManagementClientException;
-import org.wso2.carbon.tenant.mgt.core.exception.TenantManagementServerException;
-import org.wso2.carbon.tenant.mgt.core.exception.TenantMgtException;
 import org.wso2.carbon.tenant.mgt.core.internal.TenantMgtCoreServiceComponent;
 import org.wso2.carbon.tenant.mgt.core.util.TenantCoreUtil;
 import org.wso2.carbon.user.api.RealmConfiguration;
@@ -48,7 +45,8 @@ import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.user.mgt.UserMgtConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import static org.wso2.carbon.tenant.mgt.core.constants.TenantMgtConstants.ErrorMessage.ERROR_CODE_EXISTING_USER_NAME;
+import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_EXISTING_DOMAIN;
+import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_EXISTING_USER_NAME;
 
 /**
  * TenantPersistenceManager - Methods related to persisting the tenant.
@@ -316,18 +314,9 @@ public class TenantPersistor {
         validateAdminUserName(tenant);
         boolean isDomainAvailable;
         String tenantDomain = tenant.getDomain();
-        try {
-            isDomainAvailable = CommonUtil.isDomainNameAvailable(tenantDomain);
-        } catch (Exception e) {
-            if (e instanceof TenantClientException) {
-                throw new TenantManagementClientException(((TenantClientException) e).getErrorCode(), e.getMessage());
-            } else if (e instanceof TenantServerException) {
-                throw new TenantManagementServerException(e.getMessage(), e);
-            }
-            throw new TenantMgtException(e.getMessage(), e);
-        }
+        isDomainAvailable = CommonUtil.isDomainNameAvailable(tenantDomain);
         if (!isDomainAvailable) {
-            throw new TenantManagementClientException(TenantMgtConstants.ErrorMessage.ERROR_CODE_EXISTING_DOMAIN);
+            throw new TenantManagementClientException(ERROR_CODE_EXISTING_DOMAIN);
         }
 
         int tenantId = addTenant(tenant);
