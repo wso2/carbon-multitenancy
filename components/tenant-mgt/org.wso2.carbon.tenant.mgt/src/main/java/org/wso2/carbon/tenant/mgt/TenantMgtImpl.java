@@ -83,8 +83,7 @@ public class TenantMgtImpl implements TenantMgtService {
             TenantMgtUtil.activateTenantInitially(tenantInfoBean, tenantId);
         } catch (Exception e) {
             if (e instanceof TenantManagementClientException) {
-                throw new TenantManagementClientException(((TenantManagementClientException) e).getErrorCode(),
-                        e.getMessage());
+                throw (TenantManagementClientException) e;
             } else {
                 throw new TenantManagementServerException(e.getMessage(), e);
             }
@@ -127,8 +126,7 @@ public class TenantMgtImpl implements TenantMgtService {
             checkIsSuperTenantInvoking();
         } catch (Exception e) {
             if (e instanceof TenantManagementClientException) {
-                throw new TenantManagementClientException(((TenantManagementClientException) e).getErrorCode(),
-                        e.getMessage());
+                throw (TenantManagementClientException) e;
             } else {
                 throw new TenantManagementServerException(e.getMessage(), e);
             }

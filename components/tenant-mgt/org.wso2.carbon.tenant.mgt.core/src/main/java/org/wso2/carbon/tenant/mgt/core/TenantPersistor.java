@@ -316,7 +316,8 @@ public class TenantPersistor {
         String tenantDomain = tenant.getDomain();
         isDomainAvailable = CommonUtil.isDomainNameAvailable(tenantDomain);
         if (!isDomainAvailable) {
-            throw new TenantManagementClientException(ERROR_CODE_EXISTING_DOMAIN);
+            throw new TenantManagementClientException(ERROR_CODE_EXISTING_DOMAIN.getCode(), String.format
+                    (ERROR_CODE_EXISTING_DOMAIN.getMessage(), tenantDomain));
         }
 
         int tenantId = addTenant(tenant);
