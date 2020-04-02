@@ -23,6 +23,7 @@ import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -76,6 +77,8 @@ public class TenantMgtUtil {
     private static final String ILLEGAL_CHARACTERS_FOR_TENANT_DOMAIN = ".*[^a-z0-9\\._\\-].*";
     private static final String DOT = ".";
     private static ThreadLocal<Boolean> isTenantAdminCreationOperation = new ThreadLocal<>();
+    private static final int DEFAULT_ITEMS_PRE_PAGE = 15;
+    private static final int DEFAULT_MAXIMUM_ITEMS_PRE_PAGE = 100;
 
     /**
      * Prepares string to show theme management page.
@@ -599,5 +602,49 @@ public class TenantMgtUtil {
 
     public static void clearTenantAdminCreationOperation() {
         isTenantAdminCreationOperation.remove();
+    }
+
+    /**
+     * Get the Default Items per Page needed to display.
+     *
+     * @return defaultItemsPerPage need to display.
+     */
+    public static int getDefaultItemsPerPage() {
+
+        int defaultItemsPerPage = DEFAULT_ITEMS_PRE_PAGE;
+        try {
+            String defaultItemsPerPageProperty = ServerConfiguration.getInstance().getFirstProperty("ItemsPerPage");
+            if (StringUtils.isNotBlank(defaultItemsPerPageProperty)) {
+                int defaultItemsPerPageConfig = Integer.parseInt(defaultItemsPerPageProperty);
+                if (defaultItemsPerPageConfig > 0) {
+                    defaultItemsPerPage = defaultItemsPerPageConfig;
+                }
+            }
+        } catch (NumberFormatException e) {
+            defaultItemsPerPage = DEFAULT_ITEMS_PRE_PAGE;
+            log.warn("Error occurred while parsing the 'ItemsPerPage' property value in carbon.xml.", e);
+        }
+        return defaultItemsPerPage;
+    }
+
+    /**
+     * Get the Maximum Item per Page need to display.
+     *
+     * @return maximumItemsPerPage need to display.
+     */
+    public static int getMaximumItemPerPage() {
+
+        int maximumItemsPerPage = DEFAULT_MAXIMUM_ITEMS_PRE_PAGE;
+        String maximumItemsPerPagePropertyValue = ServerConfiguration.getInstance().getFirstProperty(
+                "TenantManagement.maxListLimit");
+        if (StringUtils.isNotBlank(maximumItemsPerPagePropertyValue)) {
+            try {
+                maximumItemsPerPage = Integer.parseInt(maximumItemsPerPagePropertyValue);
+            } catch (NumberFormatException e) {
+                maximumItemsPerPage = DEFAULT_MAXIMUM_ITEMS_PRE_PAGE;
+                log.warn("Error occurred while parsing the 'MaximumItemsPerPage' property value in carbon.xml.", e);
+            }
+        }
+        return maximumItemsPerPage;
     }
 }

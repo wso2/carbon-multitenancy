@@ -15,6 +15,7 @@
  */
 package org.wso2.carbon.tenant.mgt;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
@@ -23,6 +24,7 @@ import org.wso2.carbon.context.RegistryType;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.UUIDGenerator;
 import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
+import org.wso2.carbon.stratos.common.constants.TenantConstants;
 import org.wso2.carbon.stratos.common.exception.StratosException;
 import org.wso2.carbon.stratos.common.exception.TenantManagementClientException;
 import org.wso2.carbon.stratos.common.exception.TenantManagementServerException;
@@ -44,13 +46,14 @@ import org.wso2.carbon.user.core.constants.UserCoreClaimConstants;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.Tenant;
 import org.wso2.carbon.user.core.tenant.TenantManager;
+import org.wso2.carbon.user.core.tenant.TenantSearchResult;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_INVALID_OFFSET;
 import static org.wso2.carbon.tenant.mgt.util.TenantMgtUtil.initializeTenantInfoBean;
 
 /**
@@ -59,6 +62,9 @@ import static org.wso2.carbon.tenant.mgt.util.TenantMgtUtil.initializeTenantInfo
 public class TenantMgtImpl implements TenantMgtService {
 
     private static final Log log = LogFactory.getLog(TenantMgtImpl.class);
+    private static final String DEFAULT_SORT_BY = "UM_DOMAIN_NAME";
+    private static final String DESC_SORT_ORDER = "DESC";
+    private static final String ASC_SORT_ORDER = "ASC";
 
     public String addTenant(Tenant tenant) throws TenantMgtException {
 
@@ -213,32 +219,130 @@ public class TenantMgtImpl implements TenantMgtService {
         }
     }
 
-    public List<Tenant> listTenants(Integer limit, Integer offset, String filter, String sortOrder, String sortBy)
+    public TenantSearchResult listTenants(Integer limit, Integer offset, String filter, String sortOrder, String sortBy)
             throws TenantMgtException {
 
         TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
-        Tenant[] tenants;
         try {
-            tenants = (Tenant[]) tenantManager.getAllTenants();
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            String msg = "Error in retrieving the tenant information.";
-            throw new TenantManagementServerException(msg, e);
-        }
+            TenantSearchResult tenantSearchResult;
 
-        return getTenantsWithUserId(tenants);
+            limit = validateLimit(limit);
+            offset = validateOffset(offset);
+            sortBy = validateSortBy(sortBy);
+            sortOrder = validateSortOrder(sortOrder);
+
+            tenantSearchResult = tenantManager.listTenants(limit, offset, sortBy, sortOrder, sortBy);
+            assignUserIdToTenants(tenantSearchResult);
+            return tenantSearchResult;
+        } catch (UserStoreException e) {
+            throw new TenantManagementServerException("Error in retrieving the tenant information.", e);
+        }
     }
 
-    private List<Tenant> getTenantsWithUserId(Tenant[] tenants) throws TenantManagementServerException {
+    private void assignUserIdToTenants(TenantSearchResult tenantSearchResult)
+            throws TenantManagementServerException {
 
-        List<Tenant> tenantList = Arrays.asList(tenants);
         List<Tenant> tenantListWithUserId = new ArrayList<>();
-        for (Tenant tenant : tenantList) {
+        for (Tenant tenant : tenantSearchResult.getTenantList()) {
             String userId = getClaimValue(tenant.getAdminName(), UserCoreClaimConstants.USER_ID_CLAIM_URI,
                     tenant.getId());
             tenant.setAdminUserId(userId);
             tenantListWithUserId.add(tenant);
         }
-        return tenantListWithUserId;
+
+        tenantSearchResult.setTenantList(tenantListWithUserId);
+    }
+
+    /**
+     * Validate sortBy.
+     *
+     * @param sortBy sortBy attribute.
+     * @return Validated sortOrder and sortBy.
+     */
+    private String validateSortBy(String sortBy) {
+
+        if (StringUtils.isBlank(sortBy)) {
+            if (log.isDebugEnabled()) {
+                log.debug("sortBy attribute is empty. Therefore we set the default sortBy attribute: " +
+                        DEFAULT_SORT_BY);
+            }
+            return DEFAULT_SORT_BY;
+        }
+        return sortBy;
+    }
+
+    /**
+     * Validate sortOrder.
+     *
+     * @param sortOrder sortOrder ASC/DESC.
+     * @return Validated sortOrder and sortBy.
+     */
+    private String validateSortOrder(String sortOrder) {
+
+        if (StringUtils.isBlank(sortOrder)) {
+            sortOrder = ASC_SORT_ORDER;
+            if (log.isDebugEnabled()) {
+                log.debug("sortOrder is empty. Therefore we set the default sortOrder value as: " +
+                        ASC_SORT_ORDER);
+            }
+        } else if (!(sortOrder.equals(DESC_SORT_ORDER) || sortOrder.equals(ASC_SORT_ORDER))) {
+            sortOrder = ASC_SORT_ORDER;
+            if (log.isDebugEnabled()) {
+                log.debug("sortOrder is incorrect. Therefore we set the default sortOrder value as: " +
+                        ASC_SORT_ORDER + ". SortOrder: " + sortOrder);
+            }
+        }
+        return sortOrder;
+    }
+
+    /**
+     * Validate limit.
+     *
+     * @param limit given limit value.
+     * @return validated limit and offset value.
+     */
+    private int validateLimit(Integer limit) throws TenantManagementClientException {
+
+        if (limit == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Given limit is null. Therefore we get the default limit from carbon.xml.");
+            }
+            limit = TenantMgtUtil.getDefaultItemsPerPage();
+        }
+        if (limit < 0) {
+            throw new TenantManagementClientException(TenantConstants.ErrorMessage.ERROR_CODE_INVALID_LIMIT);
+        }
+
+        int maxLimit = TenantMgtUtil.getMaximumItemPerPage();
+
+        if (limit > maxLimit) {
+            if (log.isDebugEnabled()) {
+                log.debug("Given limit exceed the maximum limit. Therefore we get the default max limit: " +
+                        maxLimit + " from carbon.xml.");
+            }
+            limit = maxLimit;
+        }
+        return limit;
+    }
+
+    /**
+     * Validate offset.
+     *
+     * @param offset given offset value.
+     * @return validated limit and offset value.
+     * @throws TenantManagementClientException Error while set offset
+     */
+    private int validateOffset(Integer offset) throws TenantManagementClientException {
+
+        if (offset == null) {
+            // Return first page offset.
+            offset = 0;
+        }
+
+        if (offset < 0) {
+            throw new TenantManagementClientException(ERROR_CODE_INVALID_OFFSET);
+        }
+        return offset;
     }
 
     public Tenant getTenant(String tenantDomain) throws TenantMgtException {
@@ -256,36 +360,6 @@ public class TenantMgtImpl implements TenantMgtService {
         String userId = getClaimValue(tenant.getAdminName(), UserCoreClaimConstants.USER_ID_CLAIM_URI, tenantId);
         tenant.setAdminUserId(userId);
 
-        return tenant;
-    }
-
-    public User getOwner(String tenantDomain) throws TenantMgtException {
-
-        Tenant tenant = getTenantFromTenantManager(tenantDomain);
-        return createOwner(tenant);
-    }
-
-    private User createOwner(Tenant tenant) throws TenantManagementServerException {
-
-        String userId = getClaimValue(tenant.getAdminName(), UserCoreClaimConstants.USER_ID_CLAIM_URI, tenant.getId());
-        User owner = new User();
-        owner.setUsername(tenant.getAdminName());
-        owner.setUserID(userId);
-
-        return owner;
-    }
-
-    private Tenant getTenantFromTenantManager(String tenantDomain) throws TenantManagementServerException {
-
-        TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
-        int tenantId;
-        Tenant tenant;
-        try {
-            tenantId = tenantManager.getTenantId(tenantDomain);
-            tenant = (Tenant) tenantManager.getTenant(tenantId);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            throw new TenantManagementServerException("Error while getting the tenant: " + tenantDomain + " .", e);
-        }
         return tenant;
     }
 
@@ -353,5 +427,35 @@ public class TenantMgtImpl implements TenantMgtService {
         log.info("Deactivated the tenant '" + tenantDomain + " [" + tenantId +
                 "]' by '" + PrivilegedCarbonContext.getThreadLocalCarbonContext().
                 getUsername() + "'");
+    }
+
+    public User getOwner(String tenantDomain) throws TenantMgtException {
+
+        Tenant tenant = getTenantFromTenantManager(tenantDomain);
+        return createOwner(tenant);
+    }
+
+    private User createOwner(Tenant tenant) throws TenantManagementServerException {
+
+        String userId = getClaimValue(tenant.getAdminName(), UserCoreClaimConstants.USER_ID_CLAIM_URI, tenant.getId());
+        User owner = new User();
+        owner.setUsername(tenant.getAdminName());
+        owner.setUserID(userId);
+
+        return owner;
+    }
+
+    private Tenant getTenantFromTenantManager(String tenantDomain) throws TenantManagementServerException {
+
+        TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
+        int tenantId;
+        Tenant tenant;
+        try {
+            tenantId = tenantManager.getTenantId(tenantDomain);
+            tenant = (Tenant) tenantManager.getTenant(tenantId);
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            throw new TenantManagementServerException("Error while getting the tenant: " + tenantDomain + " .", e);
+        }
+        return tenant;
     }
 }

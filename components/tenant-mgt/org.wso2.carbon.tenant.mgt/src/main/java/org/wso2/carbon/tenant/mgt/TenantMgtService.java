@@ -18,8 +18,7 @@ package org.wso2.carbon.tenant.mgt;
 import org.wso2.carbon.stratos.common.exception.TenantMgtException;
 import org.wso2.carbon.user.core.common.User;
 import org.wso2.carbon.user.core.tenant.Tenant;
-
-import java.util.List;
+import org.wso2.carbon.user.core.tenant.TenantSearchResult;
 
 /**
  * This interface used to expose tenant management functionality as an OSGi Service.
@@ -40,13 +39,13 @@ public interface TenantMgtService {
      *
      * @param limit        limit per page.
      * @param offset       offset value.
-     * @param filter       filter value for IdP search.
-     * @param sortOrder    order of IdP ASC/DESC.
+     * @param filter       filter value for tenant search.
+     * @param sortOrder    order of Tenant ASC/DESC.
      * @param sortBy       the column value need to sort.
      * @return List<Tenant>
      * @throws TenantMgtException if failed to get the tenants.
      */
-    List<Tenant> listTenants(Integer limit, Integer offset, String filter, String sortOrder, String sortBy)
+    TenantSearchResult listTenants(Integer limit, Integer offset, String filter, String sortOrder, String sortBy)
             throws TenantMgtException;
 
     /**
