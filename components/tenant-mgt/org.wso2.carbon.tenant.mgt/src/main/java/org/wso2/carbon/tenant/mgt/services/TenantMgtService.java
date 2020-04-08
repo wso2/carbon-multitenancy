@@ -45,7 +45,7 @@ public interface TenantMgtService {
      * @return List<Tenant>
      * @throws TenantMgtException if tenant listing failed.
      */
-    TenantSearchResult listTenants(Integer limit, Integer offset, String filter, String sortOrder, String sortBy)
+    TenantSearchResult listTenants(Integer limit, Integer offset, String sortOrder, String sortBy, String filter)
             throws TenantMgtException;
 
     /**

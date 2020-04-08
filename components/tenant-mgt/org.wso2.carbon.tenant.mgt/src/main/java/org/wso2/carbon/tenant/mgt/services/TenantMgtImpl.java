@@ -64,6 +64,7 @@ public class TenantMgtImpl implements TenantMgtService {
     private static final String DEFAULT_SORT_BY = "UM_DOMAIN_NAME";
     private static final String DESC_SORT_ORDER = "DESC";
     private static final String ASC_SORT_ORDER = "ASC";
+    public static final String DOMAIN_NAME = "domainName";
 
     public String addTenant(Tenant tenant) throws TenantMgtException {
 
@@ -101,19 +102,19 @@ public class TenantMgtImpl implements TenantMgtService {
         return tenant.getTenantUniqueID();
     }
 
-    public TenantSearchResult listTenants(Integer limit, Integer offset, String filter, String sortOrder, String sortBy)
+    public TenantSearchResult listTenants(Integer limit, Integer offset, String sortOrder, String sortBy, String filter)
             throws TenantMgtException {
 
         TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
         try {
             TenantSearchResult tenantSearchResult = new TenantSearchResult();
 
-            setParameters(limit, offset, filter, sortOrder, sortBy, tenantSearchResult);
+            setParameters(limit, offset, sortOrder, sortBy, filter, tenantSearchResult);
 
-            tenantSearchResult =
-                    tenantManager.listTenants(tenantSearchResult.getLimit(), tenantSearchResult.getOffSet(),
-                            tenantSearchResult.getFilter(), tenantSearchResult.getSortOrder(),
-                            tenantSearchResult.getSortBy());
+            tenantSearchResult = tenantManager
+                    .listTenants(tenantSearchResult.getLimit(), tenantSearchResult.getOffSet(),
+                            tenantSearchResult.getSortOrder(), tenantSearchResult.getSortBy(),
+                            tenantSearchResult.getFilter());
             assignUserIdToTenants(tenantSearchResult);
             return tenantSearchResult;
         } catch (UserStoreException e) {
@@ -334,13 +335,13 @@ public class TenantMgtImpl implements TenantMgtService {
      * @param result    result object.
      * @throws TenantManagementClientException Error while validating pagination parameters.
      */
-    private void setParameters(Integer limit, Integer offset, String filter, String sortOrder, String sortBy,
+    private void setParameters(Integer limit, Integer offset, String sortOrder, String sortBy, String filter,
                                TenantSearchResult result) throws TenantManagementClientException {
 
         result.setLimit(validateLimit(limit));
         result.setOffSet(validateOffset(offset));
-        result.setSortBy(validateSortBy(sortBy));
         result.setSortOrder(validateSortOrder(sortOrder));
+        result.setSortBy(validateSortBy(sortBy));
         result.setFilter(filter);
     }
 
@@ -358,6 +359,19 @@ public class TenantMgtImpl implements TenantMgtService {
                         DEFAULT_SORT_BY);
             }
             return DEFAULT_SORT_BY;
+        }
+
+        switch (sortBy) {
+            case DOMAIN_NAME:
+                sortBy = DEFAULT_SORT_BY;
+                break;
+            default:
+                sortBy = DEFAULT_SORT_BY;
+                if (log.isDebugEnabled()) {
+                    log.debug("sortBy attribute is incorrect. Therefore we set the default sortBy attribute. " +
+                            "sortBy: " + DEFAULT_SORT_BY);
+                }
+                break;
         }
         return sortBy;
     }

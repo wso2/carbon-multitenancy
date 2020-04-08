@@ -32,8 +32,6 @@ import org.wso2.carbon.stratos.common.TenantBillingService;
 import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
 import org.wso2.carbon.stratos.common.util.CommonUtil;
 import org.wso2.carbon.stratos.common.util.StratosConfiguration;
-import org.wso2.carbon.tenant.mgt.services.TenantMgtImpl;
-import org.wso2.carbon.tenant.mgt.services.TenantMgtService;
 import org.wso2.carbon.tenant.mgt.internal.util.TenantMgtRampartUtil;
 import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -73,8 +71,6 @@ public class TenantMgtServiceComponent {
 
     private static TenantBillingService billingService = null;
 
-    private static TenantMgtService tenantMgtService;
-
     @Activate
     protected void activate(ComponentContext context) {
 
@@ -93,12 +89,6 @@ public class TenantMgtServiceComponent {
             log.debug("******* Tenant Config bundle is activated ******* ");
         } catch (Exception e) {
             log.error("******* Tenant Config bundle failed activating ****", e);
-        }
-        TenantMgtImpl tenantMgt = new TenantMgtImpl();
-        context.getBundleContext().registerService(TenantMgtImpl.class
-                .getName(), tenantMgt, null);
-        if (log.isDebugEnabled()) {
-            log.debug("*************Tenant management component is activated.**************");
         }
     }
 
@@ -309,10 +299,5 @@ public class TenantMgtServiceComponent {
     public static TenantBillingService getBillingService() {
 
         return billingService;
-    }
-
-    public static TenantMgtService getTenantMgtService() {
-
-        return tenantMgtService;
     }
 }
