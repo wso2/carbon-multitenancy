@@ -88,8 +88,8 @@ public class TenantMgtImpl implements TenantMgtService {
             // For the super tenant tenant creation, tenants are always activated as they are created.
             TenantMgtUtil.activateTenantInitially(tenantInfoBean, tenantId);
         } catch (Exception e) {
-            if (e instanceof TenantManagementClientException) {
-                throw (TenantManagementClientException) e;
+            if (e instanceof TenantMgtException) {
+                throw (TenantMgtException) e;
             } else {
                 throw new TenantManagementServerException(e.getMessage(), e);
             }
@@ -115,7 +115,6 @@ public class TenantMgtImpl implements TenantMgtService {
                     .listTenants(tenantSearchResult.getLimit(), tenantSearchResult.getOffSet(),
                             tenantSearchResult.getSortOrder(), tenantSearchResult.getSortBy(),
                             tenantSearchResult.getFilter());
-            assignUserIdToTenants(tenantSearchResult);
             return tenantSearchResult;
         } catch (UserStoreException e) {
             throw new TenantManagementServerException("Error in retrieving the tenant information.", e);
@@ -131,10 +130,6 @@ public class TenantMgtImpl implements TenantMgtService {
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             throw new TenantManagementServerException("Error while getting the tenant.", e);
         }
-
-        String userId = getClaimValue(tenant.getAdminName(), UserCoreClaimConstants.USER_ID_CLAIM_URI, tenant.getId());
-        tenant.setAdminUserId(userId);
-
         return tenant;
     }
 
@@ -215,15 +210,15 @@ public class TenantMgtImpl implements TenantMgtService {
         }
     }
 
-    private void validateInputs(Tenant tenant) throws TenantManagementClientException, TenantManagementServerException {
+    private void validateInputs(Tenant tenant) throws TenantMgtException {
 
         try {
             CommonUtil.validateEmail(tenant.getEmail());
             TenantMgtUtil.validateDomain(tenant.getDomain());
             checkIsSuperTenantInvoking();
         } catch (Exception e) {
-            if (e instanceof TenantManagementClientException) {
-                throw (TenantManagementClientException) e;
+            if (e instanceof TenantMgtException) {
+                throw (TenantMgtException) e;
             } else {
                 throw new TenantManagementServerException(e.getMessage(), e);
             }
@@ -308,20 +303,6 @@ public class TenantMgtImpl implements TenantMgtService {
             throw new TenantManagementServerException("Invalid data. Security Alert! Non super tenant trying to " +
                     "create a tenant.");
         }
-    }
-
-    private void assignUserIdToTenants(TenantSearchResult tenantSearchResult)
-            throws TenantManagementServerException {
-
-        List<Tenant> tenantListWithUserId = new ArrayList<>();
-        for (Tenant tenant : tenantSearchResult.getTenantList()) {
-            String userId = getClaimValue(tenant.getAdminName(), UserCoreClaimConstants.USER_ID_CLAIM_URI,
-                    tenant.getId());
-            tenant.setAdminUserId(userId);
-            tenantListWithUserId.add(tenant);
-        }
-
-        tenantSearchResult.setTenantList(tenantListWithUserId);
     }
 
     /**
@@ -450,32 +431,11 @@ public class TenantMgtImpl implements TenantMgtService {
         return offset;
     }
 
-    private String getClaimValue(String userName, String claim, int tenantId) throws TenantManagementServerException {
-
-        String claimValue = null;
-        RealmService realmService = TenantMgtServiceComponent.getRealmService();
-        try {
-            UserRealm tenantUserRealm = realmService.getTenantUserRealm(tenantId);
-            if (tenantUserRealm != null) {
-                UserStoreManager userStoreManager = (UserStoreManager) tenantUserRealm.getUserStoreManager();
-                if (userStoreManager != null) {
-                    claimValue = userStoreManager.getUserClaimValue(userName, claim,
-                            UserCoreConstants.DEFAULT_PROFILE);
-                }
-            }
-        } catch (org.wso2.carbon.user.api.UserStoreException ex) {
-            throw new TenantManagementServerException("Error while getting claim value for the claim: " + claim, ex);
-        }
-        return claimValue;
-    }
-
     private User createOwner(Tenant tenant) throws TenantManagementServerException {
 
-        String userId = getClaimValue(tenant.getAdminName(), UserCoreClaimConstants.USER_ID_CLAIM_URI, tenant.getId());
         User owner = new User();
         owner.setUsername(tenant.getAdminName());
-        owner.setUserID(userId);
-
+        owner.setUserID(tenant.getAdminUserId());
         return owner;
     }
 

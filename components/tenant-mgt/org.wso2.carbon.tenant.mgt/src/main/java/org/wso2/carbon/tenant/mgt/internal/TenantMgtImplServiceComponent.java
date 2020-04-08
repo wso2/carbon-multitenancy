@@ -38,7 +38,7 @@ public class TenantMgtImplServiceComponent {
         TenantMgtService tenantMgt = new TenantMgtImpl();
         context.getBundleContext().registerService(TenantMgtService.class.getName(), tenantMgt, null);
         if (log.isDebugEnabled()) {
-            log.debug("*************Tenant management component is activated.**************");
+            log.debug("Tenant management component is activated.");
         }
     }
 

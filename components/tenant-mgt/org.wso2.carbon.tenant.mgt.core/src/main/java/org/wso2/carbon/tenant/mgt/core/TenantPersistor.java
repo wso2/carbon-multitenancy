@@ -15,6 +15,7 @@
  */
 package org.wso2.carbon.tenant.mgt.core;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
@@ -47,6 +48,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_EXISTING_DOMAIN;
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_EXISTING_USER_NAME;
+import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_MISSING_REQUIRED_PARAMETER;
 
 /**
  * TenantPersistenceManager - Methods related to persisting the tenant.
@@ -177,13 +179,26 @@ public class TenantPersistor {
      *
      * @param tenant - the tenant
      * @return tenantId - the tenant id
-     * @throws Exception - UserStoreException
+     * @throws TenantManagementServerException
      */
-    private int addTenant(Tenant tenant) throws TenantManagementServerException {
+    private int addTenant(Tenant tenant) throws TenantMgtException {
 
         int tenantId;
         TenantManager tenantManager = TenantMgtCoreServiceComponent.getTenantManager();
         try {
+            if (StringUtils.isBlank(tenant.getAdminFirstName())) {
+                throw new TenantManagementClientException(ERROR_CODE_MISSING_REQUIRED_PARAMETER.getCode(), String
+                        .format(ERROR_CODE_MISSING_REQUIRED_PARAMETER.getMessage(), "owner firstName"));
+            } else if (StringUtils.isBlank(tenant.getAdminLastName())) {
+                throw new TenantManagementClientException(ERROR_CODE_MISSING_REQUIRED_PARAMETER.getCode(), String
+                        .format(ERROR_CODE_MISSING_REQUIRED_PARAMETER.getMessage(), "owner lastName"));
+            } else if (StringUtils.isBlank(tenant.getAdminName())) {
+                throw new TenantManagementClientException(ERROR_CODE_MISSING_REQUIRED_PARAMETER.getCode(), String
+                        .format(ERROR_CODE_MISSING_REQUIRED_PARAMETER.getMessage(), "owner name"));
+            } else if (StringUtils.isBlank(tenant.getDomain())) {
+                throw new TenantManagementClientException(ERROR_CODE_MISSING_REQUIRED_PARAMETER.getCode(), String
+                        .format(ERROR_CODE_MISSING_REQUIRED_PARAMETER.getMessage(), "tenant domain"));
+            }
             tenantId = tenantManager.addTenant(tenant);
             if (log.isDebugEnabled()) {
                 log.debug("Tenant is successfully added: " + tenant.getDomain());

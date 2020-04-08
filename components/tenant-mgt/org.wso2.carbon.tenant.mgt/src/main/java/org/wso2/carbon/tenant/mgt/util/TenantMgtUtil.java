@@ -77,8 +77,8 @@ public class TenantMgtUtil {
     private static final String ILLEGAL_CHARACTERS_FOR_TENANT_DOMAIN = ".*[^a-z0-9\\._\\-].*";
     private static final String DOT = ".";
     private static ThreadLocal<Boolean> isTenantAdminCreationOperation = new ThreadLocal<>();
-    private static final int DEFAULT_ITEMS_PRE_PAGE = 15;
-    private static final int DEFAULT_MAXIMUM_ITEMS_PRE_PAGE = 100;
+    private static final int DEFAULT_ITEMS_PER_PAGE = 15;
+    private static final int DEFAULT_MAXIMUM_ITEMS_PER_PAGE = 100;
 
     /**
      * Prepares string to show theme management page.
@@ -613,7 +613,7 @@ public class TenantMgtUtil {
      */
     public static int getDefaultItemsPerPage() {
 
-        int defaultItemsPerPage = DEFAULT_ITEMS_PRE_PAGE;
+        int defaultItemsPerPage = DEFAULT_ITEMS_PER_PAGE;
         try {
             String defaultItemsPerPageProperty = ServerConfiguration.getInstance().getFirstProperty("ItemsPerPage");
             if (StringUtils.isNotBlank(defaultItemsPerPageProperty)) {
@@ -623,7 +623,7 @@ public class TenantMgtUtil {
                 }
             }
         } catch (NumberFormatException e) {
-            defaultItemsPerPage = DEFAULT_ITEMS_PRE_PAGE;
+            defaultItemsPerPage = DEFAULT_ITEMS_PER_PAGE;
             log.warn("Error occurred while parsing the 'ItemsPerPage' property value in carbon.xml.", e);
         }
         return defaultItemsPerPage;
@@ -636,14 +636,14 @@ public class TenantMgtUtil {
      */
     public static int getMaximumItemPerPage() {
 
-        int maximumItemsPerPage = DEFAULT_MAXIMUM_ITEMS_PRE_PAGE;
+        int maximumItemsPerPage = DEFAULT_MAXIMUM_ITEMS_PER_PAGE;
         String maximumItemsPerPagePropertyValue = ServerConfiguration.getInstance().getFirstProperty(
-                "TenantManagement.maxListLimit");
+                "MaximumItemsPerPage");
         if (StringUtils.isNotBlank(maximumItemsPerPagePropertyValue)) {
             try {
                 maximumItemsPerPage = Integer.parseInt(maximumItemsPerPagePropertyValue);
             } catch (NumberFormatException e) {
-                maximumItemsPerPage = DEFAULT_MAXIMUM_ITEMS_PRE_PAGE;
+                maximumItemsPerPage = DEFAULT_MAXIMUM_ITEMS_PER_PAGE;
                 log.warn("Error occurred while parsing the 'MaximumItemsPerPage' property value in carbon.xml.", e);
             }
         }
