@@ -32,9 +32,9 @@ import org.wso2.carbon.stratos.common.TenantBillingService;
 import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
 import org.wso2.carbon.stratos.common.util.CommonUtil;
 import org.wso2.carbon.stratos.common.util.StratosConfiguration;
-import org.wso2.carbon.tenant.mgt.TenantMgtService;
+import org.wso2.carbon.tenant.mgt.services.TenantMgtImpl;
+import org.wso2.carbon.tenant.mgt.services.TenantMgtService;
 import org.wso2.carbon.tenant.mgt.internal.util.TenantMgtRampartUtil;
-import org.wso2.carbon.tenant.mgt.services.TenantMgtAdminService;
 import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
@@ -94,6 +94,12 @@ public class TenantMgtServiceComponent {
         } catch (Exception e) {
             log.error("******* Tenant Config bundle failed activating ****", e);
         }
+        TenantMgtImpl tenantMgt = new TenantMgtImpl();
+        context.getBundleContext().registerService(TenantMgtImpl.class
+                .getName(), tenantMgt, null);
+        if (log.isDebugEnabled()) {
+            log.debug("*************Tenant management component is activated.**************");
+        }
     }
 
     @Reference(
@@ -116,22 +122,6 @@ public class TenantMgtServiceComponent {
     protected void deactivate(ComponentContext context) {
 
         log.debug("******* Governance Tenant Config bundle is deactivated ******* ");
-    }
-
-    @Reference(
-            name = "org.wso2.carbon.tenant.mgt.service",
-            service = org.wso2.carbon.tenant.mgt.TenantMgtService.class,
-            cardinality = ReferenceCardinality.MULTIPLE,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetTenantMgtService")
-    protected void setTenantMgtService(TenantMgtService tenantMgtService) {
-
-        TenantMgtServiceComponent.tenantMgtService = tenantMgtService;
-    }
-
-    protected void unsetTenantMgtService(TenantMgtService tenantMgtService) {
-
-        setTenantMgtService(null);
     }
 
     @Reference(

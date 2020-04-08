@@ -382,8 +382,10 @@ public class TenantMgtUtil {
             claimsMap.put(UserCoreConstants.ClaimTypeURIs.GIVEN_NAME, tenant.getAdminFirstName());
             claimsMap.put(UserCoreConstants.ClaimTypeURIs.SURNAME, tenant.getAdminLastName());
             claimsMap.put(UserCoreConstants.ClaimTypeURIs.EMAIL_ADDRESS, tenant.getEmail());
-            for (Map.Entry<String, String> entry : tenant.getClaimsMap().entrySet()) {
-                claimsMap.put(entry.getKey(), entry.getValue());
+            if (tenant.getClaimsMap() != null) {
+                for (Map.Entry<String, String> entry : tenant.getClaimsMap().entrySet()) {
+                    claimsMap.put(entry.getKey(), entry.getValue());
+                }
             }
 
             // Can be extended to store other user information.

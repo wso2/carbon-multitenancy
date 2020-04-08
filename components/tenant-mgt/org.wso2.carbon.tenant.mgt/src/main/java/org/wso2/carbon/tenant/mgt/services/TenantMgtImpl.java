@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.wso2.carbon.tenant.mgt;
+package org.wso2.carbon.tenant.mgt.services;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -31,7 +31,6 @@ import org.wso2.carbon.stratos.common.exception.TenantManagementServerException;
 import org.wso2.carbon.stratos.common.exception.TenantMgtException;
 import org.wso2.carbon.stratos.common.util.CommonUtil;
 import org.wso2.carbon.tenant.mgt.core.TenantPersistor;
-import org.wso2.carbon.tenant.mgt.core.internal.TenantMgtCoreServiceComponent;
 import org.wso2.carbon.tenant.mgt.internal.TenantMgtServiceComponent;
 import org.wso2.carbon.tenant.mgt.util.TenantMgtUtil;
 import org.wso2.carbon.user.api.RealmConfiguration;
@@ -57,7 +56,7 @@ import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMess
 import static org.wso2.carbon.tenant.mgt.util.TenantMgtUtil.initializeTenantInfoBean;
 
 /**
- * Default implementation of {@link org.wso2.carbon.tenant.mgt.TenantMgtService} interface.
+ * Default implementation of {@link TenantMgtService} interface.
  */
 public class TenantMgtImpl implements TenantMgtService {
 
@@ -97,9 +96,100 @@ public class TenantMgtImpl implements TenantMgtService {
         log.info("Added the tenant '" + tenantDomain + " [" + tenantId +
                 "]' by '" + PrivilegedCarbonContext.getThreadLocalCarbonContext().
                 getUsername() + "'");
-        TenantMgtUtil.prepareStringToShowThemeMgtPage(tenant.getId(), tenant.getUUID());
+        TenantMgtUtil.prepareStringToShowThemeMgtPage(tenant.getId(), tenant.getTenantUniqueID());
 
-        return tenant.getUUID();
+        return tenant.getTenantUniqueID();
+    }
+
+    public TenantSearchResult listTenants(Integer limit, Integer offset, String filter, String sortOrder, String sortBy)
+            throws TenantMgtException {
+
+        TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
+        try {
+            TenantSearchResult tenantSearchResult = new TenantSearchResult();
+
+            setParameters(limit, offset, filter, sortOrder, sortBy, tenantSearchResult);
+
+            tenantSearchResult =
+                    tenantManager.listTenants(tenantSearchResult.getLimit(), tenantSearchResult.getOffSet(),
+                            tenantSearchResult.getFilter(), tenantSearchResult.getSortOrder(),
+                            tenantSearchResult.getSortBy());
+            assignUserIdToTenants(tenantSearchResult);
+            return tenantSearchResult;
+        } catch (UserStoreException e) {
+            throw new TenantManagementServerException("Error in retrieving the tenant information.", e);
+        }
+    }
+
+    public Tenant getTenant(String tenantUniqueID) throws TenantMgtException {
+
+        TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
+        Tenant tenant;
+        try {
+            tenant = tenantManager.getTenant(tenantUniqueID);
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            throw new TenantManagementServerException("Error while getting the tenant.", e);
+        }
+
+        String userId = getClaimValue(tenant.getAdminName(), UserCoreClaimConstants.USER_ID_CLAIM_URI, tenant.getId());
+        tenant.setAdminUserId(userId);
+
+        return tenant;
+    }
+
+    public void activateTenant(String tenantUniqueID) throws TenantMgtException {
+
+        TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
+        int tenantId;
+        String tenantDomain = null;
+        try {
+            tenantManager.activateTenant(tenantUniqueID);
+            Tenant tenant = tenantManager.getTenant(tenantUniqueID);
+            tenantId = tenant.getId();
+            tenantDomain = tenant.getDomain();
+            // Notify tenant activation all listeners.
+            TenantMgtUtil.triggerTenantActivation(tenantId);
+        } catch (UserStoreException e) {
+            throw new TenantManagementServerException("Error in activating or getting the tenant using tenant " +
+                    "unique id: " + tenantUniqueID + " .", e);
+        } catch (StratosException e) {
+            throw new TenantManagementServerException("Error in notifying tenant activation of tenant: " +
+                    tenantDomain + " .", e);
+        }
+
+        log.info("Activated the tenant '" + tenantDomain + " [" + tenantId + "]' by '" +
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername() + "'");
+    }
+
+    public void deactivateTenant(String tenantUniqueID) throws TenantMgtException {
+
+        TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
+        int tenantId;
+        String tenantDomain = null;
+        try {
+            Tenant tenant = tenantManager.getTenant(tenantUniqueID);
+            tenantId = tenant.getId();
+            tenantDomain = tenant.getDomain();
+            // Notify tenant deactivation to all listeners.
+            TenantMgtUtil.triggerTenantDeactivation(tenantId);
+            tenantManager.deactivateTenant(tenantUniqueID);
+            TenantMgtUtil.unloadTenantConfigurations(tenantDomain, tenantId);
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            throw new TenantManagementServerException("Error in retrieving or deactivating the tenant using " +
+                    "tenant unique id: " + tenantUniqueID + " .", e);
+        } catch (StratosException e) {
+            throw new TenantManagementServerException("Error while triggering tenant deactivation for the tenant: " +
+                    tenantDomain + " .", e);
+        }
+        log.info("Deactivated the tenant '" + tenantDomain + " [" + tenantId +
+                "]' by '" + PrivilegedCarbonContext.getThreadLocalCarbonContext().
+                getUsername() + "'");
+    }
+
+    public User getOwner(String tenantUniqueID) throws TenantMgtException {
+
+        Tenant tenant = getTenantFromTenantManager(tenantUniqueID);
+        return createOwner(tenant);
     }
 
     private void createTenant(Tenant tenant) throws Exception {
@@ -142,7 +232,7 @@ public class TenantMgtImpl implements TenantMgtService {
     private void addAttributeValues(Tenant tenant) throws TenantMgtException {
 
         tenant.setCreatedDate(createDate());
-        tenant.setUUID(UUIDGenerator.generateUUID());
+        tenant.setTenantUniqueID(UUIDGenerator.generateUUID());
 
         RealmConfiguration realmConfiguration = getRealmConfigForTenant(tenant);
         tenant.setRealmConfig(realmConfiguration);
@@ -150,16 +240,16 @@ public class TenantMgtImpl implements TenantMgtService {
 
     private RealmConfiguration getRealmConfigForTenant(Tenant tenant) throws TenantMgtException {
 
-        RealmService realmService = TenantMgtCoreServiceComponent.getRealmService();
+        RealmService realmService = TenantMgtServiceComponent.getRealmService();
         RealmConfiguration realmConfig = realmService.getBootstrapRealmConfiguration();
         TenantMgtConfiguration tenantMgtConfiguration = realmService.getTenantMgtConfiguration();
         try {
-            MultiTenantRealmConfigBuilder builder = TenantMgtCoreServiceComponent.
+            MultiTenantRealmConfigBuilder builder = TenantMgtServiceComponent.
                     getRealmService().getMultiTenantRealmConfigBuilder();
             RealmConfiguration realmConfigToPersist =
                     builder.getRealmConfigForTenantToPersist(realmConfig, tenantMgtConfiguration,
                             tenant, -1);
-            // Make AddAdmin true since user creation should happen even AddAdmin false
+            // Make AddAdmin true since user creation should happen even AddAdmin false.
             realmService.getBootstrapRealm().getRealmConfiguration().setAddAdmin("true");
             return realmConfigToPersist;
 
@@ -176,7 +266,7 @@ public class TenantMgtImpl implements TenantMgtService {
      */
     private void addTenantAdminUser(Tenant tenant) throws TenantManagementServerException {
 
-        RealmService realmService = TenantMgtCoreServiceComponent.getRealmService();
+        RealmService realmService = TenantMgtServiceComponent.getRealmService();
         try {
             realmService.getTenantManager().getTenant(tenant.getId()).getRealmConfig()
                     .setAdminPassword(tenant.getAdminPassword());
@@ -195,7 +285,7 @@ public class TenantMgtImpl implements TenantMgtService {
 
     private void notifyTenantAddition(TenantInfoBean tenantInfoBean) throws TenantMgtException {
 
-        //Notify tenant addition
+        // Notify tenant addition.
         try {
             TenantMgtUtil.triggerAddTenant(tenantInfoBean);
         } catch (StratosException e) {
@@ -219,26 +309,6 @@ public class TenantMgtImpl implements TenantMgtService {
         }
     }
 
-    public TenantSearchResult listTenants(Integer limit, Integer offset, String filter, String sortOrder, String sortBy)
-            throws TenantMgtException {
-
-        TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
-        try {
-            TenantSearchResult tenantSearchResult;
-
-            limit = validateLimit(limit);
-            offset = validateOffset(offset);
-            sortBy = validateSortBy(sortBy);
-            sortOrder = validateSortOrder(sortOrder);
-
-            tenantSearchResult = tenantManager.listTenants(limit, offset, sortBy, sortOrder, sortBy);
-            assignUserIdToTenants(tenantSearchResult);
-            return tenantSearchResult;
-        } catch (UserStoreException e) {
-            throw new TenantManagementServerException("Error in retrieving the tenant information.", e);
-        }
-    }
-
     private void assignUserIdToTenants(TenantSearchResult tenantSearchResult)
             throws TenantManagementServerException {
 
@@ -254,10 +324,31 @@ public class TenantMgtImpl implements TenantMgtService {
     }
 
     /**
+     * Set pagination parameters to tenant search result.
+     *
+     * @param limit     page limit.
+     * @param offset    offset value.
+     * @param filter    filter value for tenant search.
+     * @param sortOrder order of tenant(ASC/DESC).
+     * @param sortBy    the column value need to sort.
+     * @param result    result object.
+     * @throws TenantManagementClientException Error while validating pagination parameters.
+     */
+    private void setParameters(Integer limit, Integer offset, String filter, String sortOrder, String sortBy,
+                               TenantSearchResult result) throws TenantManagementClientException {
+
+        result.setLimit(validateLimit(limit));
+        result.setOffSet(validateOffset(offset));
+        result.setSortBy(validateSortBy(sortBy));
+        result.setSortOrder(validateSortOrder(sortOrder));
+        result.setFilter(filter);
+    }
+
+    /**
      * Validate sortBy.
      *
      * @param sortBy sortBy attribute.
-     * @return Validated sortOrder and sortBy.
+     * @return Validated sortBy.
      */
     private String validateSortBy(String sortBy) {
 
@@ -275,7 +366,7 @@ public class TenantMgtImpl implements TenantMgtService {
      * Validate sortOrder.
      *
      * @param sortOrder sortOrder ASC/DESC.
-     * @return Validated sortOrder and sortBy.
+     * @return Validated sortOrder.
      */
     private String validateSortOrder(String sortOrder) {
 
@@ -297,9 +388,9 @@ public class TenantMgtImpl implements TenantMgtService {
 
     /**
      * Validate limit.
-     *
-     * @param limit given limit value.
-     * @return validated limit and offset value.
+     * @param limit limit value.
+     * @return validated limit value.
+     * @throws TenantManagementClientException if limit validation fails.
      */
     private int validateLimit(Integer limit) throws TenantManagementClientException {
 
@@ -328,9 +419,9 @@ public class TenantMgtImpl implements TenantMgtService {
     /**
      * Validate offset.
      *
-     * @param offset given offset value.
-     * @return validated limit and offset value.
-     * @throws TenantManagementClientException Error while set offset
+     * @param offset offset value.
+     * @return validated offset value.
+     * @throws TenantManagementClientException Error while setting offset.
      */
     private int validateOffset(Integer offset) throws TenantManagementClientException {
 
@@ -343,24 +434,6 @@ public class TenantMgtImpl implements TenantMgtService {
             throw new TenantManagementClientException(ERROR_CODE_INVALID_OFFSET);
         }
         return offset;
-    }
-
-    public Tenant getTenant(String tenantDomain) throws TenantMgtException {
-
-        TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
-        int tenantId;
-        Tenant tenant;
-        try {
-            tenantId = tenantManager.getTenantId(tenantDomain);
-            tenant = (Tenant) tenantManager.getTenant(tenantId);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            throw new TenantManagementServerException("Error while getting the tenant: " + tenantDomain + " .", e);
-        }
-
-        String userId = getClaimValue(tenant.getAdminName(), UserCoreClaimConstants.USER_ID_CLAIM_URI, tenantId);
-        tenant.setAdminUserId(userId);
-
-        return tenant;
     }
 
     private String getClaimValue(String userName, String claim, int tenantId) throws TenantManagementServerException {
@@ -382,59 +455,6 @@ public class TenantMgtImpl implements TenantMgtService {
         return claimValue;
     }
 
-    public void activateTenant(String tenantDomain) throws TenantMgtException {
-
-        TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
-        int tenantId;
-        try {
-            tenantId = tenantManager.getTenantId(tenantDomain);
-            TenantMgtUtil.activateTenant(tenantDomain, tenantManager, tenantId);
-
-            // Notify tenant activation all listeners.
-            TenantMgtUtil.triggerTenantActivation(tenantId);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            throw new TenantManagementServerException("Error in retrieving the tenant id for the tenant domain: " +
-                    tenantDomain + " .", e);
-        } catch (StratosException e) {
-            throw new TenantManagementServerException("Error in notifying tenant activation of tenant: " +
-                    tenantDomain + " .", e);
-        } catch (Exception e) {
-            throw new TenantManagementServerException("Error while activating the tenant: " + tenantDomain + " .", e);
-        }
-
-        log.info("Activated the tenant '" + tenantDomain + " [" + tenantId + "]' by '" +
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername() + "'");
-    }
-
-    public void deactivateTenant(String tenantDomain) throws TenantMgtException {
-
-        TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
-        int tenantId;
-        try {
-            tenantId = tenantManager.getTenantId(tenantDomain);
-            // Notify tenant deactivation to all listeners.
-            TenantMgtUtil.triggerTenantDeactivation(tenantId);
-            TenantMgtUtil.deactivateTenant(tenantDomain, tenantManager, tenantId);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            throw new TenantManagementServerException("Error in retrieving the tenant id for the tenant domain: " +
-                    tenantDomain + " .", e);
-        } catch (StratosException e) {
-            throw new TenantManagementServerException("Error while triggering tenant deactivation for the tenant: " +
-                    tenantDomain + " .", e);
-        } catch (Exception e) {
-            throw new TenantManagementServerException("Error while deactivating the tenant: " + tenantDomain + " .", e);
-        }
-        log.info("Deactivated the tenant '" + tenantDomain + " [" + tenantId +
-                "]' by '" + PrivilegedCarbonContext.getThreadLocalCarbonContext().
-                getUsername() + "'");
-    }
-
-    public User getOwner(String tenantDomain) throws TenantMgtException {
-
-        Tenant tenant = getTenantFromTenantManager(tenantDomain);
-        return createOwner(tenant);
-    }
-
     private User createOwner(Tenant tenant) throws TenantManagementServerException {
 
         String userId = getClaimValue(tenant.getAdminName(), UserCoreClaimConstants.USER_ID_CLAIM_URI, tenant.getId());
@@ -445,16 +465,14 @@ public class TenantMgtImpl implements TenantMgtService {
         return owner;
     }
 
-    private Tenant getTenantFromTenantManager(String tenantDomain) throws TenantManagementServerException {
+    private Tenant getTenantFromTenantManager(String tenantUniqueID) throws TenantManagementServerException {
 
         TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
-        int tenantId;
         Tenant tenant;
         try {
-            tenantId = tenantManager.getTenantId(tenantDomain);
-            tenant = (Tenant) tenantManager.getTenant(tenantId);
+            tenant = tenantManager.getTenant(tenantUniqueID);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            throw new TenantManagementServerException("Error while getting the tenant: " + tenantDomain + " .", e);
+            throw new TenantManagementServerException("Error while getting the tenant: " + tenantUniqueID + " .", e);
         }
         return tenant;
     }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.wso2.carbon.tenant.mgt;
+package org.wso2.carbon.tenant.mgt.services;
 
 import org.wso2.carbon.stratos.common.exception.TenantMgtException;
 import org.wso2.carbon.user.core.common.User;
@@ -26,10 +26,10 @@ import org.wso2.carbon.user.core.tenant.TenantSearchResult;
 public interface TenantMgtService {
 
     /**
-     * super admin adds a tenant.
+     * Adds a tenant.
      *
      * @param tenant tenant information.
-     * @return UUID uuid used to represent the tenant.
+     * @return tenantUniqueID.
      * @throws TenantMgtException if error in adding new tenant.
      */
     String addTenant(Tenant tenant) throws TenantMgtException;
@@ -43,41 +43,41 @@ public interface TenantMgtService {
      * @param sortOrder    order of Tenant ASC/DESC.
      * @param sortBy       the column value need to sort.
      * @return List<Tenant>
-     * @throws TenantMgtException if failed to get the tenants.
+     * @throws TenantMgtException if tenant listing failed.
      */
     TenantSearchResult listTenants(Integer limit, Integer offset, String filter, String sortOrder, String sortBy)
             throws TenantMgtException;
 
     /**
-     * Get a specific tenant.
+     * Get a specific tenant using tenant uuid.
      *
-     * @param tenantDomain tenant domain.
+     * @param tenantUniqueIdentifier tenant uuid.
      * @return Tenant
      * @throws TenantMgtException if getting the tenant fails.
      */
-    Tenant getTenant(String tenantDomain) throws TenantMgtException;
+    Tenant getTenant(String tenantUniqueIdentifier) throws TenantMgtException;
 
     /**
-     * Get owner of the tenant.
-     * @param tenantDomain tenant domain.
-     * @return User user details.
+     * Get owner of the tenant using tenant uuid.
+     * @param tenantUniqueIdentifier tenant uuid.
+     * @return User.
      * @throws TenantMgtException if owner retrieval fails.
      */
-    User getOwner(String tenantDomain) throws TenantMgtException;
+    User getOwner(String tenantUniqueIdentifier) throws TenantMgtException;
 
     /**
      * Activate a deactivated tenant, by the super tenant.
      *
-     * @param tenantDomain tenant domain
+     * @param tenantUniqueIdentifier tenant uuid.
      * @throws TenantMgtException if the tenant activation fails.
      */
-    void activateTenant(String tenantDomain) throws TenantMgtException;
+    void activateTenant(String tenantUniqueIdentifier) throws TenantMgtException;
 
     /**
      * Deactivate the given tenant.
      *
-     * @param tenantDomain tenant domain
+     * @param tenantUniqueIdentifier tenant uuid.
      * @throws TenantMgtException if tenant deactivation fails.
      */
-    void deactivateTenant(String tenantDomain) throws TenantMgtException;
+    void deactivateTenant(String tenantUniqueIdentifier) throws TenantMgtException;
 }
