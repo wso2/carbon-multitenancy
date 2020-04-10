@@ -18,11 +18,8 @@
 package org.wso2.carbon.tenant.mgt.internal;
 
 import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.description.AxisService;
-import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.neethi.Policy;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -32,7 +29,6 @@ import org.wso2.carbon.stratos.common.TenantBillingService;
 import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
 import org.wso2.carbon.stratos.common.util.CommonUtil;
 import org.wso2.carbon.stratos.common.util.StratosConfiguration;
-import org.wso2.carbon.tenant.mgt.internal.util.TenantMgtRampartUtil;
 import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
@@ -57,8 +53,6 @@ public class TenantMgtServiceComponent {
 
     private static Log log = LogFactory.getLog(TenantMgtServiceComponent.class);
 
-    private static final String GAPP_TENANT_REG_SERVICE_NAME = "GAppTenantRegistrationService";
-
     private static RealmService realmService;
 
     private static RegistryService registryService;
@@ -67,7 +61,7 @@ public class TenantMgtServiceComponent {
 
     private static ServerConfigurationService serverConfigurationService;
 
-    private static List<TenantMgtListener> tenantMgtListeners = new ArrayList<TenantMgtListener>();
+    private static List<TenantMgtListener> tenantMgtListeners = new ArrayList<>();
 
     private static TenantBillingService billingService = null;
 
@@ -85,7 +79,6 @@ public class TenantMgtServiceComponent {
                 String eula = CommonUtil.loadTermsOfUsage();
                 CommonUtil.setEula(eula);
             }
-            populateRampartConfig(configurationContextService.getServerConfigContext().getAxisConfiguration());
             log.debug("******* Tenant Config bundle is activated ******* ");
         } catch (Exception e) {
             log.error("******* Tenant Config bundle failed activating ****", e);
@@ -256,28 +249,6 @@ public class TenantMgtServiceComponent {
     public static UserRegistry getConfigSystemRegistry(int tenantId) throws RegistryException {
 
         return registryService.getConfigSystemRegistry(tenantId);
-    }
-
-    /**
-     * Updates RelyingPartyService with Crypto information
-     *
-     * @param config AxisConfiguration
-     * @throws Exception
-     */
-    private void populateRampartConfig(AxisConfiguration config) throws Exception {
-
-        AxisService service;
-        // Get the RelyingParty Service to update security policy with keystore information
-        service = config.getService(GAPP_TENANT_REG_SERVICE_NAME);
-        if (service == null) {
-            String msg = GAPP_TENANT_REG_SERVICE_NAME + " is not available in the Configuration Context";
-            log.error(msg);
-            throw new Exception(msg);
-        }
-        // Create a Rampart Config with default crypto information
-        Policy rampartConfig = TenantMgtRampartUtil.getDefaultRampartConfig();
-        // Add the RampartConfig to service policy
-        service.getPolicySubject().attachPolicy(rampartConfig);
     }
 
     @Reference(

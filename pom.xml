@@ -435,21 +435,6 @@
                 <artifactId>org.wso2.carbon.event.core</artifactId>
                 <version>${carbon.commons.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.apache.rampart.wso2</groupId>
-                <artifactId>rampart-core</artifactId>
-                <version>${rampart.wso2.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.rampart.wso2</groupId>
-                <artifactId>rampart-policy</artifactId>
-                <version>${rampart.wso2.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.rampart.wso2</groupId>
-                <artifactId>rampart-trust</artifactId>
-                <version>${rampart.wso2.version}</version>
-            </dependency>
 
 
             <dependency>
@@ -984,9 +969,6 @@
         <version.javax.servlet.jsp>2.2.0.v201112011158</version.javax.servlet.jsp>
         <version.javax.servlet>3.0.0.v201112011016</version.javax.servlet>
 
-        <!-- Rampart Version -->
-        <rampart.wso2.version>1.6.1-wso2v41</rampart.wso2.version>
-
         <slf4j.wso2.version>1.5.10.wso2v1</slf4j.wso2.version>
 
         <libthrift.wso2.version>0.9.2.wso2v1</libthrift.wso2.version>
@@ -1043,7 +1025,6 @@
         <orbit.version.commons.fileuploader>1.2.0.wso2v1</orbit.version.commons.fileuploader>
 
         <opensaml2.wso2.version>3.3.1.wso2v1</opensaml2.wso2.version>
-        <wss4j.version>1.5.11.wso2v11</wss4j.version>
 
         <com.google.code.gson.version>2.8.5</com.google.code.gson.version>
         <orbit.version.json>3.0.0.wso2v1</orbit.version.json>
