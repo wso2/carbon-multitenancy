@@ -35,22 +35,16 @@ import org.wso2.carbon.tenant.mgt.internal.TenantMgtServiceComponent;
 import org.wso2.carbon.tenant.mgt.util.TenantMgtUtil;
 import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.api.TenantMgtConfiguration;
-import org.wso2.carbon.user.api.UserRealm;
-import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserStoreException;
-import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.common.User;
 import org.wso2.carbon.user.core.config.multitenancy.MultiTenantRealmConfigBuilder;
-import org.wso2.carbon.user.core.constants.UserCoreClaimConstants;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.Tenant;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.user.core.tenant.TenantSearchResult;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_INVALID_OFFSET;
 import static org.wso2.carbon.tenant.mgt.util.TenantMgtUtil.initializeTenantInfoBean;
@@ -80,7 +74,7 @@ public class TenantMgtImpl implements TenantMgtService {
             createTenant(tenant);
             addTenantAdminUser(tenant);
             tenantId = tenant.getId();
-            addClaimsToUserStore(tenant, tenantDomain, tenantId);
+            addClaimsToUserStore(tenant);
 
             TenantInfoBean tenantInfoBean = initializeTenantInfoBean(tenantId, tenant);
             notifyTenantAddition(tenantInfoBean);
@@ -108,7 +102,6 @@ public class TenantMgtImpl implements TenantMgtService {
         TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
         try {
             TenantSearchResult tenantSearchResult = new TenantSearchResult();
-
             setParameters(limit, offset, sortOrder, sortBy, filter, tenantSearchResult);
 
             tenantSearchResult = tenantManager
@@ -194,13 +187,13 @@ public class TenantMgtImpl implements TenantMgtService {
         persistor.persistTenant(tenant);
     }
 
-    private void addClaimsToUserStore(Tenant tenant, String tenantDomain, int tenantId) throws Exception {
+    private void addClaimsToUserStore(Tenant tenant) throws Exception {
 
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-            carbonContext.setTenantDomain(tenantDomain);
-            carbonContext.setTenantId(tenantId);
+            carbonContext.setTenantDomain(tenant.getDomain());
+            carbonContext.setTenantId(tenant.getId());
 
             TenantMgtUtil.addClaimsToUserStoreManager(tenant);
         } finally {

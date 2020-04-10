@@ -22,6 +22,7 @@ import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.registry.core.utils.UUIDGenerator;
 import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
 import org.wso2.carbon.stratos.common.exception.StratosException;
 import org.wso2.carbon.stratos.common.util.ClaimsMgtUtil;
@@ -70,6 +71,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
         TenantMgtUtil.setTenantAdminCreationOperation(true);
 
         Tenant tenant = TenantMgtUtil.initializeTenant(tenantInfoBean);
+        tenant.setTenantUniqueID(UUIDGenerator.generateUUID());
         TenantPersistor  persistor = new TenantPersistor();
         // not validating the domain ownership, since created by super tenant
         int tenantId = persistor.persistTenant(tenant, false, tenantInfoBean.getSuccessKey(),
@@ -113,7 +115,8 @@ public class TenantMgtAdminService extends AbstractAdmin {
             "]' by '" + PrivilegedCarbonContext.getThreadLocalCarbonContext().
             getUsername() + "'");
 
-        return TenantMgtUtil.prepareStringToShowThemeMgtPage(tenant.getId());
+        TenantMgtUtil.prepareStringToShowThemeMgtPage(tenant.getId(), tenant.getTenantUniqueID());
+        return tenant.getTenantUniqueID();
     }
 
     /**
