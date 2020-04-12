@@ -15,6 +15,7 @@
  */
 package org.wso2.carbon.tenant.mgt.core;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
@@ -25,6 +26,9 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.stratos.common.config.CloudServiceConfigParser;
 import org.wso2.carbon.stratos.common.config.CloudServicesDescConfig;
 import org.wso2.carbon.stratos.common.constants.StratosConstants;
+import org.wso2.carbon.stratos.common.exception.TenantManagementClientException;
+import org.wso2.carbon.stratos.common.exception.TenantManagementServerException;
+import org.wso2.carbon.stratos.common.exception.TenantMgtException;
 import org.wso2.carbon.stratos.common.util.CloudServicesUtil;
 import org.wso2.carbon.stratos.common.util.CommonUtil;
 import org.wso2.carbon.tenant.mgt.core.internal.TenantMgtCoreServiceComponent;
@@ -32,12 +36,19 @@ import org.wso2.carbon.tenant.mgt.core.util.TenantCoreUtil;
 import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.api.TenantMgtConfiguration;
 import org.wso2.carbon.user.core.*;
+import org.wso2.carbon.user.core.AuthorizationManager;
+import org.wso2.carbon.user.core.UserRealm;
+import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.config.multitenancy.MultiTenantRealmConfigBuilder;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.Tenant;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.user.mgt.UserMgtConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+
+import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_EXISTING_DOMAIN;
+import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_EXISTING_USER_NAME;
+import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_MISSING_REQUIRED_PARAMETER;
 
 /**
  * TenantPersistenceManager - Methods related to persisting the tenant.
@@ -48,7 +59,6 @@ public class TenantPersistor {
 
     private static CloudServicesDescConfig cloudServicesDesc = null;
     private static final String ADD_ADMIN_TRUE = "true";
-        
 
     /**
      * Persists the given tenant
@@ -67,7 +77,6 @@ public class TenantPersistor {
         }else {
            tenantId=tenant.getId();
         }
-        
         try {
             doPostTenantCreationActions(tenant, originatedService);
         } catch (Exception e) {
@@ -122,16 +131,19 @@ public class TenantPersistor {
     }
 
     private void doPostTenantCreationActions(Tenant tenant,
-                                             String originatedService) throws Exception {
+                                             String originatedService) throws TenantManagementServerException {
 
-        TenantMgtCoreServiceComponent.getRegistryLoader().loadTenantRegistry(tenant.getId());
-        copyUIPermissions(tenant.getId());
+        try {
+            TenantMgtCoreServiceComponent.getRegistryLoader().loadTenantRegistry(tenant.getId());
+            copyUIPermissions(tenant.getId());
 
-        TenantCoreUtil.setOriginatedService(tenant.getId(), originatedService);
-        setActivationFlags(tenant.getId(), originatedService);
+            TenantCoreUtil.setOriginatedService(tenant.getId(), originatedService);
+            setActivationFlags(tenant.getId(), originatedService);
+        } catch (Exception ex) {
+            throw new TenantManagementServerException("Error performing post tenant creation actions.", ex);
+        }
 
         TenantCoreUtil.initializeRegistry(tenant.getId());
-
     }
 
     /**
@@ -164,23 +176,37 @@ public class TenantPersistor {
 
     /**
      * Adds a tenant to the tenant manager
-     * 
+     *
      * @param tenant - the tenant
      * @return tenantId - the tenant id
-     * @throws Exception - UserStoreException
+     * @throws TenantManagementServerException
      */
-    private int addTenant(Tenant tenant) throws Exception {
+    private int addTenant(Tenant tenant) throws TenantMgtException {
+
         int tenantId;
         TenantManager tenantManager = TenantMgtCoreServiceComponent.getTenantManager();
         try {
+            if (StringUtils.isBlank(tenant.getAdminFirstName())) {
+                throw new TenantManagementClientException(ERROR_CODE_MISSING_REQUIRED_PARAMETER.getCode(), String
+                        .format(ERROR_CODE_MISSING_REQUIRED_PARAMETER.getMessage(), "owner firstName"));
+            } else if (StringUtils.isBlank(tenant.getAdminLastName())) {
+                throw new TenantManagementClientException(ERROR_CODE_MISSING_REQUIRED_PARAMETER.getCode(), String
+                        .format(ERROR_CODE_MISSING_REQUIRED_PARAMETER.getMessage(), "owner lastName"));
+            } else if (StringUtils.isBlank(tenant.getAdminName())) {
+                throw new TenantManagementClientException(ERROR_CODE_MISSING_REQUIRED_PARAMETER.getCode(), String
+                        .format(ERROR_CODE_MISSING_REQUIRED_PARAMETER.getMessage(), "owner name"));
+            } else if (StringUtils.isBlank(tenant.getDomain())) {
+                throw new TenantManagementClientException(ERROR_CODE_MISSING_REQUIRED_PARAMETER.getCode(), String
+                        .format(ERROR_CODE_MISSING_REQUIRED_PARAMETER.getMessage(), "tenant domain"));
+            }
             tenantId = tenantManager.addTenant(tenant);
             if (log.isDebugEnabled()) {
                 log.debug("Tenant is successfully added: " + tenant.getDomain());
             }
-        } catch (UserStoreException e) {
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Error in adding tenant with domain: " + tenant.getDomain();
             log.error(msg, e);
-            throw new Exception(msg, e);
+            throw new TenantManagementServerException(msg, e);
         }
         return tenantId;
     }
@@ -257,32 +283,33 @@ public class TenantPersistor {
 
     /**
      * Validates that the chosen AdminUserName is valid.
-     * 
-     * @param tenant
-     *            tenant information
-     * @throws Exception
-     *             UserStoreException
+     *
+     * @param tenant Tenant information
+     * @throws TenantMgtException if admin username validation fails.
      */
-    private void validateAdminUserName(Tenant tenant) throws Exception {
-        UserRealm superTenantUserRealm =
-                                        TenantMgtCoreServiceComponent.getRealmService().
-                                                                      getBootstrapRealm();
-        RealmConfiguration realmConfig = TenantMgtCoreServiceComponent.
-                getBootstrapRealmConfiguration();
+    private void validateAdminUserName(Tenant tenant) throws TenantMgtException {
+
+        UserRealm superTenantUserRealm;
+        try {
+            superTenantUserRealm = TenantMgtCoreServiceComponent.getRealmService().getBootstrapRealm();
+        } catch (UserStoreException e) {
+            String msg = "Error while getting bootstrapRealm";
+            throw new TenantManagementServerException(msg, e);
+        }
+
+        RealmConfiguration realmConfig = TenantMgtCoreServiceComponent.getBootstrapRealmConfiguration();
         String uniqueAcrossTenants = realmConfig.getUserStoreProperty(
                 UserCoreConstants.RealmConfig.PROPERTY_USERNAME_UNIQUE);
         if ("true".equals(uniqueAcrossTenants)) {
             try {
-                if (superTenantUserRealm.getUserStoreManager().isExistingUser(
-                        tenant.getAdminName())) {
-                    throw new Exception("User name : " + tenant.getAdminName() +
-                                        " exists in the system. " +
-                                        "Please pick another user name for tenant Administrator.");
+                String adminName = tenant.getAdminName();
+                if (superTenantUserRealm.getUserStoreManager().isExistingUser(adminName)) {
+                    throw new TenantManagementClientException(ERROR_CODE_EXISTING_USER_NAME.getCode(), String.format
+                            (ERROR_CODE_EXISTING_USER_NAME.getMessage(), adminName));
                 }
             } catch (UserStoreException e) {
                 String msg = "Error in checking whether the user already exists in the system";
-                log.error(msg, e);
-                throw new Exception(msg, e);
+                throw new TenantManagementServerException(msg, e);
             }
         }
         if (log.isDebugEnabled()) {
@@ -292,31 +319,27 @@ public class TenantPersistor {
 
     /**
      * Persists the given tenant
+     *
      * @param tenant - tenant to be persisted
      * @return tenant Id
      * @throws Exception, if persisting tenant failed.
      */
     public int persistTenant(Tenant tenant) throws Exception {
-        String tenantDomain = tenant.getDomain();
-        int tenantId;
+
         validateAdminUserName(tenant);
-        boolean isDomainAvailable = CommonUtil.isDomainNameAvailable(tenantDomain);
+        boolean isDomainAvailable;
+        String tenantDomain = tenant.getDomain();
+        isDomainAvailable = CommonUtil.isDomainNameAvailable(tenantDomain);
         if (!isDomainAvailable) {
-            throw new Exception("Domain is not available to register");
+            throw new TenantManagementClientException(ERROR_CODE_EXISTING_DOMAIN.getCode(), String.format
+                    (ERROR_CODE_EXISTING_DOMAIN.getMessage(), tenantDomain));
         }
 
-        tenantId = addTenant(tenant);
+        int tenantId = addTenant(tenant);
         tenant.setId(tenantId);
 
-        try {
-            doPostTenantCreationActions(tenant, null);
-        } catch (Exception e) {
-            String msg = "Error performing post tenant creation actions";
-            if(log.isDebugEnabled()) {
-                log.debug(msg, e);
-            }
-            throw new Exception(msg);
-        }
+        doPostTenantCreationActions(tenant, null);
+
         return tenantId;
     }
 }
