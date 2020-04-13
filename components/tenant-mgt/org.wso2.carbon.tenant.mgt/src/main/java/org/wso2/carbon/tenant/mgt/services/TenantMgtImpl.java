@@ -81,7 +81,7 @@ public class TenantMgtImpl implements TenantMgtService {
 
             // For the super tenant tenant creation, tenants are always activated as they are created.
             TenantMgtUtil.activateTenantInitially(tenantInfoBean, tenantId);
-            //This was separate out to support handlers invocation.
+            // This was separate out to support handlers invocation.
             addAdditionalClaimsToUserStore(tenant);
         } catch (Exception e) {
             if (e instanceof TenantMgtException) {
