@@ -81,6 +81,8 @@ public class TenantMgtImpl implements TenantMgtService {
 
             // For the super tenant tenant creation, tenants are always activated as they are created.
             TenantMgtUtil.activateTenantInitially(tenantInfoBean, tenantId);
+            // This was separate out to support handlers invocation.
+            addAdditionalClaimsToUserStore(tenant);
         } catch (Exception e) {
             if (e instanceof TenantMgtException) {
                 throw (TenantMgtException) e;
@@ -199,6 +201,21 @@ public class TenantMgtImpl implements TenantMgtService {
         } finally {
             // Remove thread local variable set to identify operation triggered for a tenant admin user.
             TenantMgtUtil.clearTenantAdminCreationOperation();
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+    }
+
+    private void addAdditionalClaimsToUserStore(Tenant tenant) throws Exception {
+
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            carbonContext.setTenantDomain(tenant.getDomain());
+            carbonContext.setTenantId(tenant.getId());
+
+            TenantMgtUtil.addAdditionalClaimsToUserStoreManager(tenant);
+        } finally {
+            // Remove thread local variable set to identify operation triggered for a tenant admin user.
             PrivilegedCarbonContext.endTenantFlow();
         }
     }

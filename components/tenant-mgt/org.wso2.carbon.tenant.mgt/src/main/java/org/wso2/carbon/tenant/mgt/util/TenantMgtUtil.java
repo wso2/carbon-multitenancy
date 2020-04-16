@@ -382,6 +382,25 @@ public class TenantMgtUtil {
             claimsMap.put(UserCoreConstants.ClaimTypeURIs.GIVEN_NAME, tenant.getAdminFirstName());
             claimsMap.put(UserCoreConstants.ClaimTypeURIs.SURNAME, tenant.getAdminLastName());
             claimsMap.put(UserCoreConstants.ClaimTypeURIs.EMAIL_ADDRESS, tenant.getEmail());
+
+            // Can be extended to store other user information.
+            UserStoreManager userStoreManager =
+                    (UserStoreManager) TenantMgtServiceComponent.getRealmService().
+                            getTenantUserRealm(tenant.getId()).getUserStoreManager();
+            userStoreManager.setUserClaimValues(tenant.getAdminName(), claimsMap,
+                    UserCoreConstants.DEFAULT_PROFILE);
+
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            String msg = "Error in adding claims to the user.";
+            throw new TenantManagementServerException(msg, e);
+        }
+    }
+
+    public static void addAdditionalClaimsToUserStoreManager(Tenant tenant) throws Exception {
+
+        try {
+            Map<String, String> claimsMap = new HashMap<String, String>();
+
             if (tenant.getClaimsMap() != null) {
                 for (Map.Entry<String, String> entry : tenant.getClaimsMap().entrySet()) {
                     claimsMap.put(entry.getKey(), entry.getValue());
@@ -394,7 +413,6 @@ public class TenantMgtUtil {
                             getTenantUserRealm(tenant.getId()).getUserStoreManager();
             userStoreManager.setUserClaimValues(tenant.getAdminName(), claimsMap,
                     UserCoreConstants.DEFAULT_PROFILE);
-
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Error in adding claims to the user.";
             throw new TenantManagementServerException(msg, e);
