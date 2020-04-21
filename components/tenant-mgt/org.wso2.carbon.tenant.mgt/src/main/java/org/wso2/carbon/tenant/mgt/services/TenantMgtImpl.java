@@ -47,6 +47,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import java.util.Date;
 
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_INVALID_OFFSET;
+import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_RESOURCE_NOT_FOUND;
 import static org.wso2.carbon.tenant.mgt.util.TenantMgtUtil.initializeTenantInfoBean;
 
 /**
@@ -122,6 +123,10 @@ public class TenantMgtImpl implements TenantMgtService {
         Tenant tenant;
         try {
             tenant = tenantManager.getTenant(tenantUniqueID);
+            if (tenant == null) {
+                throw new TenantManagementClientException(ERROR_CODE_RESOURCE_NOT_FOUND.getCode(),
+                        String.format(ERROR_CODE_RESOURCE_NOT_FOUND.getMessage(), tenantUniqueID));
+            }
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             throw new TenantManagementServerException("Error while getting the tenant.", e);
         }
@@ -134,12 +139,17 @@ public class TenantMgtImpl implements TenantMgtService {
         int tenantId;
         String tenantDomain = null;
         try {
-            tenantManager.activateTenant(tenantUniqueID);
             Tenant tenant = tenantManager.getTenant(tenantUniqueID);
-            tenantId = tenant.getId();
-            tenantDomain = tenant.getDomain();
-            // Notify tenant activation all listeners.
-            TenantMgtUtil.triggerTenantActivation(tenantId);
+            if (tenant != null) {
+                tenantManager.activateTenant(tenantUniqueID);
+                tenantId = tenant.getId();
+                tenantDomain = tenant.getDomain();
+                // Notify tenant activation all listeners.
+                TenantMgtUtil.triggerTenantActivation(tenantId);
+            } else {
+                throw new TenantManagementClientException(ERROR_CODE_RESOURCE_NOT_FOUND.getCode(),
+                        String.format(ERROR_CODE_RESOURCE_NOT_FOUND.getMessage(), tenantUniqueID));
+            }
         } catch (UserStoreException e) {
             throw new TenantManagementServerException("Error in activating or getting the tenant using tenant " +
                     "unique id: " + tenantUniqueID + " .", e);
@@ -159,12 +169,20 @@ public class TenantMgtImpl implements TenantMgtService {
         String tenantDomain = null;
         try {
             Tenant tenant = tenantManager.getTenant(tenantUniqueID);
-            tenantId = tenant.getId();
-            tenantDomain = tenant.getDomain();
-            // Notify tenant deactivation to all listeners.
-            TenantMgtUtil.triggerTenantDeactivation(tenantId);
-            tenantManager.deactivateTenant(tenantUniqueID);
-            TenantMgtUtil.unloadTenantConfigurations(tenantDomain, tenantId);
+            if (tenant != null) {
+                tenantId = tenant.getId();
+                tenantDomain = tenant.getDomain();
+                // Notify tenant deactivation to all listeners.
+                TenantMgtUtil.triggerTenantDeactivation(tenantId);
+                tenantManager.deactivateTenant(tenantUniqueID);
+                TenantMgtUtil.unloadTenantConfigurations(tenantDomain, tenantId);
+                log.info("Deactivated the tenant '" + tenantDomain + " [" + tenantId +
+                        "]' by '" + PrivilegedCarbonContext.getThreadLocalCarbonContext().
+                        getUsername() + "'");
+            } else {
+                throw new TenantManagementClientException(ERROR_CODE_RESOURCE_NOT_FOUND.getCode(),
+                        String.format(ERROR_CODE_RESOURCE_NOT_FOUND.getMessage(), tenantUniqueID));
+            }
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             throw new TenantManagementServerException("Error in retrieving or deactivating the tenant using " +
                     "tenant unique id: " + tenantUniqueID + " .", e);
@@ -172,15 +190,16 @@ public class TenantMgtImpl implements TenantMgtService {
             throw new TenantManagementServerException("Error while triggering tenant deactivation for the tenant: " +
                     tenantDomain + " .", e);
         }
-        log.info("Deactivated the tenant '" + tenantDomain + " [" + tenantId +
-                "]' by '" + PrivilegedCarbonContext.getThreadLocalCarbonContext().
-                getUsername() + "'");
     }
 
     public User getOwner(String tenantUniqueID) throws TenantMgtException {
 
         Tenant tenant = getTenantFromTenantManager(tenantUniqueID);
-        return createOwner(tenant);
+        if (tenant != null) {
+            return createOwner(tenant);
+        }
+        throw new TenantManagementClientException(ERROR_CODE_RESOURCE_NOT_FOUND.getCode(),
+                String.format(ERROR_CODE_RESOURCE_NOT_FOUND.getMessage(), tenantUniqueID));
     }
 
     private void createTenant(Tenant tenant) throws Exception {
