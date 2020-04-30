@@ -18,6 +18,7 @@ package org.wso2.carbon.tenant.mgt.services;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.context.RegistryType;
@@ -60,6 +61,9 @@ public class TenantMgtImpl implements TenantMgtService {
     private static final String DESC_SORT_ORDER = "DESC";
     private static final String ASC_SORT_ORDER = "ASC";
     public static final String DOMAIN_NAME = "domainName";
+    public static final String TENANT_ADMIN_ASK_PASSWORD_CLAIM =
+            "http://wso2.org/claims/identity/tenantAdminAskPassword";
+    public static final String INVITE_VIA_EMAIL = "invite-via-email";
 
     public String addTenant(Tenant tenant) throws TenantMgtException {
 
@@ -82,6 +86,9 @@ public class TenantMgtImpl implements TenantMgtService {
 
             // For the super tenant tenant creation, tenants are always activated as they are created.
             TenantMgtUtil.activateTenantInitially(tenantInfoBean, tenantId);
+            if (INVITE_VIA_EMAIL.equalsIgnoreCase(tenant.getProvisioningMethod())) {
+                tenant.getClaimsMap().put(TENANT_ADMIN_ASK_PASSWORD_CLAIM, "true");
+            }
             // This was separate out to support handlers invocation.
             addAdditionalClaimsToUserStore(tenant);
         } catch (Exception e) {
@@ -293,8 +300,6 @@ public class TenantMgtImpl implements TenantMgtService {
 
         RealmService realmService = TenantMgtServiceComponent.getRealmService();
         try {
-            realmService.getTenantManager().getTenant(tenant.getId()).getRealmConfig()
-                    .setAdminPassword(tenant.getAdminPassword());
             // Here when get the user realm it create admin user and group.
             realmService.getTenantUserRealm(tenant.getId());
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
