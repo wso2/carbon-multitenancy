@@ -63,6 +63,7 @@ public class TenantMgtImpl implements TenantMgtService {
     public static final String DOMAIN_NAME = "domainName";
     public static final String TENANT_ADMIN_ASK_PASSWORD_CLAIM =
             "http://wso2.org/claims/identity/tenantAdminAskPassword";
+    public static final String INVITE_VIA_EMAIL = "invite-via-email";
 
     public String addTenant(Tenant tenant) throws TenantMgtException {
 
@@ -85,7 +86,7 @@ public class TenantMgtImpl implements TenantMgtService {
 
             // For the super tenant tenant creation, tenants are always activated as they are created.
             TenantMgtUtil.activateTenantInitially(tenantInfoBean, tenantId);
-            if ("invite-via-email".equalsIgnoreCase(tenant.getProvisioningMethod())) {
+            if (INVITE_VIA_EMAIL.equalsIgnoreCase(tenant.getProvisioningMethod())) {
                 tenant.getClaimsMap().put(TENANT_ADMIN_ASK_PASSWORD_CLAIM, "true");
             }
             // This was separate out to support handlers invocation.
