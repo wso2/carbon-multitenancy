@@ -337,7 +337,8 @@ public class TenantPersistor {
 
         int tenantId = addTenant(tenant);
         tenant.setId(tenantId);
-
+        TenantMgtCoreServiceComponent.getRealmService().getTenantManager().getTenant(tenantId).getRealmConfig()
+                .setAdminPassword(tenant.getAdminPassword());
         doPostTenantCreationActions(tenant, null);
 
         return tenantId;
