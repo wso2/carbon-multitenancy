@@ -46,6 +46,7 @@ import org.wso2.carbon.user.core.tenant.TenantSearchResult;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.Date;
+import java.util.HashMap;
 
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_INVALID_OFFSET;
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_RESOURCE_NOT_FOUND;
@@ -86,7 +87,11 @@ public class TenantMgtImpl implements TenantMgtService {
 
             // For the super tenant tenant creation, tenants are always activated as they are created.
             TenantMgtUtil.activateTenantInitially(tenantInfoBean, tenantId);
+
             if (INVITE_VIA_EMAIL.equalsIgnoreCase(tenant.getProvisioningMethod())) {
+                if (tenant.getClaimsMap() == null) {
+                    tenant.setClaimsMap(new HashMap<>());
+                }
                 tenant.getClaimsMap().put(TENANT_ADMIN_ASK_PASSWORD_CLAIM, "true");
             }
             // This was separate out to support handlers invocation.
