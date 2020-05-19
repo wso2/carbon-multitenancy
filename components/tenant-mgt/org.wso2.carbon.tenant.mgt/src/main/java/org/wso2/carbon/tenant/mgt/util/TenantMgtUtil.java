@@ -626,7 +626,7 @@ public class TenantMgtUtil {
         try {
             FileUtils.deleteDirectory(tenantDir);
         } catch (IOException e) {
-            log.error("Error in deleting tenant directory: " + tenantDirPath);
+            log.error("Error in deleting tenant directory: " + tenantDirPath, e);
         }
     }
 

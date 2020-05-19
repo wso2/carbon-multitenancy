@@ -1006,6 +1006,7 @@
         <commons-codec.version>1.12</commons-codec.version>
         <orbit.version.backport.util>3.1.0.wso2v1</orbit.version.backport.util>
         <version.commons.lang3>3.1</version.commons.lang3>
+        <commons.io.wso2.osgi.version.range>[2.4.0,3.0.0)</commons.io.wso2.osgi.version.range>
 
         <log4j.version>1.2.13</log4j.version>
 
