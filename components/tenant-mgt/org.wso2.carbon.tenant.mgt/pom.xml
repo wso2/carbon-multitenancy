@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.multitenancy</groupId>
         <artifactId>tenant-mgt-parent</artifactId>
-        <version>4.8.6-SNAPSHOT</version>
+        <version>4.8.7-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -54,6 +54,7 @@
                             org.apache.axiom.*; version="${axiom.osgi.version.range}",
                             org.apache.commons.lang; version="${commons-lang.wso2.osgi.version.range}",
                             org.osgi.service.component.*;version="${imp.package.version.osgi.services}",
+                            org.apache.commons.io; version="${commons.io.wso2.osgi.version.range}",
                             *;resolution:=optional
                         </Import-Package>
                         <Export-Package>

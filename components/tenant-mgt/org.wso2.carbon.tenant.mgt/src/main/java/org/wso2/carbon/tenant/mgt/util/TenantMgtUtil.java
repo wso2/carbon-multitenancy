@@ -20,6 +20,7 @@ import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -53,8 +54,11 @@ import org.wso2.carbon.user.core.config.multitenancy.MultiTenantRealmConfigBuild
 import org.wso2.carbon.user.core.jdbc.JDBCRealmConstants;
 import org.wso2.carbon.user.core.tenant.Tenant;
 import org.wso2.carbon.user.core.tenant.TenantManager;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -602,6 +606,27 @@ public class TenantMgtUtil {
                     getConnection(), tableName, tenantId);
         } catch (Exception e) {
             throw new RuntimeException("Error in looking up data source: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Delete the tenant directory of a given tenant id
+     *
+     * @param tenantId Id of the tenant
+     */
+    public static void deleteTenantDir(int tenantId) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Deleting tenant directory of tenant: " + tenantId);
+        }
+
+        String tenantDirPath = CarbonUtils.getCarbonTenantsDirPath() + File.separator + tenantId;
+        File tenantDir = new File(tenantDirPath);
+
+        try {
+            FileUtils.deleteDirectory(tenantDir);
+        } catch (IOException e) {
+            log.error("Error in deleting tenant directory: " + tenantDirPath, e);
         }
     }
 

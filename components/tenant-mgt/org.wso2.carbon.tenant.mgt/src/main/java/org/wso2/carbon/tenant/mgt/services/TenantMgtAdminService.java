@@ -43,13 +43,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This is the admin Web service which is used for managing tenants
+ * This is the admin Web service which is used for managing tenants.
  */
 public class TenantMgtAdminService extends AbstractAdmin {
     private static final Log log = LogFactory.getLog(TenantMgtAdminService.class);
 
     /**
-     * super admin adds a tenant
+     * Super admin adds a tenant.
      *
      * @param tenantInfoBean tenant info bean
      * @return UUID
@@ -72,10 +72,10 @@ public class TenantMgtAdminService extends AbstractAdmin {
 
         Tenant tenant = TenantMgtUtil.initializeTenant(tenantInfoBean);
         tenant.setTenantUniqueID(UUIDGenerator.generateUUID());
-        TenantPersistor  persistor = new TenantPersistor();
+        TenantPersistor persistor = new TenantPersistor();
         // not validating the domain ownership, since created by super tenant
         int tenantId = persistor.persistTenant(tenant, false, tenantInfoBean.getSuccessKey(),
-                                tenantInfoBean.getOriginatedService(),false);
+                tenantInfoBean.getOriginatedService(), false);
         tenantInfoBean.setTenantId(tenantId);
 
         try {
@@ -155,7 +155,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
     }
 
     /**
-     * Notifying Tenant deletion listeners
+     * Notifying Tenant deletion listeners.
      *
      * @param tenantId
      * @throws Exception
@@ -196,14 +196,14 @@ public class TenantMgtAdminService extends AbstractAdmin {
         int tenantId;
         checkIsSuperTenantInvoking();
         try {
-            tenantId=TenantMgtServiceComponent.getTenantManager().getTenantId(tenantInfoBean.getTenantDomain());
+            tenantId = TenantMgtServiceComponent.getTenantManager().getTenantId(tenantInfoBean.getTenantDomain());
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Error in getting tenant id";
             log.error(msg, e);
             throw new Exception(msg, e);
         }
-        if(tenantId<0){
-            String msg = "Tenant is not added in user store "+tenantInfoBean.getTenantDomain();
+        if (tenantId < 0) {
+            String msg = "Tenant is not added in user store " + tenantInfoBean.getTenantDomain();
             log.error(msg);
             throw new Exception(msg);
         }
@@ -218,7 +218,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
         return TenantMgtUtil.prepareStringToShowThemeMgtPage(tenantId);
     }
     /**
-     * Get the list of the tenants
+     * Get the list of the tenants.
      *
      * @return List<TenantInfoBean>
      * @throws Exception UserStorException
@@ -243,7 +243,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
     }
 
     /**
-     * Get the list of the tenants
+     * Get the list of the tenants.
      *
      * @return List<TenantInfoBean>
      * @throws Exception UserStorException
@@ -252,7 +252,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
         TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
         Tenant[] tenants;
         try {
-        	domain = domain.trim();
+            domain = domain.trim();
             tenants = (Tenant[]) tenantManager.getAllTenantsForTenantDomainStr(domain);
         } catch (UserStoreException e) {
             String msg = "Error in retrieving the tenant information.";
@@ -269,7 +269,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
     }
 
     /**
-     * Retrieve all the tenants
+     * Retrieve all the tenants.
      *
      * @return tenantInfoBean[]
      * @throws Exception if failed to get Tenant Manager
@@ -280,7 +280,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
     }
 
     /**
-     * Retrieve all the tenants which matches the partial search domain
+     * Retrieve all the tenants which matches the partial search domain.
      *
      * @return tenantInfoBean[]
      * @throws Exception if failed to get Tenant Manager
@@ -291,13 +291,14 @@ public class TenantMgtAdminService extends AbstractAdmin {
     }
 
     /**
-     * Method to retrieve all the partial search domain tenants paginated
+     * Method to retrieve all the partial search domain tenants paginated.
      *
      * @param pageNumber Number of the page.
      * @return PaginatedTenantInfoBean
      * @throws Exception if failed to getTenantManager;
      */
-    public PaginatedTenantInfoBean retrievePaginatedPartialSearchTenants(String domain,int pageNumber) throws Exception {
+    public PaginatedTenantInfoBean retrievePaginatedPartialSearchTenants(String domain, int pageNumber)
+            throws Exception {
         List<TenantInfoBean> tenantList = searchPartialTenantsDomains(domain);
 
         // Pagination
@@ -359,14 +360,14 @@ public class TenantMgtAdminService extends AbstractAdmin {
 
         //getting the subscription plan
         String activePlan = "";
-        if(TenantMgtServiceComponent.getBillingService() != null){
+        if (TenantMgtServiceComponent.getBillingService() != null) {
             activePlan = TenantMgtServiceComponent.getBillingService().
                     getActiveUsagePlan(tenantDomain);
         }
 
-        if(activePlan != null && activePlan.trim().length() > 0){
+        if (activePlan != null && activePlan.trim().length() > 0) {
             bean.setUsagePlan(activePlan);
-        }else{
+        } else {
             bean.setUsagePlan("");
         }
 
@@ -632,6 +633,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
 
                     TenantMgtUtil.unloadTenantConfigurations(tenantDomain, tenantId);
                     TenantMgtUtil.deleteTenantRegistryData(tenantId);
+                    TenantMgtUtil.deleteTenantDir(tenantId);
                     tenantManager.deleteTenant(tenantId);
                     log.info(String.format("Deleted tenant with domain: %s and tenant id: %d from the system.", tenantDomain, tenantId));
                 } else {
