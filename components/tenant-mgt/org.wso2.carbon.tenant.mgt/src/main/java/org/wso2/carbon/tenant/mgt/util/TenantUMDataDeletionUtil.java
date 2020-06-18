@@ -35,6 +35,7 @@ public class TenantUMDataDeletionUtil {
      */
     public static void deleteTenantUMData(int tenantId, Connection conn) throws Exception {
         try {
+            // Hi
             conn.setAutoCommit(false);
             String deleteUserPermissionSql = "DELETE FROM UM_USER_PERMISSION WHERE UM_TENANT_ID = ?";
             executeDeleteQuery(conn, deleteUserPermissionSql, tenantId);
