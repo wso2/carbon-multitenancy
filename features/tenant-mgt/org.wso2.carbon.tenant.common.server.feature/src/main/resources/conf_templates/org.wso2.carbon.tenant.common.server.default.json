@@ -9,5 +9,88 @@
   "tenant_manager.ldap.properties.OrganizationalAttribute": "ou",
   "tenant_manager.ldap.properties.OrganizationalSubContextObjectClass": "organizationalUnit",
   "tenant_manager.ldap.properties.OrganizationalSubContextAttribute": "ou",
-  "tenant_manager.ldap.enabled": true
+  "tenant_manager.ldap.enabled": true,
+
+  "multi_tenancy.billing.package.demo.name": "Demo",
+  "multi_tenancy.billing.package.demo.subscription_charge": "0",
+  "multi_tenancy.billing.package.demo.users.limit": "1",
+  "multi_tenancy.billing.package.demo.users.charge": "0",
+  "multi_tenancy.billing.package.demo.resource_volume.limit": "20",
+  "multi_tenancy.billing.package.demo.resource_volume.overuse_charge": "0",
+  "multi_tenancy.billing.package.demo.bandwidth.limit": "50",
+  "multi_tenancy.billing.package.demo.bandwidth.overuse_charge": "0",
+  "multi_tenancy.billing.package.smb.name": "SMB",
+  "multi_tenancy.billing.package.smb.subscription_charge": "100",
+  "multi_tenancy.billing.package.smb.users.limit": "unlimited",
+  "multi_tenancy.billing.package.smb.users.charge": "0",
+  "multi_tenancy.billing.package.smb.resource_volume.limit": "50",
+  "multi_tenancy.billing.package.smb.resource_volume.overuse_charge": "0",
+  "multi_tenancy.billing.package.smb.bandwidth.limit": "150",
+  "multi_tenancy.billing.package.smb.bandwidth.overuse_charge": "0",
+  "multi_tenancy.billing.package.custom": [
+    {
+      "name": "Professional",
+      "subscription_charge": "500",
+      "users.limit": "unlimited",
+      "users.charge": "0",
+      "resource_volume.limit": "500",
+      "resource_volume.overuse_charge": "0",
+      "bandwidth.limit": "1536",
+      "bandwidth.overuse_charge": "0.03"
+    },
+    {
+      "name": "Enterprise",
+      "subscription_charge": "2000",
+      "users.limit": "unlimited",
+      "users.charge": "0",
+      "resource_volume.limit": "5120",
+      "resource_volume.overuse_charge": "0",
+      "bandwidth.limit": "15360",
+      "bandwidth.overuse_charge": "0.02"
+    }
+  ],
+  "multi_tenancy.usage_agent.data_persistence_task.startup_delay_in_ms": "60000",
+  "multi_tenancy.usage_agent.data_persistence_task.records_per_execution": "100",
+  "multi_tenancy.usage_agent.data_persistence_task.execution_interval_in_ms": "-1",
+  "multi_tenancy.throttling_manager_tasks": [
+    {
+      "parameters": {
+        "interval": "10",
+        "delay": "60"
+      },
+      "data_providers": [
+        "org.wso2.carbon.throttling.manager.dataproviders.BillingDataProvider",
+        "org.wso2.carbon.throttling.manager.dataproviders.UsageDataProvider"
+      ]
+    }
+  ],
+  "multi_tenancy.cloud_services": [
+    {
+      "name": "WSO2 API Manager",
+      "default": true,
+      "key": "AM",
+      "label": "API Manager",
+      "link": "https://am.cloud.wso2.com",
+      "description": "API Manager in the cloud"
+    }
+  ],
+  "multi_tenancy.stratos.disable_tenant_management_emails": true,
+  "multi_tenancy.stratos.email_validation_mandatory_for_login": false,
+  "multi_tenancy.stratos.tenant_activation_moderated": false,
+  "multi_tenancy.stratos.super_admin_email": "super-admin-email",
+  "multi_tenancy.stratos.skip_summary_generator": false,
+  "multi_tenancy.stratos.notification_email": "notification-email",
+  "multi_tenancy.stratos.finance_notification_email": "finance-notification-email",
+  "multi_tenancy.stratos.charge_on_registration": false,
+  "multi_tenancy.stratos.public_cloud_setup": true,
+  "multi_tenancy.stratos.paypal.url": "Paypal URL",
+  "multi_tenancy.stratos.paypal.username": "username",
+  "multi_tenancy.stratos.paypal.password": "password",
+  "multi_tenancy.stratos.paypal.signature": "signature",
+  "multi_tenancy.stratos.paypal.environment": "live",
+  "multi_tenancy.stratos.manager_service.url": "https://cloud-test.wso2.com/services/",
+  "multi_tenancy.stratos.manager_service.admin_username": "admin",
+  "multi_tenancy.stratos.manager_service.admin_password": "admin",
+  "multi_tenancy.stratos.google_analytics_url": "http://google-analytics.js",
+  "multi_tenancy.stratos.sso_loading_message": "Loading..."
 }
