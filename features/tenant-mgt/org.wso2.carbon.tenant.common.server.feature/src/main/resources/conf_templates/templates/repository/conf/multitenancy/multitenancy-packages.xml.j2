@@ -1,0 +1,53 @@
+<!--
+  ~ Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~
+  ~  WSO2 Inc. licenses this file to you under the Apache License,
+  ~  Version 2.0 (the "License"); you may not use this file except
+  ~  in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<!-- 
+   Subscription types and the respective limits of parameters for each of the packages.
+  -->
+
+<packages xmlns="http://wso2.com/carbon/multitenancy/billing/pacakges">
+    {% set packages = [] %}
+    {% if multi_tenancy.billing.package.demo is defined %}
+    {% do packages.append(multi_tenancy.billing.package.demo) %}
+    {% endif %}
+    {% if multi_tenancy.billing.package.smb is defined %}
+    {% do packages.append(multi_tenancy.billing.package.smb) %}
+    {% endif %}
+    {% for package in packages + multi_tenancy.billing.package.custom %}
+    <package name="{{package.name}}">
+        <subscriptionCharge>{{package.subscription_charge}}</subscriptionCharge>
+        <!-- $ per month -->
+        <users>
+            <limit>{{package.users.limit}}</limit>
+            <charge>{{package.users.charge}}</charge>
+            <!-- charge per month -->
+        </users>
+        <resourceVolume>
+            <limit>{{package.resource_volume.limit}}</limit>
+            <!--mb per tenant -->
+            <overuseCharge>{{package.resource_volume.overuse_charge}}</overuseCharge>
+        </resourceVolume>
+        <bandwidth>
+            <limit>{{package.bandwidth.limit}}</limit>
+            <!-- mb per tenant -->
+            <overuseCharge>{{package.bandwidth.overuse_charge}}</overuseCharge>
+            <!-- $ per mb -->
+        </bandwidth>
+    </package>
+    {% endfor %}
+</packages>

@@ -1,0 +1,51 @@
+<!--
+  ~ Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~
+  ~  WSO2 Inc. licenses this file to you under the Apache License,
+  ~  Version 2.0 (the "License"); you may not use this file except
+  ~  in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<UsageAndThrottlingAgentConfiguration xmlns="http://wso2.com/carbon/multitenancy/usage-throttling-agent/config">
+    <UsageAgent>
+        <UsageDataPersistenceTask>
+            <StartupDelayInMilliSeconds>{{multi_tenancy.usage_agent.data_persistence_task.startup_delay_in_ms}}</StartupDelayInMilliSeconds>
+            <NumberOfRecordsPerExecution>{{multi_tenancy.usage_agent.data_persistence_task.records_per_execution}}</NumberOfRecordsPerExecution>
+            <ExecutionIntervalInMilliSeconds>{{multi_tenancy.usage_agent.data_persistence_task.execution_interval_in_ms}}</ExecutionIntervalInMilliSeconds>
+        </UsageDataPersistenceTask>
+    </UsageAgent>
+    <ThrottlingAgent>
+        <ThrottlingInfoCacheUpdaterTask>
+            <StartupDelayInSeconds>{{multi_tenancy.throttling_agent.cache_updater_task.startup_delay_in_seconds}}</StartupDelayInSeconds>
+            <ExecutionIntervalInSeconds>{{multi_tenancy.throttling_agent.cache_updater_task.execution_interval_in_seconds}}</ExecutionIntervalInSeconds>
+        </ThrottlingInfoCacheUpdaterTask>
+    </ThrottlingAgent>
+    <ThrottlingManagerTask>
+        <tasks>
+            {% for task in multi_tenancy.throttling_manager_tasks %}
+            <task>
+                <parameters>
+                    {% for name, value in task.parameters.items() %}
+                    <parameter name="{{name}}">{{value}}</parameter>
+                    {% endfor %}
+                </parameters>
+                <dataProviders>
+                    {% for provider in task.data_providers %}
+                    <dataProvider class="{{provider}}"></dataProvider>
+                    {% endfor %}
+                </dataProviders>
+            </task>
+            {% endfor %}
+        </tasks>
+    </ThrottlingManagerTask>
+</UsageAndThrottlingAgentConfiguration>
