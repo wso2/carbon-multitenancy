@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.multitenancy</groupId>
         <artifactId>tenant-mgt-feature</artifactId>
-        <version>4.8.7-SNAPSHOT</version>
+        <version>4.9.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -80,18 +80,6 @@
             <groupId>org.wso2.carbon.multitenancy</groupId>
             <artifactId>org.wso2.carbon.tenant.theme.mgt</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.apache.rampart.wso2</groupId>
-            <artifactId>rampart-policy</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.rampart.wso2</groupId>
-            <artifactId>rampart-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.rampart.wso2</groupId>
-            <artifactId>rampart-trust</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
@@ -135,9 +123,6 @@
 
                             </bundles>
                             <importBundles>
-                                <importBundleDef>org.apache.rampart.wso2:rampart-policy</importBundleDef>
-                                <importBundleDef>org.apache.rampart.wso2:rampart-core</importBundleDef>
-                                <importBundleDef>org.apache.rampart.wso2:rampart-trust</importBundleDef>
                                 <importBundleDef>org.wso2.carbon.commons:org.wso2.carbon.application.upload:compatible:${carbon.commons.version}</importBundleDef>
                             </importBundles>
                             <importFeatures>
