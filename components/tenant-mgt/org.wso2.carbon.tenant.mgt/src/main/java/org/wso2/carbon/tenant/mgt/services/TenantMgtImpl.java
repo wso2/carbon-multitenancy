@@ -19,6 +19,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.context.RegistryType;
@@ -196,6 +197,64 @@ public class TenantMgtImpl implements TenantMgtService {
         } catch (StratosException e) {
             throw new TenantManagementServerException("Error while triggering tenant deactivation for the tenant: " +
                     tenantDomain + " .", e);
+        }
+    }
+
+    public void deleteTenant(String tenantUniqueID) throws TenantMgtException {
+
+        TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
+        int tenantId = 0;
+        String tenantDomain = null;
+        if (tenantManager != null) {
+            try {
+                Tenant tenant = tenantManager.getTenant(tenantUniqueID);
+                if (tenant != null) {
+                    tenantId = tenant.getId();
+                    tenantDomain = tenant.getDomain();
+                    if (log.isDebugEnabled()) {
+                        log.debug(String.format("Starting tenant deletion for domain: %s and tenant id: %d from the system",
+                                tenantDomain, tenantId));
+                    }
+
+                    ServerConfigurationService
+                            serverConfigurationService = TenantMgtServiceComponent.getServerConfigurationService();
+
+                    if (Boolean.parseBoolean(serverConfigurationService.getFirstProperty("Tenant.TenantDelete"))) {
+                        if (Boolean.parseBoolean(serverConfigurationService
+                                .getFirstProperty("Tenant.ListenerInvocationPolicy.InvokeOnDelete"))) {
+                            TenantMgtUtil.triggerPreTenantDelete(tenantId);
+                        } else {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Tenant.ListenerInvocationPolicy.InvokeOnDelete flag is not set to true in " +
+                                        "carbon.xml. Listener invocation ignored.");
+                            }
+                        }
+
+                        TenantMgtUtil.deleteWorkernodesTenant(tenantId);
+
+                        if (TenantMgtServiceComponent.getBillingService() != null) {
+                            TenantMgtServiceComponent.getBillingService().deleteBillingData(tenantId);
+                        }
+
+                        TenantMgtUtil.unloadTenantConfigurations(tenantDomain, tenantId);
+                        TenantMgtUtil.deleteTenantRegistryData(tenantId);
+                        TenantMgtUtil.deleteTenantDir(tenantId);
+                        tenantManager.deleteTenant(tenantId);
+                        log.info(String.format("Deleted tenant with domain: %s and tenant id: %d from the system.",
+                                tenantDomain, tenantId));
+                    } else {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Tenant.TenantDelete flag is not set to true in carbon.xml. Tenant will not be deleted.");
+                        }
+                    }
+                } else {
+                    throw new TenantManagementClientException(ERROR_CODE_RESOURCE_NOT_FOUND.getCode(),
+                            String.format(ERROR_CODE_RESOURCE_NOT_FOUND.getMessage(), tenantUniqueID));
+                }
+            } catch (Exception e) {
+                throw new TenantManagementServerException("Error while triggering tenant deletion for the " +
+                        "tenant " + tenantDomain, e);
+            }
         }
     }
 

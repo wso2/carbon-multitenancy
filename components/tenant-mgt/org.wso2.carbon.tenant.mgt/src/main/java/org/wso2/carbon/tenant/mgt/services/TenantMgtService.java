@@ -80,4 +80,12 @@ public interface TenantMgtService {
      * @throws TenantMgtException if tenant deactivation fails.
      */
     void deactivateTenant(String tenantUniqueIdentifier) throws TenantMgtException;
+
+    /**
+     * Delete the given tenant.
+     *
+     * @param tenantUniqueIdentifier tenant uuid.
+     * @throws TenantMgtException if tenant deletion fails.
+     */
+    void deleteTenant(String tenantUniqueIdentifier) throws TenantMgtException;
 }
