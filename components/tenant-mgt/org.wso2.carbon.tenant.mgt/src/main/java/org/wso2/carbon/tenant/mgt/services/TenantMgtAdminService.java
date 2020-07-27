@@ -634,6 +634,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
                     TenantMgtUtil.unloadTenantConfigurations(tenantDomain, tenantId);
                     TenantMgtUtil.deleteTenantRegistryData(tenantId);
                     TenantMgtUtil.deleteTenantDir(tenantId);
+                    tenantManager.deleteTenantUMData(tenantId);
                     tenantManager.deleteTenant(tenantId);
                     log.info(String.format("Deleted tenant with domain: %s and tenant id: %d from the system.", tenantDomain, tenantId));
                 } else {
