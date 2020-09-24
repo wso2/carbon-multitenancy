@@ -38,8 +38,20 @@
             <ResourceId>/permission/protected/manage/modify/tenants</ResourceId>
         </ManagementPermission>
         <ManagementPermission>
-            <DisplayName>List</DisplayName>
-            <ResourceId>/permission/protected/manage/monitor/tenants/list</ResourceId>
+            <DisplayName>Update</DisplayName>
+            <ResourceId>/permission/protected/manage/modify/tenants/update</ResourceId>
+        </ManagementPermission>
+        <ManagementPermission>
+            <DisplayName>Create</DisplayName>
+            <ResourceId>/permission/protected/manage/modify/tenants/create</ResourceId>
+        </ManagementPermission>
+        <ManagementPermission>
+            <DisplayName>Delete</DisplayName>
+            <ResourceId>/permission/protected/manage/modify/tenants/delete</ResourceId>
+        </ManagementPermission>
+        <ManagementPermission>
+            <DisplayName>View</DisplayName>
+            <ResourceId>/permission/protected/manage/monitor/tenants/view</ResourceId>
         </ManagementPermission>
    </ManagementPermissions>
 </component>
