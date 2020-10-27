@@ -218,9 +218,8 @@ public class TenantMgtImpl implements TenantMgtService {
 
                 try {
                     if (log.isDebugEnabled()) {
-                        log.debug(String.format(
-                                "Starting tenant deletion for domain: %s and tenant id: %d from the system",
-                                tenantDomain, tenantId));
+                        log.debug(String.format("Starting tenant deletion for domain: %s and tenant id: %d from the " +
+                                "system.", tenantDomain, tenantId));
                     }
 
                     ServerConfigurationService
@@ -237,7 +236,8 @@ public class TenantMgtImpl implements TenantMgtService {
                         } else {
                             if (log.isDebugEnabled()) {
                                 log.debug(
-                                        "Tenant.ListenerInvocationPolicy.InvokeOnDelete flag is not set to true in carbon.xml. Listener invocation ignored.");
+                                        "Tenant.ListenerInvocationPolicy.InvokeOnDelete flag is not set to true " +
+                                                "in carbon.xml. Listener invocation ignored.");
                             }
                         }
 
@@ -254,16 +254,21 @@ public class TenantMgtImpl implements TenantMgtService {
                         log.info(String.format("Deleted tenant with domain: %s and tenant id: %d from the system.",
                                 tenantDomain, tenantId));
                     } else {
+                        String msg = "Tenant.TenantDelete flag is not set to true in carbon.xml. Tenant will not be " +
+                                "deleted.";
                         if (log.isDebugEnabled()) {
-                            log.debug(
-                                    "Tenant.TenantDelete flag is not set to true in carbon.xml. Tenant will not be deleted.");
+                            log.debug(msg);
                         }
+                        throw new TenantManagementServerException(msg);
                     }
-                } catch (Exception e) {
-                    String msg = String.format("Deleted tenant with domain: %s and tenant id: %d from the system.",
-                            tenantDomain, tenantId);
-                    log.error(msg, e);
+                } catch (StratosException e) {
+                    String msg = "Error in notifying tenant deletion.";
                     throw new TenantManagementServerException(msg, e);
+                } catch (UserStoreException e) {
+                    String msg = "Error while deleting the tenant.";
+                    throw new TenantManagementServerException(msg, e);
+                } catch (Exception e) {
+                    throw new TenantManagementServerException(e.getMessage(), e);
                 }
             } else {
                 if (log.isDebugEnabled()) {
@@ -278,17 +283,11 @@ public class TenantMgtImpl implements TenantMgtService {
      * Notifying Tenant deletion listeners.
      *
      * @param tenantId tenant id
-     * @throws Exception
+     * @throws StratosException if there is an issue in triggering pre tenant deletion.
      */
-    private void notifyTenantDeletion(int tenantId) throws Exception {
+    private void notifyTenantDeletion(int tenantId) throws StratosException {
 
-        try {
-            TenantMgtUtil.triggerPreTenantDelete(tenantId);
-        } catch (StratosException e) {
-            String msg = "Error in notifying tenant addition.";
-            log.error(msg, e);
-            throw new Exception(msg, e);
-        }
+        TenantMgtUtil.triggerPreTenantDelete(tenantId);
     }
 
     public User getOwner(String tenantUniqueID) throws TenantMgtException {
