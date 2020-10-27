@@ -25,7 +25,7 @@
         </parameter>
         <operation name="addTenant">
             <parameter name="superTenantService" locked="true">true</parameter>
-            <parameter name="AuthorizationAction" locked="true">/permission/protected/manage/modify/tenants/create
+            <parameter name="AuthorizationAction" locked="true">/permission/protected/manage/monitor/tenants/create
             </parameter>
         </operation>
         <operation name="checkDomainAvailability">
@@ -35,7 +35,7 @@
         </operation>
         <operation name="addSkeletonTenant">
             <parameter name="superTenantService" locked="true">true</parameter>
-            <parameter name="AuthorizationAction" locked="true">/permission/protected/manage/modify/tenants/create
+            <parameter name="AuthorizationAction" locked="true">/permission/protected/manage/monitor/tenants/create
             </parameter>
         </operation>
         <operation name="retrieveTenants">

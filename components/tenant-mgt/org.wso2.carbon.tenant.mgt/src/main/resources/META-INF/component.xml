@@ -43,7 +43,7 @@
         </ManagementPermission>
         <ManagementPermission>
             <DisplayName>Create</DisplayName>
-            <ResourceId>/permission/protected/manage/modify/tenants/create</ResourceId>
+            <ResourceId>/permission/protected/manage/monitor/tenants/create</ResourceId>
         </ManagementPermission>
         <ManagementPermission>
             <DisplayName>Delete</DisplayName>
