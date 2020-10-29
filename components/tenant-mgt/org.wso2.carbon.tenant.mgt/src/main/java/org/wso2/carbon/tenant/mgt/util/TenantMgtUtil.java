@@ -25,6 +25,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -317,6 +318,45 @@ public class TenantMgtUtil {
             log.debug("Tenant object Initialized from the TenantInfoBean");
         }
         return tenant;
+    }
+
+    /**
+     * @param tenantDomain domain name of the tenant.
+     * @param tenantManager tenant manager used for tenant deletion .
+     * @param tenantId tenant id.
+     * @param serverConfigurationService serverConfigurationService.
+     * @throws Exception if there is an exception during the tenant deletion.
+     */
+    public static void deleteTenant(String tenantDomain, TenantManager tenantManager, int tenantId,
+                                    ServerConfigurationService serverConfigurationService) throws Exception {
+
+    /*
+     * TODO: 2/7/19 We need to fix listeners to enable this by default
+     * Refer - https://github.com/wso2-support/carbon-multitenancy/issues/35
+     */
+        if (Boolean.parseBoolean(
+                serverConfigurationService.getFirstProperty("Tenant.ListenerInvocationPolicy.InvokeOnDelete"))) {
+            triggerPreTenantDelete(tenantId);
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug(
+                        "Tenant.ListenerInvocationPolicy.InvokeOnDelete flag is not set to true in carbon.xml. " +
+                                "Listener invocation ignored.");
+            }
+        }
+
+        TenantMgtUtil.deleteWorkernodesTenant(tenantId);
+
+        if (TenantMgtServiceComponent.getBillingService() != null) {
+            TenantMgtServiceComponent.getBillingService().deleteBillingData(tenantId);
+        }
+
+        TenantMgtUtil.unloadTenantConfigurations(tenantDomain, tenantId);
+        TenantMgtUtil.deleteTenantRegistryData(tenantId);
+        TenantMgtUtil.deleteTenantDir(tenantId);
+        tenantManager.deleteTenant(tenantId);
+        log.info(String.format("Deleted tenant with domain: %s and tenant id: %d from the system.", tenantDomain,
+                tenantId));
     }
 
     /**

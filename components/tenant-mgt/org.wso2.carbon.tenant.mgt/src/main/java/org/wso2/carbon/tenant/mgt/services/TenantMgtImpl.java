@@ -49,6 +49,7 @@ import java.util.Date;
 
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_INVALID_OFFSET;
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_RESOURCE_NOT_FOUND;
+import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_TENANT_DELETION_NOT_ENABLED;
 import static org.wso2.carbon.tenant.mgt.util.TenantMgtUtil.initializeTenantInfoBean;
 
 /**
@@ -226,49 +227,17 @@ public class TenantMgtImpl implements TenantMgtService {
                             serverConfigurationService = TenantMgtServiceComponent.getServerConfigurationService();
 
                     if (Boolean.parseBoolean(serverConfigurationService.getFirstProperty("Tenant.TenantDelete"))) {
-                    /*
-                     * TODO: 2/7/19 We need to fix listeners to enable this by default
-                     * Refer - https://github.com/wso2-support/carbon-multitenancy/issues/35
-                     */
-                        if (Boolean.parseBoolean(serverConfigurationService
-                                .getFirstProperty("Tenant.ListenerInvocationPolicy.InvokeOnDelete"))) {
-                            notifyTenantDeletion(tenantId);
-                        } else {
-                            if (log.isDebugEnabled()) {
-                                log.debug(
-                                        "Tenant.ListenerInvocationPolicy.InvokeOnDelete flag is not set to true " +
-                                                "in carbon.xml. Listener invocation ignored.");
-                            }
-                        }
-
-                        TenantMgtUtil.deleteWorkernodesTenant(tenantId);
-
-                        if (TenantMgtServiceComponent.getBillingService() != null) {
-                            TenantMgtServiceComponent.getBillingService().deleteBillingData(tenantId);
-                        }
-
-                        TenantMgtUtil.unloadTenantConfigurations(tenantDomain, tenantId);
-                        TenantMgtUtil.deleteTenantRegistryData(tenantId);
-                        TenantMgtUtil.deleteTenantDir(tenantId);
-                        tenantManager.deleteTenant(tenantUniqueIdentifier);
-                        log.info(String.format("Deleted tenant with domain: %s and tenant id: %d from the system.",
-                                tenantDomain, tenantId));
+                        TenantMgtUtil.deleteTenant(tenantDomain, tenantManager, tenantId, serverConfigurationService);
                     } else {
-                        String msg = "Tenant.TenantDelete flag is not set to true in carbon.xml. Tenant will not be " +
-                                "deleted.";
-                        if (log.isDebugEnabled()) {
-                            log.debug(msg);
-                        }
-                        throw new TenantManagementServerException(msg);
+                        throw new TenantManagementClientException(ERROR_CODE_TENANT_DELETION_NOT_ENABLED.getCode(),
+                                ERROR_CODE_TENANT_DELETION_NOT_ENABLED.getMessage());
                     }
-                } catch (StratosException e) {
-                    String msg = "Error in notifying tenant deletion.";
-                    throw new TenantManagementServerException(msg, e);
-                } catch (UserStoreException e) {
-                    String msg = "Error while deleting the tenant.";
-                    throw new TenantManagementServerException(msg, e);
                 } catch (Exception e) {
-                    throw new TenantManagementServerException(e.getMessage(), e);
+                    if (e instanceof TenantMgtException) {
+                        throw (TenantMgtException) e;
+                    } else {
+                        throw new TenantManagementServerException(e.getMessage(), e);
+                    }
                 }
             } else {
                 if (log.isDebugEnabled()) {
@@ -277,17 +246,6 @@ public class TenantMgtImpl implements TenantMgtService {
                 }
             }
         }
-    }
-
-    /**
-     * Notifying Tenant deletion listeners.
-     *
-     * @param tenantId tenant id
-     * @throws StratosException if there is an issue in triggering pre tenant deletion.
-     */
-    private void notifyTenantDeletion(int tenantId) throws StratosException {
-
-        TenantMgtUtil.triggerPreTenantDelete(tenantId);
     }
 
     public User getOwner(String tenantUniqueID) throws TenantMgtException {
