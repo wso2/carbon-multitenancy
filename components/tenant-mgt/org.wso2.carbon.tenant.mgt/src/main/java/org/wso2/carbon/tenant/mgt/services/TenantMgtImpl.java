@@ -48,6 +48,7 @@ import java.util.Date;
 
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_INVALID_OFFSET;
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_RESOURCE_NOT_FOUND;
+import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_DOMAIN_NOT_FOUND;
 import static org.wso2.carbon.tenant.mgt.util.TenantMgtUtil.initializeTenantInfoBean;
 
 /**
@@ -147,8 +148,8 @@ public class TenantMgtImpl implements TenantMgtService {
             int tenantID = tenantManager.getTenantId(domain);
             tenant = (Tenant) tenantManager.getTenant(tenantID);
             if (tenant == null) {
-                throw new TenantManagementClientException(ERROR_CODE_RESOURCE_NOT_FOUND.getCode(),
-                        String.format(ERROR_CODE_RESOURCE_NOT_FOUND.getMessage(), domain));
+                throw new TenantManagementClientException(ERROR_CODE_DOMAIN_NOT_FOUND.getCode(),
+                        String.format(ERROR_CODE_DOMAIN_NOT_FOUND.getMessage(), domain));
             }
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             throw new TenantManagementServerException("Error while getting the tenant.", e);
@@ -161,7 +162,7 @@ public class TenantMgtImpl implements TenantMgtService {
         TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
         try {
             int tenantID = tenantManager.getTenantId(domain);
-            if (tenantID == -1) {
+            if (tenantID == -1) { //-1 implies no domain exist.
                 return true;
             }
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
