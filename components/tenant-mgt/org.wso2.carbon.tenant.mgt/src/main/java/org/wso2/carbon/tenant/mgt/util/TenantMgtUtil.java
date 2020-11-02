@@ -391,8 +391,10 @@ public class TenantMgtUtil {
             UserStoreManager userStoreManager =
                     (UserStoreManager) TenantMgtServiceComponent.getRealmService().
                             getTenantUserRealm(tenant.getId()).getUserStoreManager();
-            userStoreManager.setUserClaimValues(tenant.getAdminName(), claimsMap,
-                    UserCoreConstants.DEFAULT_PROFILE);
+            if (!userStoreManager.isReadOnly()) {
+                userStoreManager.setUserClaimValues(tenant.getAdminName(), claimsMap,
+                        UserCoreConstants.DEFAULT_PROFILE);
+            }
 
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Error in adding claims to the user.";
@@ -415,8 +417,10 @@ public class TenantMgtUtil {
             UserStoreManager userStoreManager =
                     (UserStoreManager) TenantMgtServiceComponent.getRealmService().
                             getTenantUserRealm(tenant.getId()).getUserStoreManager();
-            userStoreManager.setUserClaimValues(tenant.getAdminName(), claimsMap,
-                    UserCoreConstants.DEFAULT_PROFILE);
+            if (!userStoreManager.isReadOnly()) {
+                userStoreManager.setUserClaimValues(tenant.getAdminName(), claimsMap,
+                        UserCoreConstants.DEFAULT_PROFILE);
+            }
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Error in adding claims to the user.";
             throw new TenantManagementServerException(msg, e);

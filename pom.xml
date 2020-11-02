@@ -12,7 +12,7 @@
     <groupId>org.wso2.carbon.multitenancy</groupId>
     <artifactId>carbon-multitenancy</artifactId>
     <packaging>pom</packaging>
-    <version>4.8.7-SNAPSHOT</version>
+    <version>4.9.4-SNAPSHOT</version>
     <name>WSO2 Carbon - Platform Aggregator Pom</name>
     <url>http://wso2.org</url>
 
@@ -434,21 +434,6 @@
                 <groupId>org.wso2.carbon.commons</groupId>
                 <artifactId>org.wso2.carbon.event.core</artifactId>
                 <version>${carbon.commons.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.rampart.wso2</groupId>
-                <artifactId>rampart-core</artifactId>
-                <version>${rampart.wso2.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.rampart.wso2</groupId>
-                <artifactId>rampart-policy</artifactId>
-                <version>${rampart.wso2.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.rampart.wso2</groupId>
-                <artifactId>rampart-trust</artifactId>
-                <version>${rampart.wso2.version}</version>
             </dependency>
 
 
@@ -910,7 +895,7 @@
 
     <properties>
         <!-- Carbon kernel version-->
-        <carbon.kernel.version>4.6.1-m5</carbon.kernel.version>
+        <carbon.kernel.version>4.6.1-alpha</carbon.kernel.version>
         <carbon.kernel.feature.version>${carbon.kernel.version}</carbon.kernel.feature.version>
         <carbon.kernel.imp.pkg.version>[4.5.0, 5.0.0)</carbon.kernel.imp.pkg.version>
         <carbon.kernel.registry.imp.pkg.version>[1.0.1, 2.0.0)</carbon.kernel.registry.imp.pkg.version>
@@ -936,7 +921,7 @@
         <carbon.identity.imp.pkg.version>[5.14.0, 6.0.0)</carbon.identity.imp.pkg.version>
 
         <!-- Carbon Multi-tenancy version-->
-        <carbon.multitenancy.version>4.8.7-SNAPSHOT</carbon.multitenancy.version>
+        <carbon.multitenancy.version>4.9.4-SNAPSHOT</carbon.multitenancy.version>
         <carbon.multitenancy.exp.pkg.version>${carbon.multitenancy.version}</carbon.multitenancy.exp.pkg.version>
         <carbon.multitenancy.imp.pkg.version>[4.7.0, 5.0.0)</carbon.multitenancy.imp.pkg.version>
 
@@ -984,9 +969,6 @@
         <version.javax.servlet.jsp>2.2.0.v201112011158</version.javax.servlet.jsp>
         <version.javax.servlet>3.0.0.v201112011016</version.javax.servlet>
 
-        <!-- Rampart Version -->
-        <rampart.wso2.version>1.6.1-wso2v41</rampart.wso2.version>
-
         <slf4j.wso2.version>1.5.10.wso2v1</slf4j.wso2.version>
 
         <libthrift.wso2.version>0.9.2.wso2v1</libthrift.wso2.version>
@@ -999,6 +981,7 @@
         <commons.pool.version>1.5.0.wso2v1</commons.pool.version>
         <commons-logging.version>1.1.1</commons-logging.version>
         <orbit.version.commons.lang>2.6.0.wso2v1</orbit.version.commons.lang>
+        <commons-lang.wso2.osgi.version.range>[2.6.0,3.0.0)</commons-lang.wso2.osgi.version.range>
         <orbit.version.commons.httpclient>3.1.0.wso2v2</orbit.version.commons.httpclient>
         <commons-collections.version>3.2.1</commons-collections.version>
         <commons-beanutils.version>1.8.3</commons-beanutils.version>
@@ -1044,7 +1027,6 @@
         <orbit.version.commons.fileuploader>1.2.0.wso2v1</orbit.version.commons.fileuploader>
 
         <opensaml2.wso2.version>3.3.1.wso2v1</opensaml2.wso2.version>
-        <wss4j.version>1.5.11.wso2v11</wss4j.version>
 
         <com.google.code.gson.version>2.8.5</com.google.code.gson.version>
         <orbit.version.json>3.0.0.wso2v1</orbit.version.json>

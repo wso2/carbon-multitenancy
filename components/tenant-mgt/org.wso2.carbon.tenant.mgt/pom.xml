@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.multitenancy</groupId>
         <artifactId>tenant-mgt-parent</artifactId>
-        <version>4.8.7-SNAPSHOT</version>
+        <version>4.9.4-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -52,6 +52,7 @@
                             javax.servlet;version="${imp.pkg.version.javax.servlet}",
                             javax.servlet.http;version="${imp.pkg.version.javax.servlet}",
                             org.apache.axiom.*; version="${axiom.osgi.version.range}",
+                            org.apache.commons.lang; version="${commons-lang.wso2.osgi.version.range}",
                             org.osgi.service.component.*;version="${imp.package.version.osgi.services}",
                             org.apache.commons.io; version="${commons.io.wso2.osgi.version.range}",
                             *;resolution:=optional
@@ -75,6 +76,12 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.user.core</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-lang</groupId>
+                    <artifactId>commons-lang</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
            <groupId>org.wso2.carbon.multitenancy</groupId>
@@ -93,17 +100,13 @@
             <artifactId>org.wso2.carbon.tenant.common</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.rampart.wso2</groupId>
-            <artifactId>rampart-policy</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.rampart.wso2</groupId>
-            <artifactId>rampart-core</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-lang.wso2</groupId>
+            <artifactId>commons-lang</artifactId>
         </dependency>
     </dependencies>
 </project>
