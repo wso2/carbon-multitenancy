@@ -18,7 +18,6 @@ package org.wso2.carbon.tenant.mgt.services;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.context.RegistryType;
@@ -138,6 +137,37 @@ public class TenantMgtImpl implements TenantMgtService {
             throw new TenantManagementServerException("Error while getting the tenant.", e);
         }
         return tenant;
+    }
+
+    public Tenant getTenantByDomain(String domain) throws TenantMgtException {
+
+        TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
+        Tenant tenant;
+        try {
+            int tenantID = tenantManager.getTenantId(domain);
+            tenant = (Tenant) tenantManager.getTenant(tenantID);
+            if (tenant == null) {
+                throw new TenantManagementClientException(ERROR_CODE_RESOURCE_NOT_FOUND.getCode(),
+                        String.format(ERROR_CODE_RESOURCE_NOT_FOUND.getMessage(), domain));
+            }
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            throw new TenantManagementServerException("Error while getting the tenant.", e);
+        }
+        return tenant;
+    }
+
+    public boolean isDomainAvailable(String domain) throws TenantMgtException {
+
+        TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
+        try {
+            int tenantID = tenantManager.getTenantId(domain);
+            if (tenantID == -1) {
+                return true;
+            }
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            throw new TenantManagementServerException("Error while getting the tenant.", e);
+        }
+        return false;
     }
 
     public void activateTenant(String tenantUniqueID) throws TenantMgtException {
