@@ -58,6 +58,24 @@ public interface TenantMgtService {
     Tenant getTenant(String tenantUniqueIdentifier) throws TenantMgtException;
 
     /**
+     * Get a specific tenant using tenant id.
+     *
+     * @param domain tenant domain.
+     * @return Tenant
+     * @throws TenantMgtException if getting the tenant fails.
+     */
+    Tenant getTenantByDomain(String domain) throws TenantMgtException;
+
+    /**
+     * See if the domain is available to be taken.
+     *
+     * @param domain tenant domain.
+     * @return Tenant
+     * @throws TenantMgtException if checking the tenant availability fails.
+     */
+    boolean isDomainAvailable(String domain) throws TenantMgtException;
+
+    /**
      * Get owner of the tenant using tenant uuid.
      * @param tenantUniqueIdentifier tenant uuid.
      * @return User.
