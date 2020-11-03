@@ -49,7 +49,8 @@ import java.util.Date;
 
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_INVALID_OFFSET;
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_RESOURCE_NOT_FOUND;
-import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_TENANT_DELETION_NOT_ENABLED;
+import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.
+        ERROR_CODE_TENANT_DELETION_NOT_ENABLED;
 import static org.wso2.carbon.tenant.mgt.util.TenantMgtUtil.initializeTenantInfoBean;
 
 /**
@@ -203,35 +204,32 @@ public class TenantMgtImpl implements TenantMgtService {
     @Override
     public void deleteTenantMetaData(String tenantUniqueIdentifier) throws TenantMgtException {
 
+        ServerConfigurationService
+                serverConfigurationService = TenantMgtServiceComponent.getServerConfigurationService();
+
+        if (!Boolean.parseBoolean(serverConfigurationService.getFirstProperty("Tenant.TenantDelete"))) {
+            throw new TenantManagementClientException(ERROR_CODE_TENANT_DELETION_NOT_ENABLED.getCode(),
+                    ERROR_CODE_TENANT_DELETION_NOT_ENABLED.getMessage());
+        }
         TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
         if (tenantManager != null) {
-            Tenant tenant = null;
+            Tenant tenant;
             try {
                 tenant = tenantManager.getTenant(tenantUniqueIdentifier);
             } catch (UserStoreException e) {
-                throw new TenantManagementServerException("Error while getting the tenant with the tenant unique id :" +
-                        tenantUniqueIdentifier + " .", e);
+                throw new TenantManagementServerException("Error while getting the tenant with the tenant " +
+                        "unique id :" + tenantUniqueIdentifier + " .", e);
             }
 
             if (tenant != null) {
                 int tenantId = tenant.getId();
                 String tenantDomain = tenant.getDomain();
-
                 try {
                     if (log.isDebugEnabled()) {
-                        log.debug(String.format("Starting tenant deletion for domain: %s and tenant id: %d from the " +
-                                "system.", tenantDomain, tenantId));
+                        log.debug(String.format("Starting tenant deletion for domain: %s and tenant id: %d from " +
+                                "the system.", tenantDomain, tenantId));
                     }
-
-                    ServerConfigurationService
-                            serverConfigurationService = TenantMgtServiceComponent.getServerConfigurationService();
-
-                    if (Boolean.parseBoolean(serverConfigurationService.getFirstProperty("Tenant.TenantDelete"))) {
-                        TenantMgtUtil.deleteTenant(tenantDomain, tenantManager, tenantId, serverConfigurationService);
-                    } else {
-                        throw new TenantManagementClientException(ERROR_CODE_TENANT_DELETION_NOT_ENABLED.getCode(),
-                                ERROR_CODE_TENANT_DELETION_NOT_ENABLED.getMessage());
-                    }
+                    TenantMgtUtil.deleteTenant(tenantDomain, tenantManager, tenantId, serverConfigurationService);
                 } catch (Exception e) {
                     if (e instanceof TenantMgtException) {
                         throw (TenantMgtException) e;

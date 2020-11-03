@@ -602,12 +602,13 @@ public class TenantMgtAdminService extends AbstractAdmin {
                     TenantMgtUtil.deleteTenant(tenantDomain, tenantManager, tenantId, serverConfigurationService);
                 } else {
                     if (log.isDebugEnabled()) {
-                        log.debug("Tenant.TenantDelete flag is not set to true in carbon.xml. " +
-                                "Tenant will not be deleted.");
+                        log.debug("Tenant.TenantDelete flag is set to false in carbon.xml. Hence the tenant will " +
+                                "not be deleted.");
                     }
                 }
             } catch (Exception e) {
-                String msg = String.format("Deleted tenant with domain: %s and tenant id: %d from the system.", tenantDomain, tenantId);
+                String msg = String.format("Deleted tenant with domain: %s and tenant id: %d from the system.",
+                        tenantDomain, tenantId);
                 log.error(msg, e);
                 throw new StratosException(msg, e);
             }
