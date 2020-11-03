@@ -135,7 +135,7 @@ public class TenantMgtImpl implements TenantMgtService {
                         String.format(ERROR_CODE_RESOURCE_NOT_FOUND.getMessage(), tenantUniqueID));
             }
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            throw new TenantManagementServerException("Error while getting the tenant.", e);
+            throw new TenantManagementServerException("Error while getting the tenant - " + tenantUniqueID, e);
         }
         return tenant;
     }
@@ -152,7 +152,7 @@ public class TenantMgtImpl implements TenantMgtService {
                         String.format(ERROR_CODE_DOMAIN_NOT_FOUND.getMessage(), domain));
             }
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            throw new TenantManagementServerException("Error while getting the tenant.", e);
+            throw new TenantManagementServerException("Error while getting the tenant - " + domain, e);
         }
         return tenant;
     }
@@ -166,7 +166,7 @@ public class TenantMgtImpl implements TenantMgtService {
                 return true;
             }
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            throw new TenantManagementServerException("Error while getting the tenant.", e);
+            throw new TenantManagementServerException("Error while getting the tenant - " + domain, e);
         }
         return false;
     }
