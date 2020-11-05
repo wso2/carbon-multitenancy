@@ -64,16 +64,7 @@
       ]
     }
   ],
-  "multi_tenancy.cloud_services": [
-    {
-      "name": "WSO2 API Manager",
-      "default": true,
-      "key": "AM",
-      "label": "API Manager",
-      "link": "https://am.cloud.wso2.com",
-      "description": "API Manager in the cloud"
-    }
-  ],
+  "multi_tenancy.cloud_services": [],
   "multi_tenancy.stratos.disable_tenant_management_emails": true,
   "multi_tenancy.stratos.email_validation_mandatory_for_login": false,
   "multi_tenancy.stratos.tenant_activation_moderated": false,
