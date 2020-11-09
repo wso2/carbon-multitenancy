@@ -261,7 +261,7 @@ public class TenantMgtImpl implements TenantMgtService {
                         log.debug(String.format("Starting tenant deletion for domain: %s and tenant id: %d from " +
                                 "the system.", tenantDomain, tenantId));
                     }
-                    TenantMgtUtil.deleteTenant(tenantDomain, tenantManager, tenantId, serverConfigurationService);
+                    TenantMgtUtil.deleteTenant(tenantDomain);
                 } catch (Exception e) {
                     if (e instanceof TenantMgtException) {
                         throw (TenantMgtException) e;

@@ -599,7 +599,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
                         TenantMgtServiceComponent.getServerConfigurationService();
 
                 if (Boolean.parseBoolean(serverConfigurationService.getFirstProperty("Tenant.TenantDelete"))) {
-                    TenantMgtUtil.deleteTenant(tenantDomain, tenantManager, tenantId, serverConfigurationService);
+                    TenantMgtUtil.deleteTenant(tenantDomain);
                 } else {
                     if (log.isDebugEnabled()) {
                         log.debug("Tenant.TenantDelete flag is set to false in carbon.xml. Hence the tenant will " +
