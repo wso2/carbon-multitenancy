@@ -15,6 +15,7 @@
  */
 package org.wso2.carbon.tenant.mgt.services;
 
+import org.wso2.carbon.stratos.common.exception.StratosException;
 import org.wso2.carbon.stratos.common.exception.TenantMgtException;
 import org.wso2.carbon.user.core.common.User;
 import org.wso2.carbon.user.core.tenant.Tenant;
@@ -98,4 +99,12 @@ public interface TenantMgtService {
      * @throws TenantMgtException if tenant deactivation fails.
      */
     void deactivateTenant(String tenantUniqueIdentifier) throws TenantMgtException;
+
+    /**
+     * Delete tenant metadata.
+     *
+     * @param tenantUniqueIdentifier tenant uuid.
+     * @throws TenantMgtException if tenant deactivation fails.
+     */
+    void deleteTenantMetaData(String tenantUniqueIdentifier) throws TenantMgtException;
 }

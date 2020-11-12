@@ -154,22 +154,6 @@ public class TenantMgtAdminService extends AbstractAdmin {
         }
     }
 
-    /**
-     * Notifying Tenant deletion listeners.
-     *
-     * @param tenantId
-     * @throws Exception
-     */
-    private void notifyTenantDeletion(int tenantId) throws Exception {
-        try {
-            TenantMgtUtil.triggerPreTenantDelete(tenantId);
-        } catch (StratosException e) {
-            String msg = "Error in notifying tenant addition.";
-            log.error(msg, e);
-            throw new Exception(msg, e);
-        }
-    }
-
     private void checkIsSuperTenantInvoking() throws Exception {
         UserRegistry userRegistry = (UserRegistry) getGovernanceRegistry();
         if (userRegistry == null) {
@@ -607,42 +591,24 @@ public class TenantMgtAdminService extends AbstractAdmin {
 
             try {
                 if (log.isDebugEnabled()) {
-                    log.debug(String.format("Starting tenant deletion for domain: %s and tenant id: %d from the system", tenantDomain, tenantId));
+                    log.debug(String.format("Starting tenant deletion for domain: %s and tenant id: %d from the system",
+                            tenantDomain, tenantId));
                 }
 
-                ServerConfigurationService serverConfigurationService = TenantMgtServiceComponent.getServerConfigurationService();
+                ServerConfigurationService serverConfigurationService =
+                        TenantMgtServiceComponent.getServerConfigurationService();
 
                 if (Boolean.parseBoolean(serverConfigurationService.getFirstProperty("Tenant.TenantDelete"))) {
-                    /*
-                     * TODO: 2/7/19 We need to fix listeners to enable this by default
-                     * Refer - https://github.com/wso2-support/carbon-multitenancy/issues/35
-                     */
-                    if (Boolean.parseBoolean(serverConfigurationService.getFirstProperty("Tenant.ListenerInvocationPolicy.InvokeOnDelete"))) {
-                        notifyTenantDeletion(tenantId);
-                    } else {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Tenant.ListenerInvocationPolicy.InvokeOnDelete flag is not set to true in carbon.xml. Listener invocation ignored.");
-                        }
-                    }
-
-                    TenantMgtUtil.deleteWorkernodesTenant(tenantId);
-
-                    if (TenantMgtServiceComponent.getBillingService() != null) {
-                        TenantMgtServiceComponent.getBillingService().deleteBillingData(tenantId);
-                    }
-
-                    TenantMgtUtil.unloadTenantConfigurations(tenantDomain, tenantId);
-                    TenantMgtUtil.deleteTenantRegistryData(tenantId);
-                    TenantMgtUtil.deleteTenantDir(tenantId);
-                    tenantManager.deleteTenant(tenantId);
-                    log.info(String.format("Deleted tenant with domain: %s and tenant id: %d from the system.", tenantDomain, tenantId));
+                    TenantMgtUtil.deleteTenant(tenantDomain);
                 } else {
                     if (log.isDebugEnabled()) {
-                        log.debug("Tenant.TenantDelete flag is not set to true in carbon.xml. Tenant will not be deleted.");
+                        log.debug("Tenant.TenantDelete flag is set to false in carbon.xml. Hence the tenant will " +
+                                "not be deleted.");
                     }
                 }
             } catch (Exception e) {
-                String msg = String.format("Deleted tenant with domain: %s and tenant id: %d from the system.", tenantDomain, tenantId);
+                String msg = String.format("Deleted tenant with domain: %s and tenant id: %d from the system.",
+                        tenantDomain, tenantId);
                 log.error(msg, e);
                 throw new StratosException(msg, e);
             }

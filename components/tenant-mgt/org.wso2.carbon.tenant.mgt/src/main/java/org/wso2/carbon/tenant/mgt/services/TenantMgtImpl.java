@@ -18,6 +18,7 @@ package org.wso2.carbon.tenant.mgt.services;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.context.RegistryType;
@@ -49,6 +50,8 @@ import java.util.Date;
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_INVALID_OFFSET;
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_RESOURCE_NOT_FOUND;
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_DOMAIN_NOT_FOUND;
+import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.
+        ERROR_CODE_TENANT_DELETION_NOT_ENABLED;
 import static org.wso2.carbon.tenant.mgt.util.TenantMgtUtil.initializeTenantInfoBean;
 
 /**
@@ -227,6 +230,51 @@ public class TenantMgtImpl implements TenantMgtService {
         } catch (StratosException e) {
             throw new TenantManagementServerException("Error while triggering tenant deactivation for the tenant: " +
                     tenantDomain + " .", e);
+        }
+    }
+
+    @Override
+    public void deleteTenantMetaData(String tenantUniqueIdentifier) throws TenantMgtException {
+
+        ServerConfigurationService
+                serverConfigurationService = TenantMgtServiceComponent.getServerConfigurationService();
+
+        if (!Boolean.parseBoolean(serverConfigurationService.getFirstProperty("Tenant.TenantDelete"))) {
+            throw new TenantManagementClientException(ERROR_CODE_TENANT_DELETION_NOT_ENABLED.getCode(),
+                    ERROR_CODE_TENANT_DELETION_NOT_ENABLED.getMessage());
+        }
+        TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
+        if (tenantManager != null) {
+            Tenant tenant;
+            try {
+                tenant = tenantManager.getTenant(tenantUniqueIdentifier);
+            } catch (UserStoreException e) {
+                throw new TenantManagementServerException("Error while getting the tenant with the tenant " +
+                        "unique id :" + tenantUniqueIdentifier + " .", e);
+            }
+
+            if (tenant != null) {
+                int tenantId = tenant.getId();
+                String tenantDomain = tenant.getDomain();
+                try {
+                    if (log.isDebugEnabled()) {
+                        log.debug(String.format("Starting tenant deletion for domain: %s and tenant id: %d from " +
+                                "the system.", tenantDomain, tenantId));
+                    }
+                    TenantMgtUtil.deleteTenant(tenantDomain);
+                } catch (Exception e) {
+                    if (e instanceof TenantMgtException) {
+                        throw (TenantMgtException) e;
+                    } else {
+                        throw new TenantManagementServerException(e.getMessage(), e);
+                    }
+                }
+            } else {
+                if (log.isDebugEnabled()) {
+                    String msg = "Trying to delete a non-existing tenant with tenant unique id : %s .";
+                    log.debug(String.format(msg, tenantUniqueIdentifier));
+                }
+            }
         }
     }
 
