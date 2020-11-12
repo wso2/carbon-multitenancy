@@ -25,63 +25,51 @@
         </parameter>
         <operation name="addTenant">
             <parameter name="superTenantService" locked="true">true</parameter>
-            <parameter name="AuthorizationAction" locked="true">/permission/protected/manage/monitor/tenants/create
-            </parameter>
+            <parameter name="AuthorizationAction" locked="true">/permission/protected/manage/monitor/tenants</parameter>
         </operation>
         <operation name="checkDomainAvailability">
             <parameter name="superTenantService" locked="true">true</parameter>
-            <parameter name="AuthorizationAction" locked="true">/permission/protected/manage/monitor/tenants/view
-            </parameter>
+            <parameter name="AuthorizationAction" locked="true">/permission/protected/manage/monitor/tenants</parameter>
         </operation>
         <operation name="addSkeletonTenant">
             <parameter name="superTenantService" locked="true">true</parameter>
-            <parameter name="AuthorizationAction" locked="true">/permission/protected/manage/monitor/tenants/create
-            </parameter>
+            <parameter name="AuthorizationAction" locked="true">/permission/protected/manage/monitor/tenants</parameter>
         </operation>
         <operation name="retrieveTenants">
             <parameter name="superTenantService" locked="true">true</parameter>
-            <parameter name="AuthorizationAction" locked="true">/permission/protected/manage/monitor/tenants/view
-            </parameter>
+            <parameter name="AuthorizationAction" locked="true">/permission/protected/manage/monitor/tenants/list</parameter>
         </operation>
         <operation name="retrievePaginatedTenants">
             <parameter name="superTenantService" locked="true">true</parameter>
-            <parameter name="AuthorizationAction" locked="true">/permission/protected/manage/monitor/tenants/view
-            </parameter>
+            <parameter name="AuthorizationAction" locked="true">/permission/protected/manage/monitor/tenants</parameter>
         </operation>
          <operation name="retrievePartialSearchTenants">
             <parameter name="superTenantService" locked="true">true</parameter>
-             <parameter name="AuthorizationAction" locked="true">/permission/protected/manage/monitor/tenants/view
-             </parameter>
+            <parameter name="AuthorizationAction" locked="true">/permission/protected/manage/monitor/tenants</parameter>
         </operation>
         <operation name="retrievePaginatedPartialSearchTenants">
             <parameter name="superTenantService" locked="true">true</parameter>
-            <parameter name="AuthorizationAction" locked="true">/permission/protected/manage/monitor/tenants/view
-            </parameter>
+            <parameter name="AuthorizationAction" locked="true">/permission/protected/manage/monitor/tenants</parameter>
         </operation>
         <operation name="getTenant">
             <parameter name="superTenantService" locked="true">true</parameter>
-            <parameter name="AuthorizationAction" locked="true">/permission/protected/manage/monitor/tenants/view
-            </parameter>
+            <parameter name="AuthorizationAction" locked="true">/permission/protected/manage/monitor/tenants</parameter>
         </operation>
         <operation name="updateTenant">
             <parameter name="superTenantService" locked="true">true</parameter>
-            <parameter name="AuthorizationAction" locked="true">/permission/protected/manage/modify/tenants/update
-            </parameter>
+            <parameter name="AuthorizationAction" locked="true">/permission/protected/manage/modify/tenants</parameter>
         </operation>
         <operation name="activateTenant">
             <parameter name="superTenantService" locked="true">true</parameter>
-            <parameter name="AuthorizationAction" locked="true">/permission/protected/manage/modify/tenants/update
-            </parameter>
+            <parameter name="AuthorizationAction" locked="true">/permission/protected/manage/modify/tenants</parameter>
         </operation>
         <operation name="deactivateTenant">
             <parameter name="superTenantService" locked="true">true</parameter>
-            <parameter name="AuthorizationAction" locked="true">/permission/protected/manage/modify/tenants/update
-            </parameter>
+            <parameter name="AuthorizationAction" locked="true">/permission/protected/manage/modify/tenants</parameter>
         </operation>
         <operation name="deleteTenant">
             <parameter name="superTenantService" locked="true">true</parameter>
-            <parameter name="AuthorizationAction" locked="true">/permission/protected/manage/modify/tenants/delete
-            </parameter>
+            <parameter name="AuthorizationAction" locked="true">/permission/protected/manage/modify/tenants</parameter>
         </operation>
         <parameter name="adminService" locked="true">true</parameter>
     </service>
