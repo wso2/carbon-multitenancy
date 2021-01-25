@@ -187,7 +187,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
             throw new Exception(msg, e);
         }
         if (tenantId < 0) {
-            String msg = "Tenant is not added in user store " + tenantInfoBean.getTenantDomain();
+            String msg = "Tenant is not added in user store. Tenant domain: " + tenantInfoBean.getTenantDomain();
             log.error(msg);
             throw new Exception(msg);
         }
@@ -278,13 +278,13 @@ public class TenantMgtAdminService extends AbstractAdmin {
      * Method to retrieve all the partial search domain tenants paginated.
      *
      * @param pageNumber Number of the page.
-     * @return PaginatedTenantInfoBean
-     * @throws Exception if failed to getTenantManager;
+     * @return PaginatedTenantInfoBean Paginated tenant info bean.
+     * @throws Exception if failed to getTenantManager.
      */
     public PaginatedTenantInfoBean retrievePaginatedPartialSearchTenants(String domain, int pageNumber)
             throws Exception {
-        List<TenantInfoBean> tenantList = searchPartialTenantsDomains(domain);
 
+        List<TenantInfoBean> tenantList = searchPartialTenantsDomains(domain);
         // Pagination
         PaginatedTenantInfoBean paginatedTenantInfoBean = new PaginatedTenantInfoBean();
         DataPaginator.doPaging(pageNumber, tenantList, paginatedTenantInfoBean);
@@ -292,15 +292,15 @@ public class TenantMgtAdminService extends AbstractAdmin {
     }
 
     /**
-     * Method to retrieve all the tenants paginated
+     * Method to retrieve all the tenants paginated.
      *
      * @param pageNumber Number of the page.
-     * @return PaginatedTenantInfoBean
-     * @throws Exception if failed to getTenantManager;
+     * @return PaginatedTenantInfoBean Paginated tenant info bean.
+     * @throws Exception if failed to getTenantManager.
      */
     public PaginatedTenantInfoBean retrievePaginatedTenants(int pageNumber) throws Exception {
-        List<TenantInfoBean> tenantList = getAllTenants();
 
+        List<TenantInfoBean> tenantList = getAllTenants();
         // Pagination
         PaginatedTenantInfoBean paginatedTenantInfoBean = new PaginatedTenantInfoBean();
         DataPaginator.doPaging(pageNumber, tenantList, paginatedTenantInfoBean);
