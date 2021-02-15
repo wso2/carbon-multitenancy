@@ -423,9 +423,15 @@ public class TenantMgtUtil {
         try {
             Map<String, String> claimsMap = new HashMap<String, String>();
 
-            claimsMap.put(UserCoreConstants.ClaimTypeURIs.GIVEN_NAME, tenant.getAdminFirstName());
-            claimsMap.put(UserCoreConstants.ClaimTypeURIs.SURNAME, tenant.getAdminLastName());
-            claimsMap.put(UserCoreConstants.ClaimTypeURIs.EMAIL_ADDRESS, tenant.getEmail());
+            if (StringUtils.isNotEmpty(tenant.getAdminFirstName())) {
+                claimsMap.put(UserCoreConstants.ClaimTypeURIs.GIVEN_NAME, tenant.getAdminFirstName());
+            }
+            if (StringUtils.isNotEmpty(tenant.getAdminLastName())) {
+                claimsMap.put(UserCoreConstants.ClaimTypeURIs.SURNAME, tenant.getAdminLastName());
+            }
+            if (StringUtils.isNotEmpty(tenant.getEmail())) {
+                claimsMap.put(UserCoreConstants.ClaimTypeURIs.EMAIL_ADDRESS, tenant.getEmail());
+            }
 
             // Can be extended to store other user information.
             UserStoreManager userStoreManager =
