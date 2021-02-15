@@ -186,7 +186,10 @@ public class TenantPersistor {
         int tenantId;
         TenantManager tenantManager = TenantMgtCoreServiceComponent.getTenantManager();
         try {
-            if (StringUtils.isBlank(tenant.getDomain())) {
+            if (StringUtils.isBlank(tenant.getAdminName())) {
+                throw new TenantManagementClientException(ERROR_CODE_MISSING_REQUIRED_PARAMETER.getCode(), String
+                        .format(ERROR_CODE_MISSING_REQUIRED_PARAMETER.getMessage(), "owner name"));
+            } else if (StringUtils.isBlank(tenant.getDomain())) {
                 throw new TenantManagementClientException(ERROR_CODE_MISSING_REQUIRED_PARAMETER.getCode(), String
                         .format(ERROR_CODE_MISSING_REQUIRED_PARAMETER.getMessage(), "tenant domain"));
             }
