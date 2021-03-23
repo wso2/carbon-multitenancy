@@ -36,6 +36,7 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.UUIDGenerator;
 import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
 import org.wso2.carbon.stratos.common.constants.StratosConstants;
+import org.wso2.carbon.stratos.common.constants.TenantConstants;
 import org.wso2.carbon.stratos.common.exception.StratosException;
 import org.wso2.carbon.stratos.common.exception.TenantManagementClientException;
 import org.wso2.carbon.stratos.common.exception.TenantManagementServerException;
@@ -64,6 +65,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
@@ -72,6 +75,7 @@ import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMess
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_EMPTY_EXTENSION;
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_ILLEGAL_CHARACTERS_IN_DOMAIN;
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_INVALID_DOMAIN;
+import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_TENANT_DOES_NOT_MATCH_REGEX_PATTERN;
 
 /**
  * Utility methods for tenant management.
@@ -221,6 +225,14 @@ public class TenantMgtUtil {
             if (lastIndexOfDot <= 0) {
                 throw new TenantManagementClientException(ERROR_CODE_EMPTY_EXTENSION);
             }
+        }
+        String regex = CommonUtil.getTenantDomainRegexPattern();
+        if (StringUtils.isNotBlank(regex)) {
+            if (!isFormatCorrect(regex, domainName)) {
+                throw new TenantManagementClientException(ERROR_CODE_TENANT_DOES_NOT_MATCH_REGEX_PATTERN.getCode(),
+                        String.format(ERROR_CODE_TENANT_DOES_NOT_MATCH_REGEX_PATTERN.getMessage(), domainName, regex));
+            }
+            return;
         }
         int indexOfDot = domainName.indexOf(DOT);
         if (indexOfDot == 0) {
@@ -741,5 +753,12 @@ public class TenantMgtUtil {
             }
         }
         return maximumItemsPerPage;
+    }
+
+    private static boolean isFormatCorrect(String regularExpression, String domainName) {
+
+        Pattern p2 = Pattern.compile(regularExpression);
+        Matcher m2 = p2.matcher(domainName);
+        return m2.matches();
     }
 }

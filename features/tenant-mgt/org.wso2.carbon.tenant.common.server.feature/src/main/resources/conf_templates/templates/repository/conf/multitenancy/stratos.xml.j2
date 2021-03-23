@@ -59,7 +59,9 @@
 
     <!--A few Stratos Public Cloud Specific customizations are handled by this parameter-->
     <StratosPublicCloudSetup>{{multi_tenancy.stratos.public_cloud_setup}}</StratosPublicCloudSetup>
-
+    {% if multi_tenancy.stratos.tenant_domain_regex is defined %}
+    <TenantDomainRegexPattern>{{multi_tenancy.stratos.tenant_domain_regex}}</TenantDomainRegexPattern>
+    {% endif %}
     <!--The URL of the Paypal-->
     <PaypalUrl>{{multi_tenancy.stratos.paypal.url}}</PaypalUrl>
 
