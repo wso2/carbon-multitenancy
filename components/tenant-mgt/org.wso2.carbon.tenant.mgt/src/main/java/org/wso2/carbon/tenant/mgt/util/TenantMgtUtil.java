@@ -226,6 +226,7 @@ public class TenantMgtUtil {
                 throw new TenantManagementClientException(ERROR_CODE_EMPTY_EXTENSION);
             }
         }
+        // Regex validation will be skipped if it is not configured.
         String regex = CommonUtil.getTenantDomainRegexPattern();
         if (StringUtils.isNotBlank(regex)) {
             if (!isFormatCorrect(regex, domainName)) {
