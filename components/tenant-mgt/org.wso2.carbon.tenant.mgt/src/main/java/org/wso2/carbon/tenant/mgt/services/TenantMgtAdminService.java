@@ -66,7 +66,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
         String tenantDomain = tenantInfoBean.getTenantDomain();
         TenantMgtUtil.validateDomain(tenantDomain);
         checkIsSuperTenantInvoking();
-
+        notifyPreTenantAddition(tenantInfoBean);
         //Set a thread local variable to identify the operations triggered for a tenant admin user
         TenantMgtUtil.setTenantAdminCreationOperation(true);
 
@@ -154,6 +154,17 @@ public class TenantMgtAdminService extends AbstractAdmin {
         }
     }
 
+    private void notifyPreTenantAddition(TenantInfoBean tenantInfoBean) throws Exception {
+
+        try {
+            TenantMgtUtil.triggerPreAddTenant(tenantInfoBean);
+        } catch (StratosException e) {
+            String msg = "Error in notifying pre tenant addition.";
+            log.error(msg, e);
+            throw new Exception(msg, e);
+        }
+    }
+
     private void checkIsSuperTenantInvoking() throws Exception {
         UserRegistry userRegistry = (UserRegistry) getGovernanceRegistry();
         if (userRegistry == null) {
@@ -191,6 +202,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
             log.error(msg);
             throw new Exception(msg);
         }
+        notifyPreTenantAddition(tenantInfoBean);
         Tenant tenant = TenantMgtUtil.initializeTenant(tenantInfoBean);
         tenant.setId(tenantId);
         TenantPersistor persistor = new TenantPersistor();

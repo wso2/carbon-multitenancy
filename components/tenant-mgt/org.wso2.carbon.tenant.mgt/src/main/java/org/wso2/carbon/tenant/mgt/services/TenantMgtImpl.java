@@ -26,6 +26,7 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.UUIDGenerator;
 import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
 import org.wso2.carbon.stratos.common.constants.TenantConstants;
+import org.wso2.carbon.stratos.common.exception.StratosClientException;
 import org.wso2.carbon.stratos.common.exception.StratosException;
 import org.wso2.carbon.stratos.common.exception.TenantManagementClientException;
 import org.wso2.carbon.stratos.common.exception.TenantManagementServerException;
@@ -45,13 +46,13 @@ import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.user.core.tenant.TenantSearchResult;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import java.util.Calendar;
 import java.util.Date;
 
+import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_DOMAIN_NOT_FOUND;
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_INVALID_OFFSET;
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_RESOURCE_NOT_FOUND;
-import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_DOMAIN_NOT_FOUND;
-import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.
-        ERROR_CODE_TENANT_DELETION_NOT_ENABLED;
+import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_TENANT_DELETION_NOT_ENABLED;
 import static org.wso2.carbon.tenant.mgt.util.TenantMgtUtil.initializeTenantInfoBean;
 
 /**
@@ -74,6 +75,8 @@ public class TenantMgtImpl implements TenantMgtService {
         int tenantId;
 
         validateInputs(tenant);
+        TenantInfoBean preCreateTenantInfo = buildTenantInfoBean(tenant);
+        notifyPreTenantAddition(preCreateTenantInfo);
         try {
             // Set a thread local variable to identify the operations triggered for a tenant admin user.
             TenantMgtUtil.setTenantAdminCreationOperation(true);
@@ -403,6 +406,30 @@ public class TenantMgtImpl implements TenantMgtService {
         }
     }
 
+    private void notifyPreTenantAddition(TenantInfoBean tenantInfoBean) throws TenantMgtException {
+
+        try {
+            TenantMgtUtil.triggerPreAddTenant(tenantInfoBean);
+        } catch (StratosClientException e) {
+            String msg = TenantConstants.ErrorMessage.ERROR_CODE_PRE_TENANT_CREATION_FAILED.getMessage();
+            String code = TenantConstants.ErrorMessage.ERROR_CODE_PRE_TENANT_CREATION_FAILED.getCode();
+
+            if (StringUtils.isNotBlank(e.getMessage())) {
+                msg = e.getMessage();
+            }
+            if (StringUtils.isNotBlank(e.getErrorCode())) {
+                code = e.getErrorCode();
+            }
+            throw new TenantManagementClientException(code, msg, e);
+        } catch (StratosException e) {
+            String msg = TenantConstants.ErrorMessage.ERROR_CODE_PRE_TENANT_CREATION_FAILED.getMessage();
+            if (StringUtils.isNotBlank(e.getMessage())) {
+                msg = e.getMessage();
+            }
+            throw new TenantMgtException(msg, e);
+        }
+    }
+
     private void checkIsSuperTenantInvoking() throws TenantManagementServerException {
 
         UserRegistry userRegistry = (UserRegistry) (CarbonContext.getThreadLocalCarbonContext().getRegistry(
@@ -562,5 +589,27 @@ public class TenantMgtImpl implements TenantMgtService {
             throw new TenantManagementServerException("Error while getting the tenant: " + tenantUniqueID + " .", e);
         }
         return tenant;
+    }
+
+    private static TenantInfoBean buildTenantInfoBean(Tenant tenant) {
+
+        TenantInfoBean bean = new TenantInfoBean();
+        bean.setTenantId(tenant.getId());
+        bean.setTenantDomain(tenant.getDomain());
+        bean.setEmail(tenant.getEmail());
+        bean.setAdmin(tenant.getAdminName());
+        bean.setFirstname(tenant.getAdminFirstName());
+        bean.setLastname(tenant.getAdminLastName());
+        bean.setAdminPassword(tenant.getAdminPassword());
+        if (tenant.getCreatedDate() != null) {
+            Calendar createdDate = Calendar.getInstance();
+            createdDate.setTimeInMillis(tenant.getCreatedDate().getTime());
+            bean.setCreatedDate(createdDate);
+        }
+        bean.setActive(tenant.isActive());
+        if (log.isDebugEnabled()) {
+            log.debug("The TenantInfoBean object has been created from the tenant.");
+        }
+        return bean;
     }
 }

@@ -36,7 +36,6 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.UUIDGenerator;
 import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
 import org.wso2.carbon.stratos.common.constants.StratosConstants;
-import org.wso2.carbon.stratos.common.constants.TenantConstants;
 import org.wso2.carbon.stratos.common.exception.StratosException;
 import org.wso2.carbon.stratos.common.exception.TenantManagementClientException;
 import org.wso2.carbon.stratos.common.exception.TenantManagementServerException;
@@ -153,6 +152,19 @@ public class TenantMgtUtil {
         for (TenantMgtListener tenantMgtListener :
                 TenantMgtServiceComponent.getTenantMgtListeners()) {
             tenantMgtListener.onTenantCreate(tenantInfo);
+        }
+    }
+
+    /**
+     * Triggers pre tenant add listeners.
+     *
+     * @param tenantInfo tenant
+     * @throws StratosException
+     */
+    public static void triggerPreAddTenant(TenantInfoBean tenantInfo) throws StratosException {
+
+        for (TenantMgtListener tenantMgtListener : TenantMgtServiceComponent.getTenantMgtListeners()) {
+            tenantMgtListener.onPreTenantCreate(tenantInfo);
         }
     }
 
