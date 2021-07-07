@@ -368,19 +368,18 @@ public class TenantMgtUtil {
                             "carbon.xml. Listener invocation ignored.");
                 }
             }
-
+            org.wso2.carbon.user.api.Tenant tenant = tenantManager.getTenant(tenantId);
             TenantMgtUtil.deleteWorkernodesTenant(tenantId);
-
             if (TenantMgtServiceComponent.getBillingService() != null) {
                 TenantMgtServiceComponent.getBillingService().deleteBillingData(tenantId);
             }
-
             TenantMgtUtil.unloadTenantConfigurations(tenantDomain, tenantId);
             TenantMgtUtil.deleteTenantRegistryData(tenantId);
             TenantMgtUtil.deleteTenantDir(tenantId);
             tenantManager.deleteTenant(tenantId);
             log.info(String.format("Deleted tenant with domain: %s and tenant id: %d from the system.", tenantDomain,
                     tenantId));
+            triggerPostTenantDelete(tenantId, tenant.getTenantUniqueID(), tenant.getAdminUserId());
         }
     }
 
@@ -773,5 +772,24 @@ public class TenantMgtUtil {
         Pattern p2 = Pattern.compile(regularExpression);
         Matcher m2 = p2.matcher(domainName);
         return m2.matches();
+    }
+
+    /**
+     * Triggers post tenant delete for TenantMgtListener.
+     *
+     * @param tenantId int Tenant id.
+     * @param tenantUuid String Tenant unique identifier.
+     * @param adminUserUuid String Tenant admin user unique identifier.
+     * @throws StratosException  If trigger failed.
+     */
+    private static void triggerPostTenantDelete(int tenantId, String tenantUuid, String adminUserUuid)
+            throws StratosException {
+
+        for (TenantMgtListener tenantMgtListener : TenantMgtServiceComponent
+                .getTenantMgtListeners()) {
+            log.debug("Executing OnPostDelete on Listener Impl Class Name : "
+                    + tenantMgtListener.getClass().getName());
+            tenantMgtListener.onPostDelete(tenantId, tenantUuid, adminUserUuid);
+        }
     }
 }
