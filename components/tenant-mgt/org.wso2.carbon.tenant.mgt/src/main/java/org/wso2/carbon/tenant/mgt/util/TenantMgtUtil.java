@@ -51,6 +51,7 @@ import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
+import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.config.multitenancy.MultiTenantRealmConfigBuilder;
 import org.wso2.carbon.user.core.jdbc.JDBCRealmConstants;
 import org.wso2.carbon.user.core.tenant.Tenant;
@@ -368,7 +369,9 @@ public class TenantMgtUtil {
                             "carbon.xml. Listener invocation ignored.");
                 }
             }
-            org.wso2.carbon.user.api.Tenant tenant = tenantManager.getTenant(tenantId);
+            Tenant tenant = (Tenant) tenantManager.getTenant(tenantId);
+            String adminUserUuid = getTenantAdminUuid(tenant);
+            String tenantUuid = tenant.getTenantUniqueID();
             TenantMgtUtil.deleteWorkernodesTenant(tenantId);
             if (TenantMgtServiceComponent.getBillingService() != null) {
                 TenantMgtServiceComponent.getBillingService().deleteBillingData(tenantId);
@@ -379,8 +382,31 @@ public class TenantMgtUtil {
             tenantManager.deleteTenant(tenantId);
             log.info(String.format("Deleted tenant with domain: %s and tenant id: %d from the system.", tenantDomain,
                     tenantId));
-            triggerPostTenantDelete(tenantId, tenant.getTenantUniqueID(), tenant.getAdminUserId());
+            triggerPostTenantDelete(tenantId, tenantUuid, adminUserUuid);
         }
+    }
+
+    private static String getTenantAdminUuid(Tenant tenant) throws TenantManagementServerException {
+
+        String adminUserUuid = tenant.getAdminUserId();
+        if (StringUtils.isNotBlank(adminUserUuid)) {
+            return adminUserUuid;
+        }
+        // If the admin user uuid is not in the tenant object, we need to get it from user store.
+        String adminUsername = tenant.getAdminName();
+        try {
+            UserStoreManager userStoreManager = (UserStoreManager) TenantMgtServiceComponent.getRealmService().
+                    getTenantUserRealm(tenant.getId()).getUserStoreManager();
+            adminUserUuid = ((AbstractUserStoreManager) userStoreManager).getUserIDFromUserName(adminUsername);
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            throw new TenantManagementServerException(String.format(
+                    "Error occurred while getting user store manager for tenantId: %s.", tenant.getId()), e);
+        }
+        if (StringUtils.isBlank(adminUserUuid)) {
+            throw new TenantManagementServerException(String.format(
+                    "No UUID found for the admin user of tenant: %s.", tenant.getId()));
+        }
+        return adminUserUuid;
     }
 
     /**
