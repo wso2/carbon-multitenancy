@@ -386,7 +386,7 @@ public class TenantMgtUtil {
         }
     }
 
-    private static String getTenantAdminUuid(Tenant tenant) throws UserStoreException {
+    private static String getTenantAdminUuid(Tenant tenant) throws TenantManagementServerException {
 
         String adminUserUuid = tenant.getAdminUserId();
         if (StringUtils.isNotBlank(adminUserUuid)) {
@@ -399,15 +399,12 @@ public class TenantMgtUtil {
                     getTenantUserRealm(tenant.getId()).getUserStoreManager();
             adminUserUuid = ((AbstractUserStoreManager) userStoreManager).getUserIDFromUserName(adminUsername);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            log.error(
-                    String.format("Error occurred while getting user store manager for tenantId: %s", tenant.getId())
-            );
+            throw new TenantManagementServerException(String.format(
+                    "Error occurred while getting user store manager for tenantId: %s.", tenant.getId()), e);
         }
         if (StringUtils.isBlank(adminUserUuid)) {
-            throw new UserStoreException(
-                    String.format("Error occurred while getting admin user unique identifier " +
-                            "for admin username: %s. Empty admin user unique identifier", adminUsername)
-            );
+            throw new TenantManagementServerException(String.format(
+                    "No UUID found for the admin user of tenant: %s.", tenant.getId()));
         }
         return adminUserUuid;
     }
