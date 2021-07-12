@@ -52,6 +52,17 @@
                 <version>${carbon.identity.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.wso2.carbon.identity.framework</groupId>
+                <artifactId>org.wso2.carbon.identity.claim.metadata.mgt</artifactId>
+                <version>${carbon.identity.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.identity.framework</groupId>
+                <artifactId>org.wso2.carbon.identity.core</artifactId>
+                <version>${carbon.identity.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.core</artifactId>
                 <version>${carbon.kernel.version}</version>
@@ -915,7 +926,7 @@
         <carbon.registry.imp.pkg.version>[4.4.0, 5.0.0)</carbon.registry.imp.pkg.version>
 
         <!-- Carbon Identity version-->
-        <carbon.identity.version>5.15.17</carbon.identity.version>
+        <carbon.identity.version>5.20.107</carbon.identity.version>
         <carbon.identity.um.ws.api.version>5.3.3</carbon.identity.um.ws.api.version>
         <identity.authenticator.saml2.sso.import.feature.version>5.4.4</identity.authenticator.saml2.sso.import.feature.version>
         <carbon.identity.imp.pkg.version>[5.14.0, 6.0.0)</carbon.identity.imp.pkg.version>
