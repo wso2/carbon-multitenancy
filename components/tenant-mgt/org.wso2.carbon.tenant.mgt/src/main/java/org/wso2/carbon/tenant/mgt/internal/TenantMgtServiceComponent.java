@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.base.api.ServerConfigurationService;
+import org.wso2.carbon.identity.claim.metadata.mgt.ClaimMetadataManagementService;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -64,6 +65,8 @@ public class TenantMgtServiceComponent {
     private static List<TenantMgtListener> tenantMgtListeners = new ArrayList<>();
 
     private static TenantBillingService billingService = null;
+
+    private static ClaimMetadataManagementService claimMetadataManagementService;
 
     @Activate
     protected void activate(ComponentContext context) {
@@ -175,6 +178,22 @@ public class TenantMgtServiceComponent {
         setServerConfigurationService(null);
     }
 
+    @Reference(
+            name = "carbon.identity.claim.metadata.mgt.ClaimMetadataManagementService",
+            service = org.wso2.carbon.identity.claim.metadata.mgt.ClaimMetadataManagementService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetClaimMetadataManagementService")
+    protected void setClaimMetadataManagementService(ClaimMetadataManagementService claimMetadataManagementService) {
+
+        TenantMgtServiceComponent.claimMetadataManagementService = claimMetadataManagementService;
+    }
+
+    protected void unsetClaimMetadataManagementService(ClaimMetadataManagementService claimMetadataManagementService) {
+
+        setClaimMetadataManagementService(null);
+    }
+
     public static void addTenantMgtListener(TenantMgtListener tenantMgtListener) {
 
         tenantMgtListeners.add(tenantMgtListener);
@@ -249,6 +268,11 @@ public class TenantMgtServiceComponent {
     public static UserRegistry getConfigSystemRegistry(int tenantId) throws RegistryException {
 
         return registryService.getConfigSystemRegistry(tenantId);
+    }
+
+    public static ClaimMetadataManagementService getClaimMetadataManagementService() {
+
+        return claimMetadataManagementService;
     }
 
     @Reference(

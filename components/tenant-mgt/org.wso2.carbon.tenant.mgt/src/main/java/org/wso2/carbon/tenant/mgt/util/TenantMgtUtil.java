@@ -28,6 +28,7 @@ import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
+import org.wso2.carbon.identity.claim.metadata.mgt.exception.ClaimMetadataException;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -376,6 +377,7 @@ public class TenantMgtUtil {
             if (TenantMgtServiceComponent.getBillingService() != null) {
                 TenantMgtServiceComponent.getBillingService().deleteBillingData(tenantId);
             }
+            removeAllClaims(tenantId);
             TenantMgtUtil.unloadTenantConfigurations(tenantDomain, tenantId);
             TenantMgtUtil.deleteTenantRegistryData(tenantId);
             TenantMgtUtil.deleteTenantDir(tenantId);
@@ -383,6 +385,16 @@ public class TenantMgtUtil {
             log.info(String.format("Deleted tenant with domain: %s and tenant id: %d from the system.", tenantDomain,
                     tenantId));
             triggerPostTenantDelete(tenantId, tenantUuid, adminUserUuid);
+        }
+    }
+
+    private static void removeAllClaims(int tenantId) throws TenantManagementServerException {
+
+        try {
+            TenantMgtServiceComponent.getClaimMetadataManagementService().removeAllClaims(tenantId);
+        } catch (ClaimMetadataException e) {
+            throw new TenantManagementServerException(String.format(
+                    "Error occurred while deleting claims for tenant: %s.", tenantId), e);
         }
     }
 
