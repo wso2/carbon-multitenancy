@@ -55,10 +55,10 @@ public class TenantThemeMgtServiceComponent {
         try {
             ServerConfigurationService serverConfiguration = ServerConfiguration.getInstance();
             String enableTenantTheme = serverConfiguration.getFirstProperty(ENABLE_TENANT_THEME_MANAGEMENT);
-            boolean enableTenantThemeMgt = enableTenantTheme == null || !enableTenantTheme.equalsIgnoreCase("false");
+            boolean enableTenantThemeMgt = enableTenantTheme == null || Boolean.parseBoolean(enableTenantTheme);
             if (!enableTenantThemeMgt) {
-                log.debug("******* Multitenancy Theme Config bundle is activated. But tenant theme management" +
-                        " is disabled ******* ");
+                log.debug("******* Multitenancy Theme bundle is activated. But tenant theme management" +
+                        " configuration is disabled *******  ");
                 return;
             }
             ThemeUtil.loadResourceThemes();
