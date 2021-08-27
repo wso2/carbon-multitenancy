@@ -698,11 +698,6 @@
                 <version>2.1.1.wso2v1</version>
             </dependency>
             <dependency>
-                <groupId>kaptcha.wso2</groupId>
-                <artifactId>kaptcha</artifactId>
-                <version>2.3.0.wso2v1</version>
-            </dependency>
-            <dependency>
                 <groupId>org.wso2.carbon.multitenancy</groupId>
                 <artifactId>org.wso2.carbon.tenant.redirector.servlet.ui</artifactId>
                 <version>${carbon.multitenancy.version}</version>
