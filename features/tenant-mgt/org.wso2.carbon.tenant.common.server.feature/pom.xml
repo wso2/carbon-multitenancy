@@ -61,10 +61,6 @@
         </dependency>
 
         <dependency>
-            <groupId>kaptcha.wso2</groupId>
-            <artifactId>kaptcha</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.carbon.multitenancy</groupId>
             <artifactId>org.wso2.carbon.tenant.keystore.mgt</artifactId>
         </dependency>
@@ -114,7 +110,6 @@
                                 <!-- Tenant Mgmt -->
                                 <bundleDef>org.json.wso2:json</bundleDef>
                                 <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.mgt:${carbon.multitenancy.version}</bundleDef>
-                                <bundleDef>kaptcha.wso2:kaptcha</bundleDef>
                                 <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.keystore.mgt</bundleDef>
                                 <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.mgt.core:${carbon.multitenancy.version}
                                 </bundleDef>
