@@ -17,6 +17,8 @@
  */
 package org.wso2.carbon.theme.mgt.internal;
 
+import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
 import org.wso2.carbon.theme.mgt.util.ThemeLoadingListener;
 import org.apache.commons.logging.Log;
@@ -42,6 +44,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
         immediate = true)
 public class TenantThemeMgtServiceComponent {
 
+    private static final String ENABLE_TENANT_THEME_MANAGEMENT = "Tenant.EnableTenantThemeManagement";
     private static Log log = LogFactory.getLog(TenantThemeMgtServiceComponent.class);
 
     private static ConfigurationContextService configContextService = null;
@@ -50,6 +53,14 @@ public class TenantThemeMgtServiceComponent {
     protected void activate(ComponentContext context) {
 
         try {
+            ServerConfigurationService serverConfiguration = ServerConfiguration.getInstance();
+            String enableTenantTheme = serverConfiguration.getFirstProperty(ENABLE_TENANT_THEME_MANAGEMENT);
+            boolean enableTenantThemeMgt = enableTenantTheme == null || Boolean.parseBoolean(enableTenantTheme);
+            if (!enableTenantThemeMgt) {
+                log.debug("******* Multitenancy Theme bundle is activated. But tenant theme management" +
+                        " configuration is disabled *******  ");
+                return;
+            }
             ThemeUtil.loadResourceThemes();
             // registering the Theme Logding Listener
             BundleContext bundleContext = context.getBundleContext();
