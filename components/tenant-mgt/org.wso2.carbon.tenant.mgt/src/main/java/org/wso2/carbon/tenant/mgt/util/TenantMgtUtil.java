@@ -823,10 +823,11 @@ public class TenantMgtUtil {
     private static void triggerPostTenantDelete(int tenantId, String tenantUuid, String adminUserUuid)
             throws StratosException {
 
-        for (TenantMgtListener tenantMgtListener : TenantMgtServiceComponent
-                .getTenantMgtListeners()) {
-            log.debug("Executing OnPostDelete on Listener Impl Class Name : "
-                    + tenantMgtListener.getClass().getName());
+        for (TenantMgtListener tenantMgtListener : TenantMgtServiceComponent.getTenantMgtListeners()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Executing OnPostDelete on Listener Impl Class Name: "
+                        + tenantMgtListener.getClass().getName());
+            }
             tenantMgtListener.onPostDelete(tenantId, tenantUuid, adminUserUuid);
         }
     }
