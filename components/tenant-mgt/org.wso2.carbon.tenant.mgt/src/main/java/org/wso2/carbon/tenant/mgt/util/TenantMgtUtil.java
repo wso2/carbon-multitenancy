@@ -815,10 +815,10 @@ public class TenantMgtUtil {
     /**
      * Triggers post tenant delete for TenantMgtListener.
      *
-     * @param tenantId int Tenant id.
-     * @param tenantUuid String Tenant unique identifier.
+     * @param tenantId      int Tenant id.
+     * @param tenantUuid    String Tenant unique identifier.
      * @param adminUserUuid String Tenant admin user unique identifier.
-     * @throws StratosException  If trigger failed.
+     * @throws StratosException If trigger failed.
      */
     private static void triggerPostTenantDelete(int tenantId, String tenantUuid, String adminUserUuid)
             throws StratosException {
