@@ -103,6 +103,9 @@ public class TenantMgtImpl implements TenantMgtService {
             } else {
                 throw new TenantManagementServerException(e.getMessage(), e);
             }
+        } finally {
+            // Remove thread local variable set to identify operation triggered for a tenant admin user.
+            TenantMgtUtil.clearTenantAdminCreationOperation();
         }
         log.info("Added the tenant '" + tenantDomain + " [" + tenantId +
                 "]' by '" + PrivilegedCarbonContext.getThreadLocalCarbonContext().
