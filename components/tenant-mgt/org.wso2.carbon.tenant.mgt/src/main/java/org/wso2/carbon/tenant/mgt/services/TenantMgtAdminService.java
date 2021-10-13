@@ -67,18 +67,20 @@ public class TenantMgtAdminService extends AbstractAdmin {
         TenantMgtUtil.validateDomain(tenantDomain);
         checkIsSuperTenantInvoking();
         notifyPreTenantAddition(tenantInfoBean);
-        //Set a thread local variable to identify the operations triggered for a tenant admin user
-        TenantMgtUtil.setTenantAdminCreationOperation(true);
-
-        Tenant tenant = TenantMgtUtil.initializeTenant(tenantInfoBean);
-        tenant.setTenantUniqueID(UUIDGenerator.generateUUID());
-        TenantPersistor persistor = new TenantPersistor();
-        // not validating the domain ownership, since created by super tenant
-        int tenantId = persistor.persistTenant(tenant, false, tenantInfoBean.getSuccessKey(),
-                tenantInfoBean.getOriginatedService(), false);
-        tenantInfoBean.setTenantId(tenantId);
-
+        int tenantId;
+        Tenant tenant;
         try {
+            // Set a thread local variable to identify the operations triggered for a tenant admin user.
+            TenantMgtUtil.setTenantAdminCreationOperation(true);
+
+            tenant = TenantMgtUtil.initializeTenant(tenantInfoBean);
+            tenant.setTenantUniqueID(UUIDGenerator.generateUUID());
+            TenantPersistor persistor = new TenantPersistor();
+            // Not validating the domain ownership, since created by super tenant.
+            tenantId = persistor.persistTenant(tenant, false, tenantInfoBean.getSuccessKey(),
+                    tenantInfoBean.getOriginatedService(), false);
+            tenantInfoBean.setTenantId(tenantId);
+
             PrivilegedCarbonContext.startTenantFlow();
 
             PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
@@ -87,7 +89,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
 
             TenantMgtUtil.addClaimsToUserStoreManager(tenant);
         } finally {
-            //Remove thread local variable set to identify operation triggered for a tenant admin user.
+            // Remove thread local variable set to identify operation triggered for a tenant admin user.
             TenantMgtUtil.clearTenantAdminCreationOperation();
 
             PrivilegedCarbonContext.endTenantFlow();
