@@ -12,7 +12,7 @@
     <groupId>org.wso2.carbon.multitenancy</groupId>
     <artifactId>carbon-multitenancy</artifactId>
     <packaging>pom</packaging>
-    <version>4.9.8</version>
+    <version>4.9.21-SNAPSHOT</version>
     <name>WSO2 Carbon - Platform Aggregator Pom</name>
     <url>http://wso2.org</url>
 
@@ -28,7 +28,7 @@
         <url>https://github.com/wso2/carbon-multitenancy.git</url>
         <developerConnection>scm:git:https://github.com/wso2/carbon-multitenancy.git</developerConnection>
         <connection>scm:git:https://github.com/wso2/carbon-multitenancy.git</connection>
-        <tag>v4.9.8</tag>
+        <tag>HEAD</tag>
     </scm>
 
 
