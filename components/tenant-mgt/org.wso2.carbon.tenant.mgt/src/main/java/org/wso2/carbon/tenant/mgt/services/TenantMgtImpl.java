@@ -209,6 +209,32 @@ public class TenantMgtImpl implements TenantMgtService {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername() + "'");
     }
 
+    @Override
+    public void activateTenant(int tenantId) throws TenantMgtException {
+
+        TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
+        String tenantDomain = null;
+        try {
+            Tenant tenant = (Tenant) tenantManager.getTenant(tenantId);
+            if (tenant == null) {
+                throw new TenantManagementClientException(ERROR_CODE_RESOURCE_NOT_FOUND.getCode(),
+                        String.format(ERROR_CODE_RESOURCE_NOT_FOUND.getMessage(), tenantId));
+            }
+            tenantManager.activateTenant(tenantId);
+            tenantDomain = tenant.getDomain();
+            // Notify tenant activation to all listeners.
+            TenantMgtUtil.triggerTenantActivation(tenantId);
+            log.info(String.format("Tenant with id: %s and domain: %s activated by %s", tenantId,
+                    tenantDomain, PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername()));
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            throw new TenantManagementServerException(String.format("Error while retrieving or deactivating the " +
+                    "tenant with id: %s", tenantId), e);
+        } catch (StratosException e) {
+            throw new TenantManagementServerException(String.format("Error in notifying tenant activation of tenant " +
+                    "with id: %s and domain: %s", tenantId, tenantDomain), e);
+        }
+    }
+
     public void deactivateTenant(String tenantUniqueID) throws TenantMgtException {
 
         TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
@@ -236,6 +262,33 @@ public class TenantMgtImpl implements TenantMgtService {
         } catch (StratosException e) {
             throw new TenantManagementServerException("Error while triggering tenant deactivation for the tenant: " +
                     tenantDomain + " .", e);
+        }
+    }
+
+    @Override
+    public void deactivateTenant(int tenantId) throws TenantMgtException {
+
+        TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
+        String tenantDomain = null;
+        try {
+            Tenant tenant = (Tenant) tenantManager.getTenant(tenantId);
+            if (tenant == null) {
+                throw new TenantManagementClientException(ERROR_CODE_RESOURCE_NOT_FOUND.getCode(),
+                        String.format(ERROR_CODE_RESOURCE_NOT_FOUND.getMessage(), tenantId));
+            }
+            tenantDomain = tenant.getDomain();
+            // Notify tenant deactivation to all listeners.
+            TenantMgtUtil.triggerTenantDeactivation(tenantId);
+            tenantManager.deactivateTenant(tenantId);
+            TenantMgtUtil.unloadTenantConfigurations(tenantDomain, tenantId);
+            log.info(String.format("Tenant with id: %s and domain: %s deactivated by %s", tenantId,
+                    tenantDomain, PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername()));
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            throw new TenantManagementServerException(String.format("Error while retrieving or deactivating the " +
+                    "tenant with id: %s", tenantId), e);
+        } catch (StratosException e) {
+            throw new TenantManagementServerException(String.format("Error while triggering tenant deactivation for " +
+                    "the tenant with id: %s and domain: %s", tenantId, tenantDomain), e);
         }
     }
 
