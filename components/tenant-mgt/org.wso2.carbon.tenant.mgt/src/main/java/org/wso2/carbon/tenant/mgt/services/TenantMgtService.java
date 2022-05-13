@@ -93,12 +93,32 @@ public interface TenantMgtService {
     void activateTenant(String tenantUniqueIdentifier) throws TenantMgtException;
 
     /**
-     * Deactivate the given tenant.
+     * Activate the given tenant by the tenant id.
+     *
+     * @param tenantId tenant id.
+     * @throws TenantMgtException if tenant activation fails.
+     */
+    default void activateTenant(int tenantId) throws TenantMgtException {
+
+    }
+
+    /**
+     * Deactivate the given tenant by the tenant uuid.
      *
      * @param tenantUniqueIdentifier tenant uuid.
      * @throws TenantMgtException if tenant deactivation fails.
      */
     void deactivateTenant(String tenantUniqueIdentifier) throws TenantMgtException;
+
+    /**
+     * Deactivate the given tenant by the tenant id.
+     *
+     * @param tenantId tenant id.
+     * @throws TenantMgtException if tenant deactivation fails.
+     */
+    default void deactivateTenant(int tenantId) throws TenantMgtException {
+
+    }
 
     /**
      * Delete tenant metadata.
