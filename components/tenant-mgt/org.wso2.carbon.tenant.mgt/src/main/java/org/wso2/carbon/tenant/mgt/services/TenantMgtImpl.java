@@ -83,9 +83,13 @@ public class TenantMgtImpl implements TenantMgtService {
 
             addAttributeValues(tenant);
             createTenant(tenant);
-            addTenantAdminUser(tenant);
             tenantId = tenant.getId();
-            addClaimsToUserStore(tenant);
+            // If the tenant is created in the organization mgt creation flow, this property has a value.
+            String associatedOrgID = tenant.getAssociatedOrganizationUUID();
+            if (StringUtils.isBlank(associatedOrgID)) {
+                addTenantAdminUser(tenant);
+                addClaimsToUserStore(tenant);
+            }
 
             TenantInfoBean tenantInfoBean = initializeTenantInfoBean(tenantId, tenant);
             notifyTenantAddition(tenantInfoBean);
@@ -96,7 +100,9 @@ public class TenantMgtImpl implements TenantMgtService {
                 tenant.getClaimsMap().put(TENANT_ADMIN_ASK_PASSWORD_CLAIM, "true");
             }
             // This was separate out to support handlers invocation.
-            addAdditionalClaimsToUserStore(tenant);
+            if (StringUtils.isBlank(associatedOrgID)) {
+                addAdditionalClaimsToUserStore(tenant);
+            }
         } catch (Exception e) {
             if (e instanceof TenantMgtException) {
                 throw (TenantMgtException) e;
