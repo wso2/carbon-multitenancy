@@ -123,7 +123,6 @@
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:compatible:${carbon.kernel.feature.version}</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.tenant.mgt.common.server:compatible:${carbon.commons.import.feature.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.identity.authenticator.saml2.sso.server:compatible:${identity.authenticator.saml2.sso.import.feature.version}</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.registry.core.server:compatible:${carbon.registry.import.feature.version}</importFeatureDef>
                             </importFeatures>
                         </configuration>
