@@ -122,7 +122,9 @@ public class ThemeUtil {
                     // This is a Directory add a new collection
                     // This path is used to store the file resource under registry
                     Collection newCollection = registry.newCollection();
-                    registry.put(fileRegistryPath, newCollection);
+                    if (!registry.resourceExists(fileRegistryPath)) {
+                        registry.put(fileRegistryPath, newCollection);
+                    }
 
                     // recur
                     transferAllThemesToRegistry(file, registry, fileRegistryPath);
@@ -139,7 +141,9 @@ public class ThemeUtil {
                     }
                     newResource.setMediaType(mediaType);
                     newResource.setContentStream(new FileInputStream(file));
-                    registry.put(fileRegistryPath, newResource);
+                    if (!registry.resourceExists(fileRegistryPath)) {
+                        registry.put(fileRegistryPath, newResource);
+                    }
                 }
             }
         } catch (Exception e) {
@@ -187,7 +191,9 @@ public class ThemeUtil {
             String themeDirName = themeDir.getName();
             String fileRegistryPath = StratosConstants.ALL_THEMES_PATH + RegistryConstants.PATH_SEPARATOR + themeDirName;
             Collection newCollection = systemRegistry.newCollection();
-            systemRegistry.put(fileRegistryPath, newCollection);
+            if (!systemRegistry.resourceExists(fileRegistryPath)) {
+                systemRegistry.put(fileRegistryPath, newCollection);
+            }
             if (reloadThemes || !systemRegistry.resourceExists(fileRegistryPath)) {
                 ThemeUtil.transferAllThemesToRegistry(themeDir, systemRegistry, fileRegistryPath);
             }
