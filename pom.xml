@@ -995,7 +995,7 @@
 
         <bcprov-jdk15.version>1.60.0.wso2v1</bcprov-jdk15.version>
         <bcpkix-jdk15.version>1.60.0.wso2v1</bcpkix-jdk15.version>
-        <org.bouncycastle.imp.pkg.version.range>[1.52.0,2.0.0)</org.bouncycastle.imp.pkg.version.range>
+        <org.bouncycastle.imp.pkg.version.range>[1.0.0,2.0.0)</org.bouncycastle.imp.pkg.version.range>
 
         <!-- Jasper Reports Version -->
         <version.jasper>2.2.2.v201205150955</version.jasper>
