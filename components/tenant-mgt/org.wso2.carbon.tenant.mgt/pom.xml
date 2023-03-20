@@ -47,6 +47,10 @@
                         <Import-Package>
                             org.wso2.carbon.stratos.common.*,
                             org.wso2.carbon.registry.core.*;version="${carbon.kernel.registry.imp.pkg.version}",
+                            org.wso2.carbon.identity.claim.metadata.mgt;
+                            version="${carbon.identity.imp.pkg.version}",
+                            org.wso2.carbon.identity.claim.metadata.mgt.exception;
+                            version="${carbon.identity.imp.pkg.version}",
                             !javax.xml.namespace,
                             javax.xml.namespace; version=0.0.0,
                             javax.servlet;version="${imp.pkg.version.javax.servlet}",
