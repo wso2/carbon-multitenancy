@@ -104,12 +104,12 @@ function addTenant(isUpdating, isPublicCloud, isEmailUser) {
     addTenantForm.submit();
 }
 function showSuccessRegisterMessage() {
-    var message = "You have registered the Organization Successfully";
+    var message = "You have registered the tenant successfully.";
     CARBON.showInfoDialog(message);
     return;
 }
 function showSuccessUpdateMessage() {
-    var message = "Your changes saved Successfully!";
+    var message = "Tenant is updated successfully.";
     CARBON.showInfoDialog(message);
     return;
 }
