@@ -22,15 +22,18 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.core.RegistryResources;
 import org.wso2.carbon.core.keystore.KeyStoreAdmin;
+import org.wso2.carbon.core.keystore.KeyStoreManagementException;
+import org.wso2.carbon.core.keystore.dao.KeyStoreDAO;
+import org.wso2.carbon.core.keystore.dao.PubCertDAO;
+import org.wso2.carbon.core.keystore.dao.impl.KeyStoreDAOImpl;
+import org.wso2.carbon.core.keystore.dao.impl.PubCertDAOImpl;
+import org.wso2.carbon.core.keystore.model.PubCertModel;
+import org.wso2.carbon.core.keystore.util.KeyStoreMgtUtil;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.keystore.mgt.util.RealmServiceHolder;
-import org.wso2.carbon.keystore.mgt.util.RegistryServiceHolder;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.security.SecurityConstants;
+import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ServerConstants;
 import sun.security.x509.AlgorithmId;
@@ -39,9 +42,9 @@ import sun.security.x509.CertificateSerialNumber;
 import sun.security.x509.CertificateValidity;
 import sun.security.x509.CertificateVersion;
 import sun.security.x509.CertificateX509Key;
+import sun.security.x509.X500Name;
 import sun.security.x509.X509CertImpl;
 import sun.security.x509.X509CertInfo;
-import sun.security.x509.X500Name;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
@@ -61,24 +64,24 @@ public class KeyStoreGenerator {
 
     private static Log log = LogFactory.getLog(KeyStoreGenerator.class);
     private UserRegistry govRegistry;
+    private KeyStoreDAO keyStoreDAO;
+    private PubCertDAO pubCertDAO;
     private int tenantId;
+    private String tenantUUID;
     private String tenantDomain;
     private String password;
 
 
     public KeyStoreGenerator(int  tenantId) throws KeyStoreMgtException {
+
         try {
             this.tenantId = tenantId;
+            this.tenantUUID = KeyStoreMgtUtil.getTenantUUID(tenantId);
             this.tenantDomain = getTenantDomainName();
-            this.govRegistry = RegistryServiceHolder.getRegistryService().
-                    getGovernanceSystemRegistry(tenantId);
-            if(govRegistry == null){
-                log.error("Governance registry instance is null");
-                throw new KeyStoreMgtException("Governance registry instance is null");
-            }
-        } catch (RegistryException e) {
-            String errorMsg = "Error while obtaining the governance registry for tenant : " +
-                      tenantId;
+            this.keyStoreDAO = new KeyStoreDAOImpl();
+            this.pubCertDAO = new PubCertDAOImpl();
+        } catch (KeyStoreManagementException | UserStoreException e) {
+            String errorMsg = "Error while initializing the key store generator for the tenant: " + tenantId;
             log.error(errorMsg, e);
             throw new KeyStoreMgtException(errorMsg, e);
         }
@@ -133,12 +136,13 @@ public class KeyStoreGenerator {
     	String keyStoreName = generateKSNameFromDomainName();
     	boolean isKeyStoreExists = false;
     	try {
-    		isKeyStoreExists = govRegistry.resourceExists(RegistryResources.SecurityManagement.KEY_STORES + "/" + keyStoreName);
-		} catch (RegistryException e) {
-			String msg = "Error while checking the existance of keystore.  ";
+    		isKeyStoreExists = keyStoreDAO.getKeyStore(KeyStoreMgtUtil.getTenantUUID(tenantId), keyStoreName)
+                    .isPresent();
+		} catch (KeyStoreManagementException | UserStoreException e) {
+            String msg = "Error while checking the existence of keystore.  ";
             log.error(msg + e.getMessage());
-		}
-    	return isKeyStoreExists;
+        }
+        return isKeyStoreExists;
     }
 
     /**
@@ -217,25 +221,15 @@ public class KeyStoreGenerator {
             keystoreAdmin.addKeyStore(outputStream.toByteArray(), keyStoreName,
                                       password, " ", "JKS", password);
             
-            //Create the pub. key resource
-            Resource pubKeyResource = govRegistry.newResource();
-            pubKeyResource.setContent(PKCertificate.getEncoded());
-            pubKeyResource.addProperty(SecurityConstants.PROP_TENANT_PUB_KEY_FILE_NAME_APPENDER,
-                                       generatePubKeyFileNameAppender());
-
-            govRegistry.put(RegistryResources.SecurityManagement.TENANT_PUBKEY_RESOURCE, pubKeyResource);
+            PubCertModel pubCertModel = new PubCertModel();
+            pubCertModel.setContent(PKCertificate.getEncoded());
+            pubCertModel.setFileNameAppender(generatePubKeyFileNameAppender());
+            String id = pubCertDAO.addPubCert(pubCertModel);
 
             //associate the public key with the keystore
-            govRegistry.addAssociation(RegistryResources.SecurityManagement.KEY_STORES + "/" + keyStoreName,
-                                       RegistryResources.SecurityManagement.TENANT_PUBKEY_RESOURCE,
-                                       SecurityConstants.ASSOCIATION_TENANT_KS_PUB_KEY);
+            keyStoreDAO.addPubCertIdToKeyStore(this.tenantUUID, keyStoreName, id);
 
-        } catch (RegistryException e) {
-            String msg = "Error when writing the keystore/pub.cert to registry";
-            log.error(msg, e);
-            throw new KeyStoreMgtException(msg, e);
-        }
-        catch (Exception e) {
+        } catch (Exception e) { //TODO: catch specific exceptions
             String msg = "Error when processing keystore/pub. cert to be stored in registry";
             log.error(msg, e);
             throw new KeyStoreMgtException(msg, e);
