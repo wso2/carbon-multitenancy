@@ -24,9 +24,6 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.keystore.mgt.util.RealmServiceHolder;
-import org.wso2.carbon.keystore.mgt.util.RegistryServiceHolder;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.security.SecurityConfigException;
 import org.wso2.carbon.security.keystore.KeyStoreAdmin;
 import org.wso2.carbon.security.keystore.dao.KeyStoreDAO;
@@ -63,7 +60,6 @@ import java.util.Date;
 public class KeyStoreGenerator {
 
     private static Log log = LogFactory.getLog(KeyStoreGenerator.class);
-    private UserRegistry govRegistry;
     private KeyStoreDAO keyStoreDAO;
     private PubCertDAO pubCertDAO;
     private int tenantId;
@@ -75,20 +71,9 @@ public class KeyStoreGenerator {
         try {
             this.tenantId = tenantId;
             this.tenantDomain = getTenantDomainName();
-            this.govRegistry = RegistryServiceHolder.getRegistryService().
-                    getGovernanceSystemRegistry(tenantId);
-            if(govRegistry == null){
-                log.error("Governance registry instance is null");
-                throw new KeyStoreMgtException("Governance registry instance is null");
-            }
             this.keyStoreDAO = new KeyStoreDAOImpl(tenantId);
             this.pubCertDAO = new PubCertDAOImpl(tenantId);
 
-        } catch (RegistryException e) {
-            String errorMsg = "Error while obtaining the governance registry for tenant : " +
-                      tenantId;
-            log.error(errorMsg, e);
-            throw new KeyStoreMgtException(errorMsg, e);
         } catch (SecurityConfigException e) {
             String errorMsg = "Error while obtaining DAO implementations for tenant id : " +
                     tenantId;
@@ -226,7 +211,7 @@ public class KeyStoreGenerator {
 
             String keyStoreName = generateKSNameFromDomainName();
             // Use the keystore using the keystore admin
-            KeyStoreAdmin keystoreAdmin = new KeyStoreAdmin(tenantId, govRegistry);
+            KeyStoreAdmin keystoreAdmin = new KeyStoreAdmin(tenantId);
             keystoreAdmin.addKeyStore(outputStream.toByteArray(), keyStoreName,
                                       password, " ", "JKS", password);
             
@@ -256,7 +241,7 @@ public class KeyStoreGenerator {
             outputStream.flush();
             outputStream.close();
 
-            KeyStoreAdmin keystoreAdmin = new KeyStoreAdmin(tenantId, govRegistry);
+            KeyStoreAdmin keystoreAdmin = new KeyStoreAdmin(tenantId);
             keystoreAdmin.addTrustStore(outputStream.toByteArray(), trustStoreName, password, " ", "JKS");
         } catch (Exception e) {
             String msg = "Error when processing keystore/pub. cert to be stored in registry";

@@ -20,11 +20,9 @@ package org.wso2.carbon.keystore.mgt.internal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.keystore.mgt.KeystoreTenantMgtListener;
 import org.wso2.carbon.keystore.mgt.util.RealmServiceHolder;
-import org.wso2.carbon.keystore.mgt.util.RegistryServiceHolder;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -55,28 +53,6 @@ public class KeyStoreMgtServiceComponent {
 
         if (log.isDebugEnabled()) {
             log.debug("************Stratos keystore mgt component is decativated.*************");
-        }
-    }
-
-    @Reference(
-            name = "registry.service",
-            service = org.wso2.carbon.registry.core.service.RegistryService.class,
-            cardinality = ReferenceCardinality.MANDATORY,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetRegistryService")
-    protected void setRegistryService(RegistryService registryService) {
-
-        RegistryServiceHolder.setRegistryService(registryService);
-        if (log.isDebugEnabled()) {
-            log.debug("Registry Service is set for KeyStoreMgtServiceComponent.");
-        }
-    }
-
-    protected void unsetRegistryService(RegistryService registryService) {
-
-        RegistryServiceHolder.setRegistryService(null);
-        if (log.isDebugEnabled()) {
-            log.debug("Registry Service is unset for KeyStoreMgtServiceComponent.");
         }
     }
 
