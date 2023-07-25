@@ -1035,7 +1035,7 @@
         <opensaml2.wso2.version>3.3.1.wso2v1</opensaml2.wso2.version>
 
         <com.google.code.gson.version>2.8.5</com.google.code.gson.version>
-        <orbit.version.json>3.0.0.wso2v1</orbit.version.json>
+        <orbit.version.json>3.0.0.wso2v2</orbit.version.json>
         <org.eclipse.osgi.version>3.9.1.v20130814-1242</org.eclipse.osgi.version>
         <version.equinox.osgi.services>3.3.100.v20130513-1956</version.equinox.osgi.services>
 
