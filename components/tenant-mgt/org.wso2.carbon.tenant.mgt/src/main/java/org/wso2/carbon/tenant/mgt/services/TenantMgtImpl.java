@@ -71,6 +71,16 @@ public class TenantMgtImpl implements TenantMgtService {
 
     public String addTenant(Tenant tenant) throws TenantMgtException {
 
+        try {
+            TenantMgtUtil.setTenantCreationThreadLocal(true);
+            return registerTenant(tenant);
+        } finally {
+            TenantMgtUtil.clearTenantCreationTreadLocal();
+        }
+    }
+
+    private String registerTenant(Tenant tenant) throws TenantMgtException {
+
         String tenantDomain = tenant.getDomain();
         int tenantId;
 
