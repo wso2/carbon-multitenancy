@@ -56,6 +56,17 @@ public class TenantMgtAdminService extends AbstractAdmin {
      * @throws Exception if error in adding new tenant.
      */
     public String addTenant(TenantInfoBean tenantInfoBean) throws Exception {
+
+        try {
+            TenantMgtUtil.setTenantCreationThreadLocal(true);
+            return registerTenant(tenantInfoBean);
+        } finally {
+            TenantMgtUtil.clearTenantCreationTreadLocal();
+        }
+    }
+
+    private String registerTenant(TenantInfoBean tenantInfoBean) throws Exception {
+
         try {
             CommonUtil.validateEmail(tenantInfoBean.getEmail());
         } catch (Exception e) {

@@ -87,6 +87,7 @@ public class TenantMgtUtil {
     private static final String ILLEGAL_CHARACTERS_FOR_TENANT_DOMAIN = ".*[^a-z0-9\\._\\-].*";
     private static final String DOT = ".";
     private static ThreadLocal<Boolean> isTenantAdminCreationOperation = new ThreadLocal<>();
+    private static final ThreadLocal<Boolean> isTenantCreationTreadLocal = new ThreadLocal<>();
     private static final int DEFAULT_ITEMS_PER_PAGE = 15;
     private static final int DEFAULT_MAXIMUM_ITEMS_PER_PAGE = 100;
 
@@ -759,6 +760,35 @@ public class TenantMgtUtil {
 
     public static void clearTenantAdminCreationOperation() {
         isTenantAdminCreationOperation.remove();
+    }
+
+    /**
+     * Check whether the current operation is a tenant creation operation.
+     *
+     * @return true if the current operation is a tenant creation operation.
+     */
+    public static boolean isTenantCreation () {
+
+        if (isTenantCreationTreadLocal.get() == null) {
+            return false;
+        }
+        return isTenantCreationTreadLocal.get();
+    }
+
+    /**
+     * Set isTenantCreationTreadLocal true.
+     */
+    public static void setTenantCreationThreadLocal(boolean isTenantCreationOperation) {
+
+        isTenantCreationTreadLocal.set(isTenantCreationOperation);
+    }
+
+    /**
+     * Clear isTenantCreationTreadLocal.
+     */
+    public static void clearTenantCreationTreadLocal() {
+
+        isTenantCreationTreadLocal.remove();
     }
 
     /**
