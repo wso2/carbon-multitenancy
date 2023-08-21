@@ -63,10 +63,10 @@
                             <propertiesFile>../../etc/feature.properties</propertiesFile>
                             <includedFeatures>
                                 <includedFeatureDef>
-                                    org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.common.server.feature:${carbon.multitenancy.version}
+                                    org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.common.server.feature:${project.version}
                                 </includedFeatureDef>
                                 <includedFeatureDef>
-                                    org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.common.ui.feature:${carbon.multitenancy.version}
+                                    org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.common.ui.feature:${project.version}
                                 </includedFeatureDef>
                             </includedFeatures>
                             <importFeatures>

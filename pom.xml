@@ -570,7 +570,7 @@
             <dependency>
                 <groupId>org.wso2.carbon.multitenancy</groupId>
                 <artifactId>org.wso2.carbon.tenant.common</artifactId>
-                <version>${carbon.multitenancy.version}</version>
+                <version>${project.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.wso2.identity</groupId>
@@ -581,32 +581,32 @@
             <dependency>
                 <groupId>org.wso2.carbon.multitenancy</groupId>
                 <artifactId>org.wso2.carbon.tenant.mgt.core</artifactId>
-                <version>${carbon.multitenancy.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.multitenancy</groupId>
                 <artifactId>org.wso2.carbon.tenant.mgt</artifactId>
-                <version>${carbon.multitenancy.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.multitenancy</groupId>
                 <artifactId>org.wso2.carbon.tenant.deployment</artifactId>
-                <version>${carbon.multitenancy.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.multitenancy</groupId>
                 <artifactId>org.wso2.carbon.tenant.keystore.mgt</artifactId>
-                <version>${carbon.multitenancy.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.multitenancy</groupId>
                 <artifactId>org.wso2.carbon.tenant.theme.mgt</artifactId>
-                <version>${carbon.multitenancy.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.multitenancy</groupId>
                 <artifactId>org.wso2.carbon.tenant.throttling.agent</artifactId>
-                <version>${carbon.multitenancy.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.commons</groupId>
@@ -616,7 +616,7 @@
             <dependency>
                 <groupId>org.wso2.carbon.multitenancy</groupId>
                 <artifactId>org.wso2.carbon.tenant.usage.agent</artifactId>
-                <version>${carbon.multitenancy.version}</version>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
@@ -637,12 +637,12 @@
             <dependency>
                 <groupId>org.wso2.carbon.multitenancy</groupId>
                 <artifactId>org.wso2.carbon.tenant.mgt.stub</artifactId>
-                <version>${carbon.multitenancy.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.multitenancy</groupId>
                 <artifactId>org.wso2.carbon.tenant.activation</artifactId>
-                <version>${carbon.multitenancy.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.equinox</groupId>
@@ -653,12 +653,12 @@
             <dependency>
                 <groupId>org.wso2.carbon.multitenancy</groupId>
                 <artifactId>org.wso2.carbon.tenant.redirector.servlet.stub</artifactId>
-                <version>${carbon.multitenancy.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.multitenancy</groupId>
                 <artifactId>org.wso2.carbon.tenant.theme.mgt.stub</artifactId>
-                <version>${carbon.multitenancy.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.tomcat</groupId>
@@ -673,24 +673,24 @@
             <dependency>
                 <groupId>org.wso2.carbon.multitenancy</groupId>
                 <artifactId>org.wso2.carbon.tenant.common.server.feature</artifactId>
-                <version>${carbon.multitenancy.version}</version>
+                <version>${project.version}</version>
                 <type>zip</type>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.multitenancy</groupId>
                 <artifactId>org.wso2.carbon.tenant.common.ui.feature</artifactId>
-                <version>${carbon.multitenancy.version}</version>
+                <version>${project.version}</version>
                 <type>zip</type>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.multitenancy</groupId>
                 <artifactId>org.wso2.carbon.tenant.dispatcher</artifactId>
-                <version>${carbon.multitenancy.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.multitenancy</groupId>
                 <artifactId>org.wso2.carbon.tenant.redirector.servlet</artifactId>
-                <version>${carbon.multitenancy.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.quartz-scheduler.wso2</groupId>
@@ -700,22 +700,22 @@
             <dependency>
                 <groupId>org.wso2.carbon.multitenancy</groupId>
                 <artifactId>org.wso2.carbon.tenant.redirector.servlet.ui</artifactId>
-                <version>${carbon.multitenancy.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.multitenancy</groupId>
                 <artifactId>org.wso2.carbon.tenant.sso.redirector.ui</artifactId>
-                <version>${carbon.multitenancy.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.multitenancy</groupId>
                 <artifactId>org.wso2.carbon.tenant.mgt.ui</artifactId>
-                <version>${carbon.multitenancy.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.multitenancy</groupId>
                 <artifactId>org.wso2.carbon.tenant.theme.mgt.ui</artifactId>
-                <version>${carbon.multitenancy.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
@@ -927,8 +927,7 @@
         <carbon.identity.imp.pkg.version>[5.14.0, 7.0.0)</carbon.identity.imp.pkg.version>
 
         <!-- Carbon Multi-tenancy version-->
-        <carbon.multitenancy.version>4.11.9-SNAPSHOT</carbon.multitenancy.version>
-        <carbon.multitenancy.exp.pkg.version>${carbon.multitenancy.version}</carbon.multitenancy.exp.pkg.version>
+        <carbon.multitenancy.exp.pkg.version>${project.version}</carbon.multitenancy.exp.pkg.version>
         <carbon.multitenancy.imp.pkg.version>[4.7.0, 5.0.0)</carbon.multitenancy.imp.pkg.version>
 
         <!-- Carbon Security Mgt version-->
