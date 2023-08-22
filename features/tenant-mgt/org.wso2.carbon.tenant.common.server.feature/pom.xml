@@ -109,11 +109,11 @@
 
                                 <!-- Tenant Mgmt -->
                                 <bundleDef>org.json.wso2:json</bundleDef>
-                                <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.mgt:${carbon.multitenancy.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.mgt:${project.version}</bundleDef>
                                 <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.keystore.mgt</bundleDef>
-                                <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.mgt.core:${carbon.multitenancy.version}
+                                <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.mgt.core:${project.version}
                                 </bundleDef>
-                                <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.theme.mgt:${carbon.multitenancy.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.multitenancy:org.wso2.carbon.tenant.theme.mgt:${project.version}</bundleDef>
                                 <!-- End Tenant Mgmt -->
 
                             </bundles>
