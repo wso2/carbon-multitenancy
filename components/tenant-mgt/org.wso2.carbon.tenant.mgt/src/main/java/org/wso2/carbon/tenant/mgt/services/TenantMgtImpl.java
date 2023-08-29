@@ -404,7 +404,10 @@ public class TenantMgtImpl implements TenantMgtService {
 
         try {
             CommonUtil.validateEmail(tenant.getEmail());
-            TenantMgtUtil.validateDomain(tenant.getDomain());
+            // The tenants created for sub-organizations should not need to validate the domain name as it is a UUID.
+            if (!StringUtils.equals(tenant.getAssociatedOrganizationUUID(), tenant.getDomain())) {
+                TenantMgtUtil.validateDomain(tenant.getDomain());
+            }
             checkIsSuperTenantInvoking();
         } catch (Exception e) {
             if (e instanceof TenantMgtException) {
