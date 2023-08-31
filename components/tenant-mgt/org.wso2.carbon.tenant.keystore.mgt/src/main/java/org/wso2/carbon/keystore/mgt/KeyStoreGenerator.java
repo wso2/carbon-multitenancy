@@ -22,18 +22,17 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.core.keystore.util.KeyStoreMgtUtil;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.keystore.mgt.util.RealmServiceHolder;
-import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.security.SecurityConfigException;
-import org.wso2.carbon.security.keystore.KeyStoreAdmin;
-import org.wso2.carbon.security.keystore.KeyStoreManagementException;
-import org.wso2.carbon.security.keystore.dao.KeyStoreDAO;
-import org.wso2.carbon.security.keystore.dao.PubCertDAO;
-import org.wso2.carbon.security.keystore.dao.impl.KeyStoreDAOImpl;
-import org.wso2.carbon.security.keystore.dao.impl.PubCertDAOImpl;
-import org.wso2.carbon.security.keystore.model.PubCertModel;
-import org.wso2.carbon.security.util.KeyStoreMgtUtil;
+import org.wso2.carbon.core.keystore.KeyStoreAdmin;
+import org.wso2.carbon.core.keystore.KeyStoreManagementException;
+import org.wso2.carbon.core.keystore.dao.KeyStoreDAO;
+import org.wso2.carbon.core.keystore.dao.PubCertDAO;
+import org.wso2.carbon.core.keystore.dao.impl.KeyStoreDAOImpl;
+import org.wso2.carbon.core.keystore.dao.impl.PubCertDAOImpl;
+import org.wso2.carbon.core.keystore.model.PubCertModel;
+import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ServerConstants;
 import sun.security.x509.AlgorithmId;
@@ -67,7 +66,6 @@ import java.util.Date;
 public class KeyStoreGenerator {
 
     private static final Log log = LogFactory.getLog(KeyStoreGenerator.class);
-    private UserRegistry govRegistry;
     private final KeyStoreDAO keyStoreDAO;
     private final PubCertDAO pubCertDAO;
     private final int tenantId;
@@ -134,7 +132,7 @@ public class KeyStoreGenerator {
         try {
             isKeyStoreExists = keyStoreDAO.getKeyStore(KeyStoreMgtUtil.getTenantUUID(tenantId), keyStoreName)
                     .isPresent();
-        } catch (KeyStoreManagementException e) {
+        } catch (KeyStoreManagementException | UserStoreException e) {
             String msg = "Error while checking the existance of keystore.  ";
             log.error(msg + e.getMessage());
             throw new KeyStoreMgtException(msg, e);
@@ -215,7 +213,7 @@ public class KeyStoreGenerator {
 
             String keyStoreName = generateKSNameFromDomainName();
             // Use the keystore using the keystore admin
-            KeyStoreAdmin keystoreAdmin = new KeyStoreAdmin(tenantId, govRegistry);
+            KeyStoreAdmin keystoreAdmin = new KeyStoreAdmin(tenantId);
             keystoreAdmin.addKeyStore(outputStream.toByteArray(), keyStoreName,
                     password, " ", "JKS", password);
 
@@ -228,8 +226,8 @@ public class KeyStoreGenerator {
             //associate the public key with the keystore
             keyStoreDAO.addPubCertIdToKeyStore(KeyStoreMgtUtil.getTenantUUID(tenantId), keyStoreName, id);
 
-        } catch (SecurityConfigException | KeyStoreManagementException | CertificateException | KeyStoreException |
-                 IOException | NoSuchAlgorithmException e) {
+        } catch (KeyStoreManagementException | CertificateException | KeyStoreException | IOException |
+                 NoSuchAlgorithmException | UserStoreException e) {
             String msg = "Error when processing keystore/pub. cert to be stored in registry";
             log.error(msg, e);
             throw new KeyStoreMgtException(msg, e);
@@ -249,7 +247,7 @@ public class KeyStoreGenerator {
             outputStream.flush();
             outputStream.close();
 
-            KeyStoreAdmin keystoreAdmin = new KeyStoreAdmin(tenantId, govRegistry);
+            KeyStoreAdmin keystoreAdmin = new KeyStoreAdmin(tenantId);
             keystoreAdmin.addTrustStore(outputStream.toByteArray(), trustStoreName, password, " ", "JKS");
         } catch (Exception e) {
             String msg = "Error when processing keystore/pub. cert to be stored in registry";
