@@ -49,7 +49,7 @@
                         <Import-Package>
                             javax.servlet;version="${imp.pkg.version.javax.servlet}",
                             javax.servlet.http;version="${imp.pkg.version.javax.servlet}",
-                            org.wso2.carbon.security.*; version="${org.wso2.carbon.security.mgt.version.range}",
+                            org.wso2.carbon.security.*; version="${carbon.identity.imp.pkg.version}",
                             org.bouncycastle.*;version="${org.bouncycastle.imp.pkg.version.range}",
                             org.apache.lucene.*,
                             org.osgi.service.component.*;version="${imp.package.version.osgi.services}",
@@ -104,7 +104,7 @@
             <artifactId>bcprov-jdk15on</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.security.mgt</groupId>
+            <groupId>org.wso2.carbon.identity.framework</groupId>
             <artifactId>org.wso2.carbon.security.mgt</artifactId>
         </dependency>
         <dependency>
