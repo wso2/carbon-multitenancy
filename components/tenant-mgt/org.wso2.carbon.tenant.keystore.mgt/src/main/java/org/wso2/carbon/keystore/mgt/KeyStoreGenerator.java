@@ -177,7 +177,7 @@ public class KeyStoreGenerator {
             x509CertInfo.set(X509CertInfo.KEY, new CertificateX509Key(keyPair.getPublic()));
             x509CertInfo.set(X509CertInfo.VERSION, new CertificateVersion(CertificateVersion.V3));
 
-            AlgorithmId signatureAlgoId = new AlgorithmId(AlgorithmId.md5WithRSAEncryption_oid);
+            AlgorithmId signatureAlgoId = AlgorithmId.get("MD5withRSA");
             x509CertInfo.set(X509CertInfo.ALGORITHM_ID, new CertificateAlgorithmId(signatureAlgoId));
             PrivateKey privateKey = keyPair.getPrivate();
             X509CertImpl x509Cert = new X509CertImpl(x509CertInfo);
