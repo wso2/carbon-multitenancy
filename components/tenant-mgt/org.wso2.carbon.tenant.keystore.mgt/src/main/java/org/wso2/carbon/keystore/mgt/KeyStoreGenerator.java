@@ -22,15 +22,17 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.core.RegistryResources;
+import org.wso2.carbon.core.keystore.KeyStoreAdmin;
+import org.wso2.carbon.core.keystore.KeyStoreManagementException;
+import org.wso2.carbon.core.keystore.dao.KeyStoreDAO;
+import org.wso2.carbon.core.keystore.dao.PubCertDAO;
+import org.wso2.carbon.core.keystore.dao.impl.KeyStoreDAOImpl;
+import org.wso2.carbon.core.keystore.dao.impl.PubCertDAOImpl;
+import org.wso2.carbon.core.keystore.model.PubCertModel;
+import org.wso2.carbon.core.keystore.util.KeyStoreMgtUtil;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.keystore.mgt.util.RealmServiceHolder;
-import org.wso2.carbon.keystore.mgt.util.RegistryServiceHolder;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.security.SecurityConstants;
-import org.wso2.carbon.security.keystore.KeyStoreAdmin;
+import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ServerConstants;
 import sun.security.x509.AlgorithmId;
@@ -39,46 +41,50 @@ import sun.security.x509.CertificateSerialNumber;
 import sun.security.x509.CertificateValidity;
 import sun.security.x509.CertificateVersion;
 import sun.security.x509.CertificateX509Key;
+import sun.security.x509.X500Name;
 import sun.security.x509.X509CertImpl;
 import sun.security.x509.X509CertInfo;
-import sun.security.x509.X500Name;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
 /**
- * This class is used to generate a key store for a tenant and store it in the governance registry.
+ * This class is used to generate a key store for a tenant.
  * This class also provides APIs for idp-mgt component to generate a trust store with a given name.
  */
 public class KeyStoreGenerator {
 
     private static Log log = LogFactory.getLog(KeyStoreGenerator.class);
-    private UserRegistry govRegistry;
+    private KeyStoreDAO keyStoreDAO;
+    private PubCertDAO pubCertDAO;
     private int tenantId;
+    private String tenantUUID;
     private String tenantDomain;
     private String password;
 
 
     public KeyStoreGenerator(int  tenantId) throws KeyStoreMgtException {
+
         try {
             this.tenantId = tenantId;
+            this.tenantUUID = KeyStoreMgtUtil.getTenantUUID(tenantId);
             this.tenantDomain = getTenantDomainName();
-            this.govRegistry = RegistryServiceHolder.getRegistryService().
-                    getGovernanceSystemRegistry(tenantId);
-            if(govRegistry == null){
-                log.error("Governance registry instance is null");
-                throw new KeyStoreMgtException("Governance registry instance is null");
-            }
-        } catch (RegistryException e) {
-            String errorMsg = "Error while obtaining the governance registry for tenant : " +
-                      tenantId;
+            this.keyStoreDAO = new KeyStoreDAOImpl();
+            this.pubCertDAO = new PubCertDAOImpl();
+        } catch (KeyStoreManagementException | UserStoreException e) {
+            String errorMsg = "Error while initializing the key store generator for the tenant: " + tenantId;
             log.error(errorMsg, e);
             throw new KeyStoreMgtException(errorMsg, e);
         }
@@ -86,7 +92,7 @@ public class KeyStoreGenerator {
 
 
     /**
-     * This method first generates the keystore, then persist it in the gov.registry of that tenant
+     * This method generates and store the keystore.
      *
      * @throws KeyStoreMgtException Error when generating or storing the keystore
      */
@@ -105,7 +111,7 @@ public class KeyStoreGenerator {
     }
 
     /**
-     * This method first generates the keystore, then persist it in the gov.registry of that tenant
+     * This method generates and store the trust store.
      *
      * @throws KeyStoreMgtException Error when generating or storing the keystore
      */
@@ -133,12 +139,13 @@ public class KeyStoreGenerator {
     	String keyStoreName = generateKSNameFromDomainName();
     	boolean isKeyStoreExists = false;
     	try {
-    		isKeyStoreExists = govRegistry.resourceExists(RegistryResources.SecurityManagement.KEY_STORES + "/" + keyStoreName);
-		} catch (RegistryException e) {
-			String msg = "Error while checking the existance of keystore.  ";
+    		isKeyStoreExists = keyStoreDAO.getKeyStore(KeyStoreMgtUtil.getTenantUUID(tenantId), keyStoreName)
+                    .isPresent();
+		} catch (KeyStoreManagementException | UserStoreException e) {
+            String msg = "Error while checking the existence of keystore.  ";
             log.error(msg + e.getMessage());
-		}
-    	return isKeyStoreExists;
+        }
+        return isKeyStoreExists;
     }
 
     /**
@@ -197,13 +204,13 @@ public class KeyStoreGenerator {
     }
 
     /**
-     * Persist the keystore in the gov.registry
+     * Persist the keystore and the public key.
      *
      * @param keyStore created Keystore of the tenant
      * @param PKCertificate pub. key of the tenant
-     * @throws KeyStoreMgtException Exception when storing the keystore in the registry
+     * @throws KeyStoreMgtException Exception when storing the keystore.
      */
-    private void persistKeyStore(KeyStore keyStore, X509Certificate PKCertificate)
+    private void persistKeyStore(KeyStore keyStore, X509Certificate pKCertificate)
             throws KeyStoreMgtException {
         try {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -213,40 +220,31 @@ public class KeyStoreGenerator {
 
             String keyStoreName = generateKSNameFromDomainName();
             // Use the keystore using the keystore admin
-            KeyStoreAdmin keystoreAdmin = new KeyStoreAdmin(tenantId, govRegistry);
+            KeyStoreAdmin keystoreAdmin = new KeyStoreAdmin(tenantId);
             keystoreAdmin.addKeyStore(outputStream.toByteArray(), keyStoreName,
                                       password, " ", "JKS", password);
             
-            //Create the pub. key resource
-            Resource pubKeyResource = govRegistry.newResource();
-            pubKeyResource.setContent(PKCertificate.getEncoded());
-            pubKeyResource.addProperty(SecurityConstants.PROP_TENANT_PUB_KEY_FILE_NAME_APPENDER,
-                                       generatePubKeyFileNameAppender());
-
-            govRegistry.put(RegistryResources.SecurityManagement.TENANT_PUBKEY_RESOURCE, pubKeyResource);
+            PubCertModel pubCertModel = new PubCertModel();
+            pubCertModel.setContent(pKCertificate.getEncoded());
+            pubCertModel.setFileNameAppender(generatePubKeyFileNameAppender());
+            String id = pubCertDAO.addPubCert(pubCertModel);
 
             //associate the public key with the keystore
-            govRegistry.addAssociation(RegistryResources.SecurityManagement.KEY_STORES + "/" + keyStoreName,
-                                       RegistryResources.SecurityManagement.TENANT_PUBKEY_RESOURCE,
-                                       SecurityConstants.ASSOCIATION_TENANT_KS_PUB_KEY);
+            keyStoreDAO.addPubCertIdToKeyStore(this.tenantUUID, keyStoreName, id);
 
-        } catch (RegistryException e) {
-            String msg = "Error when writing the keystore/pub.cert to registry";
-            log.error(msg, e);
-            throw new KeyStoreMgtException(msg, e);
-        }
-        catch (Exception e) {
-            String msg = "Error when processing keystore/pub. cert to be stored in registry";
+        } catch (KeyStoreManagementException | CertificateException | NoSuchAlgorithmException | IOException |
+                 KeyStoreException e) {
+            String msg = "Error when processing keystore/pub. cert.";
             log.error(msg, e);
             throw new KeyStoreMgtException(msg, e);
         }
     }
 
     /**
-     * Persist the trust store in the gov.registry
+     * Persist the trust store.
      *
      * @param trustStore created trust store of the tenant
-     * @throws KeyStoreMgtException Exception when storing the trust store in the registry
+     * @throws KeyStoreMgtException Exception when storing the trust store.
      */
     private void persistTrustStore(KeyStore trustStore, String trustStoreName) throws KeyStoreMgtException {
         try {
@@ -255,10 +253,10 @@ public class KeyStoreGenerator {
             outputStream.flush();
             outputStream.close();
 
-            KeyStoreAdmin keystoreAdmin = new KeyStoreAdmin(tenantId, govRegistry);
+            KeyStoreAdmin keystoreAdmin = new KeyStoreAdmin(tenantId);
             keystoreAdmin.addTrustStore(outputStream.toByteArray(), trustStoreName, password, " ", "JKS");
         } catch (Exception e) {
-            String msg = "Error when processing keystore/pub. cert to be stored in registry";
+            String msg = "Error when processing keystore/pub. cert.";
             log.error(msg, e);
             throw new KeyStoreMgtException(msg, e);
         }

@@ -46,7 +46,6 @@
                         </Private-Package>
                         <Import-Package>
                             org.wso2.carbon.stratos.common.*,
-                            org.wso2.carbon.registry.core.*;version="${carbon.kernel.registry.imp.pkg.version}",
                             org.wso2.carbon.identity.claim.metadata.mgt;
                             version="${carbon.identity.imp.pkg.version}",
                             org.wso2.carbon.identity.claim.metadata.mgt.exception;
@@ -90,10 +89,6 @@
         <dependency>
            <groupId>org.wso2.carbon.multitenancy</groupId>
             <artifactId>org.wso2.carbon.tenant.mgt.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.registry.core</artifactId>
         </dependency>
         <dependency>
            <groupId>org.wso2.carbon.identity.user.ws</groupId>
