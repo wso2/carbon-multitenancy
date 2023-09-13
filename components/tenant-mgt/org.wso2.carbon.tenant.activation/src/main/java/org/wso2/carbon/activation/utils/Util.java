@@ -18,12 +18,7 @@
  */
 package org.wso2.carbon.activation.utils;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.service.RegistryService;
-import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.core.service.RealmService;
 
 /**
@@ -31,33 +26,8 @@ import org.wso2.carbon.user.core.service.RealmService;
  */
 public class Util {
 
-    private static RegistryService registryService = null;
     private static RealmService realmService = null;
     private static String serviceName = null;
-    private static final Log log = LogFactory.getLog(Util.class);
-
-    private static boolean cloudServiceInfoPathSanityChecked = false;
-
-    /**
-     * Stores an instance of the Registry Service that can be used to access the registry.
-     *
-     * @param service the Registry Service instance.
-     */
-    public static synchronized void setRegistryService(RegistryService service) {
-        if (registryService == null) {
-            registryService = service;
-        }
-    }
-
-    /**
-     * Method to retrieve the Registry Service instance.
-     *
-     * @return the Registry Service instance if it has been stored or null if not.
-     */
-    @SuppressWarnings("unused")
-    public static RegistryService getRegistryService() {
-        return registryService;
-    }
 
     /**
      * Stores an instance of the Realm Service that can be used to access the user realm.
@@ -77,10 +47,6 @@ public class Util {
      */
     public static RealmService getRealmService() {
         return realmService;
-    }
-
-    private static UserRegistry getSuperTenantGovernanceSystemRegistry() throws RegistryException {
-        return registryService.getGovernanceSystemRegistry();
     }
 
 //    /**

@@ -23,7 +23,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.activation.service.ActivationService;
@@ -81,34 +80,6 @@ public class ActivationServiceComponent {
         registration = null;
         ActivationManager.stopCacheCleaner();
         log.debug("******* Stratos Activation bundle is deactivated ******* ");
-    }
-
-    /**
-     * Method to set the registry service used. This will be used when accessing the registry. This
-     * method is called when the OSGi Registry Service is available.
-     *
-     * @param registryService the registry service.
-     */
-    @Reference(
-            name = "registry.service",
-            service = org.wso2.carbon.registry.core.service.RegistryService.class,
-            cardinality = ReferenceCardinality.MANDATORY,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetRegistryService")
-    protected void setRegistryService(RegistryService registryService) {
-
-        Util.setRegistryService(registryService);
-    }
-
-    /**
-     * This method is called when the current registry service becomes un-available.
-     *
-     * @param registryService the current registry service instance, to be used for any
-     *                        cleaning-up.
-     */
-    protected void unsetRegistryService(RegistryService registryService) {
-
-        Util.setRegistryService(null);
     }
 
     /**
