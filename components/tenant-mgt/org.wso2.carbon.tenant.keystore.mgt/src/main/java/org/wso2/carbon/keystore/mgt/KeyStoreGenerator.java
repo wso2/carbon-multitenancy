@@ -343,8 +343,8 @@ public class KeyStoreGenerator {
         String algorithm = ServerConfiguration.getInstance().getFirstProperty(CERT_SIGN_ALGO);
         // Find in a list of supported signature algorithms.
         for (String supportedAlgorithm : signatureAlgorithms) {
-            if (supportedAlgorithm.equals(algorithm)) {
-                return algorithm;
+            if (supportedAlgorithm.equalsIgnoreCase(algorithm)) {
+                return supportedAlgorithm;
             }
         }
         return RSA_MD5;
