@@ -64,7 +64,7 @@ public class KeyStoreGenerator {
     private int tenantId;
     private String tenantDomain;
     private String password;
-    private static final String CERT_SIGN_ALGO = "Tenant.PublicCertificateSigningAlgorithm";
+    private static final String SIGNING_ALG = "Tenant.SigningAlgorithm";
 
     // Supported signature algorithms for public certificate generation.
     private static final String DSA_SHA1 = "SHA1withDSA";
@@ -340,7 +340,7 @@ public class KeyStoreGenerator {
 
     private static String getSignatureAlgorithm() {
 
-        String algorithm = ServerConfiguration.getInstance().getFirstProperty(CERT_SIGN_ALGO);
+        String algorithm = ServerConfiguration.getInstance().getFirstProperty(SIGNING_ALG);
         // Find in a list of supported signature algorithms.
         for (String supportedAlgorithm : signatureAlgorithms) {
             if (supportedAlgorithm.equalsIgnoreCase(algorithm)) {
