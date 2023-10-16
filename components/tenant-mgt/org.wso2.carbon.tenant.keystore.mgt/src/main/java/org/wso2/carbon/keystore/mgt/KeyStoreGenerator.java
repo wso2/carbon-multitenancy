@@ -1,20 +1,20 @@
 /*
-*  Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-*  WSO2 Inc. licenses this file to you under the Apache License,
-*  Version 2.0 (the "License"); you may not use this file except
-*  in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
+ * Copyright (c) (2005-2023), WSO2 LLC. (http://www.wso2.com).
+ *
+ * WSO2 LLC. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.wso2.carbon.keystore.mgt;
 
 import org.apache.axiom.om.util.UUIDGenerator;
@@ -64,6 +64,24 @@ public class KeyStoreGenerator {
     private int tenantId;
     private String tenantDomain;
     private String password;
+    private static final String SIGNING_ALG = "Tenant.SigningAlgorithm";
+
+    // Supported signature algorithms for public certificate generation.
+    private static final String DSA_SHA1 = "SHA1withDSA";
+    private static final String ECDSA_SHA1 = "SHA1withECDSA";
+    private static final String ECDSA_SHA256 = "SHA256withECDSA";
+    private static final String ECDSA_SHA384 = "SHA384withECDSA";
+    private static final String ECDSA_SHA512 = "SHA512withECDSA";
+    private static final String RSA_MD5 = "MD5withRSA";
+    private static final String RSA_SHA1 = "SHA1withRSA";
+    private static final String RSA_SHA256 = "SHA256withRSA";
+    private static final String RSA_SHA384 = "SHA384withRSA";
+    private static final String RSA_SHA512 = "SHA512withRSA";
+    private static final String[] signatureAlgorithms = new String[]{
+            DSA_SHA1, ECDSA_SHA1, ECDSA_SHA256, ECDSA_SHA384, ECDSA_SHA512, RSA_MD5, RSA_SHA1, RSA_SHA256,
+            RSA_SHA384, RSA_SHA512
+    };
+
 
 
     public KeyStoreGenerator(int  tenantId) throws KeyStoreMgtException {
@@ -177,11 +195,12 @@ public class KeyStoreGenerator {
             x509CertInfo.set(X509CertInfo.KEY, new CertificateX509Key(keyPair.getPublic()));
             x509CertInfo.set(X509CertInfo.VERSION, new CertificateVersion(CertificateVersion.V3));
 
-            AlgorithmId signatureAlgoId = AlgorithmId.get("MD5withRSA");
+            String algorithmName = getSignatureAlgorithm();
+            AlgorithmId signatureAlgoId = AlgorithmId.get(algorithmName);
             x509CertInfo.set(X509CertInfo.ALGORITHM_ID, new CertificateAlgorithmId(signatureAlgoId));
             PrivateKey privateKey = keyPair.getPrivate();
             X509CertImpl x509Cert = new X509CertImpl(x509CertInfo);
-            x509Cert.sign(privateKey, "MD5withRSA", getJCEProvider());
+            x509Cert.sign(privateKey, algorithmName, getJCEProvider());
 
             //add private key to KS
             keyStore.setKeyEntry(tenantDomain, keyPair.getPrivate(), password.toCharArray(),
@@ -317,5 +336,17 @@ public class KeyStoreGenerator {
             return provider;
         }
         return ServerConstants.JCE_PROVIDER_BC;
+    }
+
+    private static String getSignatureAlgorithm() {
+
+        String algorithm = ServerConfiguration.getInstance().getFirstProperty(SIGNING_ALG);
+        // Find in a list of supported signature algorithms.
+        for (String supportedAlgorithm : signatureAlgorithms) {
+            if (supportedAlgorithm.equalsIgnoreCase(algorithm)) {
+                return supportedAlgorithm;
+            }
+        }
+        return RSA_MD5;
     }
 }
