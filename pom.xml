@@ -621,8 +621,8 @@
 
             <dependency>
                 <groupId>org.wso2.orbit.org.bouncycastle</groupId>
-                <artifactId>bcprov-jdk15on</artifactId>
-                <version>${bcprov-jdk15.version}</version>
+                <artifactId>bcprov-jdk18on</artifactId>
+                <version>${bcprov-jdk18.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.orbit.org.bouncycastle</groupId>
@@ -998,7 +998,7 @@
 
         <log4j.version>1.2.13</log4j.version>
 
-        <bcprov-jdk15.version>1.60.0.wso2v1</bcprov-jdk15.version>
+        <bcprov-jdk18.version>1.74.0.wso2v1</bcprov-jdk18.version>
         <bcpkix-jdk15.version>1.60.0.wso2v1</bcpkix-jdk15.version>
         <org.bouncycastle.imp.pkg.version.range>[1.52.0,2.0.0)</org.bouncycastle.imp.pkg.version.range>
 
