@@ -170,7 +170,7 @@ public class KeyStoreGenerator {
         try {
             CryptoUtil.getDefaultCryptoUtil();
             //generate key pair
-            String keyGenerationAlgorithm = getKeyGenerationAlgorithm();
+            String keyGenerationAlgorithm = "falcon";
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(keyGenerationAlgorithm);
             int keySize = getKeySize(keyGenerationAlgorithm);
             if (keySize != 0) {
@@ -198,7 +198,7 @@ public class KeyStoreGenerator {
             x509CertInfo.set(X509CertInfo.KEY, new CertificateX509Key(keyPair.getPublic()));
             x509CertInfo.set(X509CertInfo.VERSION, new CertificateVersion(CertificateVersion.V3));
 
-            String algorithmName = getSignatureAlgorithm();
+            String algorithmName = "falcon";
             AlgorithmId signatureAlgoId = AlgorithmId.get(algorithmName);
             x509CertInfo.set(X509CertInfo.ALGORITHM_ID, new CertificateAlgorithmId(signatureAlgoId));
             PrivateKey privateKey = keyPair.getPrivate();
