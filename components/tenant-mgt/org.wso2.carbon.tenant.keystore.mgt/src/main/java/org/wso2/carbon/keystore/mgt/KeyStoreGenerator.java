@@ -369,11 +369,11 @@ public class KeyStoreGenerator {
 
     private static int getKeySize(String algorithm) {
 
-        // Initialize the key size according to the FIPS 140-2 standard.
+        // Initialize the key size according to the FIPS standard.
         // This need to be updated if more algorithms are supported.
-        if (algorithm.equalsIgnoreCase("ECDSA")) {
+        if ("ECDSA".equalsIgnoreCase(algorithm)) {
             return 384;
-        } else if (algorithm.equalsIgnoreCase("RSA") || algorithm.equalsIgnoreCase("DSA")) {
+        } else if ("RSA".equalsIgnoreCase(algorithm) || "DSA".equalsIgnoreCase(algorithm)) {
             return 2048;
         }
         return 0;
