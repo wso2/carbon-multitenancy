@@ -111,7 +111,7 @@ public class KeyStoreGenerator {
     public void generateKeyStore() throws KeyStoreMgtException {
         try {
             password = generatePassword();
-            KeyStore keyStore = KeyStore.getInstance("JKS");
+            KeyStore keyStore = KeyStore.getInstance("BKS");
             keyStore.load(null, password.toCharArray());
             X509Certificate pubCert = generateKeyPair(keyStore);
             persistKeyStore(keyStore, pubCert);
@@ -170,7 +170,7 @@ public class KeyStoreGenerator {
         try {
             CryptoUtil.getDefaultCryptoUtil();
             //generate key pair
-            String keyGenerationAlgorithm = "falcon";
+            String keyGenerationAlgorithm = "dilithium3";
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(keyGenerationAlgorithm);
             int keySize = getKeySize(keyGenerationAlgorithm);
             if (keySize != 0) {
@@ -198,7 +198,7 @@ public class KeyStoreGenerator {
             x509CertInfo.set(X509CertInfo.KEY, new CertificateX509Key(keyPair.getPublic()));
             x509CertInfo.set(X509CertInfo.VERSION, new CertificateVersion(CertificateVersion.V3));
 
-            String algorithmName = "falcon";
+            String algorithmName = "dilithium3";
             AlgorithmId signatureAlgoId = AlgorithmId.get(algorithmName);
             x509CertInfo.set(X509CertInfo.ALGORITHM_ID, new CertificateAlgorithmId(signatureAlgoId));
             PrivateKey privateKey = keyPair.getPrivate();
@@ -237,7 +237,7 @@ public class KeyStoreGenerator {
             // Use the keystore using the keystore admin
             KeyStoreAdmin keystoreAdmin = new KeyStoreAdmin(tenantId, govRegistry);
             keystoreAdmin.addKeyStore(outputStream.toByteArray(), keyStoreName,
-                                      password, " ", "JKS", password);
+                                      password, " ", "BKS", password);
             
             //Create the pub. key resource
             Resource pubKeyResource = govRegistry.newResource();
