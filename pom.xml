@@ -626,8 +626,8 @@
             </dependency>
             <dependency>
                 <groupId>org.wso2.orbit.org.bouncycastle</groupId>
-                <artifactId>bcpkix-jdk15on</artifactId>
-                <version>${bcpkix-jdk15.version}</version>
+                <artifactId>bcpkix-jdk18on</artifactId>
+                <version>${bcpkix-jdk18.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.identity.user.ws</groupId>
@@ -999,7 +999,7 @@
         <log4j.version>1.2.13</log4j.version>
 
         <bcprov-jdk18.version>1.74.0.wso2v1</bcprov-jdk18.version>
-        <bcpkix-jdk15.version>1.60.0.wso2v1</bcpkix-jdk15.version>
+        <bcpkix-jdk18.version>1.74.0.wso2v1</bcpkix-jdk18.version>
         <org.bouncycastle.imp.pkg.version.range>[1.52.0,2.0.0)</org.bouncycastle.imp.pkg.version.range>
 
         <!-- Jasper Reports Version -->
