@@ -111,7 +111,7 @@ public class KeyStoreGenerator {
     public void generateKeyStore() throws KeyStoreMgtException {
         try {
             password = generatePassword();
-            KeyStore keyStore = KeyStore.getInstance("BKS");
+            KeyStore keyStore = KeyStore.getInstance("PKCS12");
             keyStore.load(null, password.toCharArray());
             X509Certificate pubCert = generateKeyPair(keyStore);
             persistKeyStore(keyStore, pubCert);
@@ -237,7 +237,7 @@ public class KeyStoreGenerator {
             // Use the keystore using the keystore admin
             KeyStoreAdmin keystoreAdmin = new KeyStoreAdmin(tenantId, govRegistry);
             keystoreAdmin.addKeyStore(outputStream.toByteArray(), keyStoreName,
-                                      password, " ", "BKS", password);
+                                      password, " ", "PKCS12", password);
             
             //Create the pub. key resource
             Resource pubKeyResource = govRegistry.newResource();
