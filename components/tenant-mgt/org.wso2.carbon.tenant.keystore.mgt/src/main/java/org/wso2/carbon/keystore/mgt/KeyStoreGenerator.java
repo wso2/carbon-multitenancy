@@ -111,7 +111,7 @@ public class KeyStoreGenerator {
     public void generateKeyStore() throws KeyStoreMgtException {
         try {
             password = generatePassword();
-            KeyStore keyStore = KeyStore.getInstance("JKS");
+            KeyStore keyStore = KeyStore.getInstance("PKCS");
             keyStore.load(null, password.toCharArray());
             X509Certificate pubCert = generateKeyPair(keyStore);
             persistKeyStore(keyStore, pubCert);
@@ -130,7 +130,7 @@ public class KeyStoreGenerator {
     public void generateTrustStore(String trustStoreName) throws KeyStoreMgtException {
         try {
             password = generatePassword();
-            KeyStore keyStore = KeyStore.getInstance("JKS");
+            KeyStore keyStore = KeyStore.getInstance("PKCS");
             keyStore.load(null, password.toCharArray());
             persistTrustStore(keyStore, trustStoreName);
         } catch (Exception e) {
@@ -237,7 +237,7 @@ public class KeyStoreGenerator {
             // Use the keystore using the keystore admin
             KeyStoreAdmin keystoreAdmin = new KeyStoreAdmin(tenantId, govRegistry);
             keystoreAdmin.addKeyStore(outputStream.toByteArray(), keyStoreName,
-                                      password, " ", "JKS", password);
+                                      password, " ", "PKCS", password);
             
             //Create the pub. key resource
             Resource pubKeyResource = govRegistry.newResource();
@@ -278,7 +278,7 @@ public class KeyStoreGenerator {
             outputStream.close();
 
             KeyStoreAdmin keystoreAdmin = new KeyStoreAdmin(tenantId, govRegistry);
-            keystoreAdmin.addTrustStore(outputStream.toByteArray(), trustStoreName, password, " ", "JKS");
+            keystoreAdmin.addTrustStore(outputStream.toByteArray(), trustStoreName, password, " ", "PKCS");
         } catch (Exception e) {
             String msg = "Error when processing keystore/pub. cert to be stored in registry";
             log.error(msg, e);
@@ -313,7 +313,7 @@ public class KeyStoreGenerator {
      */
     private String generateKSNameFromDomainName(){
         String ksName = tenantDomain.trim().replace(".", "-");
-        return (ksName + ".jks" );
+        return (ksName + ".p12" );
     }
 
     private String getTenantDomainName() throws KeyStoreMgtException {
