@@ -112,7 +112,7 @@ public class KeyStoreGenerator {
     public void generateKeyStore() throws KeyStoreMgtException {
         try {
             password = generatePassword();
-            KeyStore keyStore = KeyStore.getInstance(KeystoreUtils.getKeyStoreFileType());
+            KeyStore keyStore = KeyStore.getInstance(KeystoreUtils.getKeyStoreFileType(tenantDomain));
             keyStore.load(null, password.toCharArray());
             X509Certificate pubCert = generateKeyPair(keyStore);
             persistKeyStore(keyStore, pubCert);
@@ -131,7 +131,7 @@ public class KeyStoreGenerator {
     public void generateTrustStore(String trustStoreName) throws KeyStoreMgtException {
         try {
             password = generatePassword();
-            KeyStore keyStore = KeyStore.getInstance(KeystoreUtils.getKeyStoreFileType());
+            KeyStore keyStore = KeyStore.getInstance(KeystoreUtils.getTrustStoreFileType());
             keyStore.load(null, password.toCharArray());
             persistTrustStore(keyStore, trustStoreName);
         } catch (Exception e) {
@@ -143,21 +143,22 @@ public class KeyStoreGenerator {
     
     /**
      * This method checks the existance of a keystore
-     * 
+     *
      * @param tenantId
      * @return
      * @throws KeyStoreMgtException
      */
     public boolean isKeyStoreExists(int tenantId) throws KeyStoreMgtException{
-    	String keyStoreName = generateKSNameFromDomainName();
-    	boolean isKeyStoreExists = false;
-    	try {
-    		isKeyStoreExists = govRegistry.resourceExists(RegistryResources.SecurityManagement.KEY_STORES + "/" + keyStoreName);
-		} catch (RegistryException e) {
-			String msg = "Error while checking the existance of keystore.  ";
+
+        String keyStoreName = KeystoreUtils.getKeyStoreFileLocation(tenantDomain);
+        boolean isKeyStoreExists = false;
+        try {
+            isKeyStoreExists = govRegistry.resourceExists(RegistryResources.SecurityManagement.KEY_STORES + "/" + keyStoreName);
+        } catch (RegistryException e) {
+            String msg = "Error while checking the existance of keystore.  ";
             log.error(msg + e.getMessage());
-		}
-    	return isKeyStoreExists;
+        }
+        return isKeyStoreExists;
     }
 
     /**
@@ -238,8 +239,8 @@ public class KeyStoreGenerator {
             // Use the keystore using the keystore admin
             KeyStoreAdmin keystoreAdmin = new KeyStoreAdmin(tenantId, govRegistry);
             keystoreAdmin.addKeyStore(outputStream.toByteArray(), keyStoreName,
-                                      password, " ", KeystoreUtils.getKeyStoreFileType(), password);
-            
+                                      password, " ", KeystoreUtils.getKeyStoreFileType(tenantDomain), password);
+
             //Create the pub. key resource
             Resource pubKeyResource = govRegistry.newResource();
             pubKeyResource.setContent(PKCertificate.getEncoded());
@@ -280,7 +281,7 @@ public class KeyStoreGenerator {
 
             KeyStoreAdmin keystoreAdmin = new KeyStoreAdmin(tenantId, govRegistry);
             keystoreAdmin.addTrustStore(outputStream.toByteArray(), trustStoreName, password, " ",
-                    KeystoreUtils.getKeyStoreFileType());
+                    KeystoreUtils.getTrustStoreFileType());
         } catch (Exception e) {
             String msg = "Error when processing keystore/pub. cert to be stored in registry";
             log.error(msg, e);
@@ -315,7 +316,7 @@ public class KeyStoreGenerator {
      */
     private String generateKSNameFromDomainName(){
         String ksName = tenantDomain.trim().replace(".", "-");
-        return (ksName + KeystoreUtils.getKeyStoreFileExtension());
+        return (ksName + KeystoreUtils.getExtensionByFileType(KeystoreUtils.StoreFileType.defaultFileType()));
     }
 
     private String getTenantDomainName() throws KeyStoreMgtException {
