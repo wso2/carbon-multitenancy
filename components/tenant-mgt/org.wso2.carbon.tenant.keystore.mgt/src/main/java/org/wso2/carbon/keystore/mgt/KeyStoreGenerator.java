@@ -20,18 +20,6 @@ package org.wso2.carbon.keystore.mgt;
 import org.apache.axiom.om.util.UUIDGenerator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cert.X509v3CertificateBuilder;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
-import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
-import org.bouncycastle.crypto.util.PrivateKeyFactory;
-import org.bouncycastle.operator.ContentSigner;
-import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
-import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
-import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
 import org.wso2.carbon.core.RegistryResources;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.keystore.mgt.util.RealmServiceHolder;
@@ -42,12 +30,23 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.security.SecurityConstants;
 import org.wso2.carbon.security.keystore.KeyStoreAdmin;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.utils.ServerConstants;
+import sun.security.x509.AlgorithmId;
+import sun.security.x509.CertificateAlgorithmId;
+import sun.security.x509.CertificateSerialNumber;
+import sun.security.x509.CertificateValidity;
+import sun.security.x509.CertificateVersion;
+import sun.security.x509.CertificateX509Key;
+import sun.security.x509.X500Name;
+import sun.security.x509.X509CertImpl;
+import sun.security.x509.X509CertInfo;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
+import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.Date;
@@ -160,26 +159,32 @@ public class KeyStoreGenerator {
             String commonName = "CN=" + tenantDomain + ", OU=None, O=None L=None, C=None";
 
             //generate certificates
-            AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find("MD5WithRSAEncryption");
-            AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
-            AsymmetricKeyParameter privateKeyAsymKeyParam = PrivateKeyFactory.createKey(keyPair.getPrivate().getEncoded());
-            SubjectPublicKeyInfo subPubKeyInfo = SubjectPublicKeyInfo.getInstance(keyPair.getPublic().getEncoded());
-            ContentSigner sigGen = new BcRSAContentSignerBuilder(sigAlgId, digAlgId).build(privateKeyAsymKeyParam);
+            X500Name distinguishedName = new X500Name(commonName);
+            X509CertInfo x509CertInfo = new X509CertInfo();
 
             Date notBefore = new Date(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 30);
             Date notAfter = new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 365 * 10));
 
-            X509v3CertificateBuilder v3CertBuilder = new X509v3CertificateBuilder(new X500Name(commonName),
-                    BigInteger.valueOf(new SecureRandom().nextInt()),
-                    notBefore, notAfter, new X500Name(commonName), subPubKeyInfo);
+            CertificateValidity interval = new CertificateValidity(notBefore, notAfter);
+            BigInteger serialNumber = BigInteger.valueOf(new SecureRandom().nextInt());
 
-            X509CertificateHolder certificateHolder = v3CertBuilder.build(sigGen);
-            X509Certificate PKCertificate = new JcaX509CertificateConverter().setProvider("BC").getCertificate(certificateHolder);
+            x509CertInfo.set(X509CertInfo.VALIDITY, interval);
+            x509CertInfo.set(X509CertInfo.SERIAL_NUMBER, new CertificateSerialNumber(serialNumber));
+            x509CertInfo.set(X509CertInfo.SUBJECT, distinguishedName);
+            x509CertInfo.set(X509CertInfo.ISSUER, distinguishedName);
+            x509CertInfo.set(X509CertInfo.KEY, new CertificateX509Key(keyPair.getPublic()));
+            x509CertInfo.set(X509CertInfo.VERSION, new CertificateVersion(CertificateVersion.V3));
+
+            AlgorithmId signatureAlgoId = AlgorithmId.get("MD5withRSA");
+            x509CertInfo.set(X509CertInfo.ALGORITHM_ID, new CertificateAlgorithmId(signatureAlgoId));
+            PrivateKey privateKey = keyPair.getPrivate();
+            X509CertImpl x509Cert = new X509CertImpl(x509CertInfo);
+            x509Cert.sign(privateKey, "MD5withRSA", getPreferredJceProviderIdentifier());
 
             //add private key to KS
             keyStore.setKeyEntry(tenantDomain, keyPair.getPrivate(), password.toCharArray(),
-                                 new java.security.cert.Certificate[]{PKCertificate});
-            return PKCertificate;
+                                 new java.security.cert.Certificate[]{x509Cert});
+            return x509Cert;
         } catch (Exception ex) {
             String msg = "Error while generating the certificate for tenant :" +
                          tenantDomain + ".";
@@ -301,5 +306,18 @@ public class KeyStoreGenerator {
             log.error(msg, e);
             throw new KeyStoreMgtException(msg, e);
         }
+    }
+
+    /**
+     * This method returns the preferred JCE provider identifier to be used.
+     *
+     * @return jce provider identifier name
+     */
+    private String getPreferredJceProviderIdentifier() {
+        String provider = System.getProperty(ServerConstants.JCE_PROVIDER_PARAMETER);
+        if (ServerConstants.BOUNCY_CASTLE_FIPS_PROVIDER_IDENTIFIER.equalsIgnoreCase(provider)) {
+            return ServerConstants.BOUNCY_CASTLE_FIPS_PROVIDER_IDENTIFIER;
+        }
+        return ServerConstants.BOUNCY_CASTLE_PROVIDER_IDENTIFIER;
     }
 }
