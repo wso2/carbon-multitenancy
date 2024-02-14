@@ -520,9 +520,10 @@ public class TenantMgtAdminService extends AbstractAdmin {
             throw new Exception(msg, e);
         }
 
-        log.info("Updated the tenant '" + tenantDomain + " [" + tenantId +
-            "]' by '" + PrivilegedCarbonContext.getThreadLocalCarbonContext().
-            getUsername() + "'");
+        log.info("Updated the tenant '" + tenantDomain + " [" + tenantId + "]' by '" +
+                (LoggerUtils.isLogMaskingEnable ? LoggerUtils.getMaskedContent(
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername()) :
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername()) + "'");
         //updating the usage plan
         /*try{
             if(TenantMgtServiceComponent.getBillingService() != null){
@@ -565,9 +566,10 @@ public class TenantMgtAdminService extends AbstractAdmin {
             throw new Exception(msg, e);
         }
 
-        log.info("Activated the tenant '" + tenantDomain + " [" + tenantId +
-            "]' by '" + PrivilegedCarbonContext.getThreadLocalCarbonContext().
-            getUsername() + "'");
+        log.info("Activated the tenant '" + tenantDomain + " [" + tenantId + "]' by '" +
+                (LoggerUtils.isLogMaskingEnable ? LoggerUtils.getMaskedContent(
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername()) :
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername()) + "'");
     }
 
     /**
@@ -600,9 +602,10 @@ public class TenantMgtAdminService extends AbstractAdmin {
             throw new Exception(msg, e);
         }
 
-        log.info("Deactivated the tenant '" + tenantDomain + " [" + tenantId +
-            "]' by '" + PrivilegedCarbonContext.getThreadLocalCarbonContext().
-            getUsername() + "'");
+        log.info("Deactivated the tenant '" + tenantDomain + " [" + tenantId + "]' by '" +
+                (LoggerUtils.isLogMaskingEnable ? LoggerUtils.getMaskedContent(
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername()) :
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername()) + "'");
     }
 
     /**
