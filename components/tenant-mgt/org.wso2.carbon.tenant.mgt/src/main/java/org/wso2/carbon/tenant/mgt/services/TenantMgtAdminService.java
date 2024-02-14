@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
+import org.wso2.carbon.identity.central.log.mgt.utils.LoggerUtils;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.UUIDGenerator;
 import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
@@ -124,9 +125,10 @@ public class TenantMgtAdminService extends AbstractAdmin {
 
         // For the super tenant tenant creation, tenants are always activated as they are created.
         TenantMgtUtil.activateTenantInitially(tenantInfoBean, tenantId);
-        log.info("Added the tenant '" + tenantDomain + " [" + tenantId +
-            "]' by '" + PrivilegedCarbonContext.getThreadLocalCarbonContext().
-            getUsername() + "'");
+        log.info("Added the tenant '" + tenantDomain + " [" + tenantId + "]' by '" +
+                (LoggerUtils.isLogMaskingEnable ? LoggerUtils.getMaskedContent(
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername()) :
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername()) + "'");
 
         TenantMgtUtil.prepareStringToShowThemeMgtPage(tenant.getId(), tenant.getTenantUniqueID());
         return tenant.getTenantUniqueID();

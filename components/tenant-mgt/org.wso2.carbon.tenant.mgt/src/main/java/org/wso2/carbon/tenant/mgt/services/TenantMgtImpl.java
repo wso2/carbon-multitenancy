@@ -22,6 +22,7 @@ import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.context.RegistryType;
+import org.wso2.carbon.identity.central.log.mgt.utils.LoggerUtils;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.UUIDGenerator;
 import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
@@ -123,9 +124,10 @@ public class TenantMgtImpl implements TenantMgtService {
             // Remove thread local variable set to identify operation triggered for a tenant admin user.
             TenantMgtUtil.clearTenantAdminCreationOperation();
         }
-        log.info("Added the tenant '" + tenantDomain + " [" + tenantId +
-                "]' by '" + PrivilegedCarbonContext.getThreadLocalCarbonContext().
-                getUsername() + "'");
+        log.info("Added the tenant '" + tenantDomain + " [" + tenantId + "]' by '" +
+                (LoggerUtils.isLogMaskingEnable ? LoggerUtils.getMaskedContent(
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername()) :
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername()) + "'");
         TenantMgtUtil.prepareStringToShowThemeMgtPage(tenant.getId(), tenant.getTenantUniqueID());
 
         return tenant.getTenantUniqueID();
