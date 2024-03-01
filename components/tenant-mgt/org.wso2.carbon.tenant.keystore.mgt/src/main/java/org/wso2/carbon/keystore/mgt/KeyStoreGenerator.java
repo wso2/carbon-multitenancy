@@ -20,6 +20,20 @@ package org.wso2.carbon.keystore.mgt;
 import org.apache.axiom.om.util.UUIDGenerator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
+import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
+import org.bouncycastle.crypto.util.PrivateKeyFactory;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.wso2.carbon.core.RegistryResources;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.keystore.mgt.util.RealmServiceHolder;
@@ -31,22 +45,12 @@ import org.wso2.carbon.security.SecurityConstants;
 import org.wso2.carbon.security.keystore.KeyStoreAdmin;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ServerConstants;
-import sun.security.x509.AlgorithmId;
-import sun.security.x509.CertificateAlgorithmId;
-import sun.security.x509.CertificateSerialNumber;
-import sun.security.x509.CertificateValidity;
-import sun.security.x509.CertificateVersion;
-import sun.security.x509.CertificateX509Key;
-import sun.security.x509.X500Name;
-import sun.security.x509.X509CertImpl;
-import sun.security.x509.X509CertInfo;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
-import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.Date;
@@ -63,6 +67,9 @@ public class KeyStoreGenerator {
     private String tenantDomain;
     private String password;
 
+    private static final String SIGNATURE_ALGORITHM = "MD5WithRSAEncryption";
+    private static final String KEY_GENERATION_ALGORITHM = "RSA";
+    private static final int KEY_SIZE = 2048;
 
     public KeyStoreGenerator(int  tenantId) throws KeyStoreMgtException {
         try {
@@ -149,42 +156,48 @@ public class KeyStoreGenerator {
     private X509Certificate generateKeyPair(KeyStore keyStore) throws KeyStoreMgtException {
         try {
             CryptoUtil.getDefaultCryptoUtil();
-            //generate key pair
-            KeyPairGenerator keyPairGenerator = null;
-            keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-            keyPairGenerator.initialize(2048);
+
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(KEY_GENERATION_ALGORITHM);
+            keyPairGenerator.initialize(KEY_SIZE);
             KeyPair keyPair = keyPairGenerator.generateKeyPair();
+            AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find(SIGNATURE_ALGORITHM);
+            AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
 
-            // Common Name and alias for the generated certificate
-            String commonName = "CN=" + tenantDomain + ", OU=None, O=None L=None, C=None";
-
-            //generate certificates
-            X500Name distinguishedName = new X500Name(commonName);
-            X509CertInfo x509CertInfo = new X509CertInfo();
-
+            // Certificate details
             Date notBefore = new Date(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 30);
             Date notAfter = new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 365 * 10));
+            BigInteger serialNumber = new BigInteger(64, new SecureRandom());
+            String commonName = "CN=" + tenantDomain + ", OU=None, O=None L=None, C=None";
+            X509Certificate certificate = null;
+            if (ServerConstants.BOUNCY_CASTLE_FIPS_PROVIDER_IDENTIFIER.equals(getPreferredJceProviderIdentifier())) {
+                X509v3CertificateBuilder certificateBuilder = new JcaX509v3CertificateBuilder(new X500Name(commonName),
+                                                                                              serialNumber, notBefore,
+                                                                                              notAfter,
+                                                                                              new X500Name(commonName),
+                                                                                              keyPair.getPublic());
+                ContentSigner signer = new JcaContentSignerBuilder(SIGNATURE_ALGORITHM).build(keyPair.getPrivate());
+                certificate = new JcaX509CertificateConverter().setProvider(
+                        ServerConstants.BOUNCY_CASTLE_FIPS_PROVIDER_IDENTIFIER).getCertificate(
+                        certificateBuilder.build(signer));
+            } else {
+                AsymmetricKeyParameter privateKeyAsymKeyParam = PrivateKeyFactory.createKey(
+                        keyPair.getPrivate().getEncoded());
+                SubjectPublicKeyInfo subPubKeyInfo = SubjectPublicKeyInfo.getInstance(keyPair.getPublic().getEncoded());
 
-            CertificateValidity interval = new CertificateValidity(notBefore, notAfter);
-            BigInteger serialNumber = BigInteger.valueOf(new SecureRandom().nextInt());
-
-            x509CertInfo.set(X509CertInfo.VALIDITY, interval);
-            x509CertInfo.set(X509CertInfo.SERIAL_NUMBER, new CertificateSerialNumber(serialNumber));
-            x509CertInfo.set(X509CertInfo.SUBJECT, distinguishedName);
-            x509CertInfo.set(X509CertInfo.ISSUER, distinguishedName);
-            x509CertInfo.set(X509CertInfo.KEY, new CertificateX509Key(keyPair.getPublic()));
-            x509CertInfo.set(X509CertInfo.VERSION, new CertificateVersion(CertificateVersion.V3));
-
-            AlgorithmId signatureAlgoId = AlgorithmId.get("MD5withRSA");
-            x509CertInfo.set(X509CertInfo.ALGORITHM_ID, new CertificateAlgorithmId(signatureAlgoId));
-            PrivateKey privateKey = keyPair.getPrivate();
-            X509CertImpl x509Cert = new X509CertImpl(x509CertInfo);
-            x509Cert.sign(privateKey, "MD5withRSA", getPreferredJceProviderIdentifier());
-
-            //add private key to KS
+                ContentSigner sigGen = new BcRSAContentSignerBuilder(sigAlgId, digAlgId).build(privateKeyAsymKeyParam);
+                X509v3CertificateBuilder v3CertBuilder = new X509v3CertificateBuilder(new X500Name(commonName),
+                                                                                      BigInteger.valueOf(
+                                                                                              new SecureRandom().nextInt()),
+                                                                                      notBefore, notAfter,
+                                                                                      new X500Name(commonName),
+                                                                                      subPubKeyInfo);
+                X509CertificateHolder certificateHolder = v3CertBuilder.build(sigGen);
+                certificate = new JcaX509CertificateConverter().setProvider(
+                        ServerConstants.BOUNCY_CASTLE_PROVIDER_IDENTIFIER).getCertificate(certificateHolder);
+            }
             keyStore.setKeyEntry(tenantDomain, keyPair.getPrivate(), password.toCharArray(),
-                                 new java.security.cert.Certificate[]{x509Cert});
-            return x509Cert;
+                                 new java.security.cert.Certificate[] { certificate });
+            return certificate;
         } catch (Exception ex) {
             String msg = "Error while generating the certificate for tenant :" +
                          tenantDomain + ".";

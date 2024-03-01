@@ -619,6 +619,16 @@
                 <version>${bcpkix-jdk15.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bc-fips</artifactId>
+                <version>${bc-fips.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcpkix-fips</artifactId>
+                <version>${bcpkix-fips.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.wso2.carbon.identity.user.ws</groupId>
                 <artifactId>org.wso2.carbon.um.ws.api</artifactId>
                 <version>${carbon.identity.um.ws.api.version}</version>
@@ -995,6 +1005,9 @@
 
         <bcprov-jdk15.version>1.60.0.wso2v1</bcprov-jdk15.version>
         <bcpkix-jdk15.version>1.60.0.wso2v1</bcpkix-jdk15.version>
+        <bc-fips.version>1.0.2.3</bc-fips.version>
+        <bcpkix-fips.version>1.0.7</bcpkix-fips.version>
+
         <org.bouncycastle.imp.pkg.version.range>[1.0.0,2.0.0)</org.bouncycastle.imp.pkg.version.range>
 
         <!-- Jasper Reports Version -->
