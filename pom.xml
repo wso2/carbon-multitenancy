@@ -1005,7 +1005,7 @@
 
         <bcprov-jdk15.version>1.60.0.wso2v1</bcprov-jdk15.version>
         <bcpkix-jdk15.version>1.60.0.wso2v1</bcpkix-jdk15.version>
-        <bc-fips.version>1.0.2.3</bc-fips.version>
+        <bc-fips.version>1.0.2.4</bc-fips.version>
         <bcpkix-fips.version>1.0.7</bcpkix-fips.version>
 
         <org.bouncycastle.imp.pkg.version.range>[1.0.0,2.0.0)</org.bouncycastle.imp.pkg.version.range>
