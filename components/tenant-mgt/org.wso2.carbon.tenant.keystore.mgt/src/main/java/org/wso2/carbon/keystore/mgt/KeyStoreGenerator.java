@@ -166,7 +166,7 @@ public class KeyStoreGenerator {
             // Certificate details
             Date notBefore = new Date(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 30);
             Date notAfter = new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 365 * 10));
-            BigInteger serialNumber = new BigInteger(64, new SecureRandom());
+            BigInteger serialNumber = BigInteger.valueOf(new SecureRandom().nextInt());
             String commonName = "CN=" + tenantDomain + ", OU=None, O=None L=None, C=None";
             X509Certificate certificate = null;
             if (ServerConstants.BOUNCY_CASTLE_FIPS_PROVIDER_IDENTIFIER.equals(getPreferredJceProviderIdentifier())) {
@@ -176,9 +176,9 @@ public class KeyStoreGenerator {
                                                                                               new X500Name(commonName),
                                                                                               keyPair.getPublic());
                 ContentSigner signer = new JcaContentSignerBuilder(SIGNATURE_ALGORITHM).build(keyPair.getPrivate());
+                X509CertificateHolder certificateHolder = certificateBuilder.build(signer);
                 certificate = new JcaX509CertificateConverter().setProvider(
-                        ServerConstants.BOUNCY_CASTLE_FIPS_PROVIDER_IDENTIFIER).getCertificate(
-                        certificateBuilder.build(signer));
+                        ServerConstants.BOUNCY_CASTLE_FIPS_PROVIDER_IDENTIFIER).getCertificate(certificateHolder);
             } else {
                 AsymmetricKeyParameter privateKeyAsymKeyParam = PrivateKeyFactory.createKey(
                         keyPair.getPrivate().getEncoded());
@@ -186,9 +186,7 @@ public class KeyStoreGenerator {
 
                 ContentSigner sigGen = new BcRSAContentSignerBuilder(sigAlgId, digAlgId).build(privateKeyAsymKeyParam);
                 X509v3CertificateBuilder v3CertBuilder = new X509v3CertificateBuilder(new X500Name(commonName),
-                                                                                      BigInteger.valueOf(
-                                                                                              new SecureRandom().nextInt()),
-                                                                                      notBefore, notAfter,
+                                                                                      serialNumber, notBefore, notAfter,
                                                                                       new X500Name(commonName),
                                                                                       subPubKeyInfo);
                 X509CertificateHolder certificateHolder = v3CertBuilder.build(sigGen);
