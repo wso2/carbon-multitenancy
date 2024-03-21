@@ -167,7 +167,7 @@ public class KeyStoreGenerator {
             Date notBefore = new Date(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 30);
             Date notAfter = new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 365 * 10));
             BigInteger serialNumber = BigInteger.valueOf(new SecureRandom().nextInt());
-            String commonName = "CN=" + tenantDomain + ", OU=None, O=None L=None, C=None";
+            String commonName = "CN=" + tenantDomain + ", OU=None, O=None, L=None, C=None";
             X509Certificate certificate = null;
             if (ServerConstants.BOUNCY_CASTLE_FIPS_PROVIDER_IDENTIFIER.equals(getPreferredJceProviderIdentifier())) {
                 X509v3CertificateBuilder certificateBuilder = new JcaX509v3CertificateBuilder(new X500Name(commonName),

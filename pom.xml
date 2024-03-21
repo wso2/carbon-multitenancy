@@ -67,7 +67,7 @@
                 <version>${carbon.kernel.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.ops4j.pax.logging</groupId>
+                <groupId>org.wso2.org.ops4j.pax.logging</groupId>
                 <artifactId>pax-logging-api</artifactId>
                 <version>${pax.logging.api.version}</version>
             </dependency>
@@ -604,13 +604,13 @@
 
             <dependency>
                 <groupId>org.wso2.orbit.org.bouncycastle</groupId>
-                <artifactId>bcprov-jdk15on</artifactId>
-                <version>${bcprov-jdk15.version}</version>
+                <artifactId>bcprov-jdk18on</artifactId>
+                <version>${bcprov-jdk18.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.orbit.org.bouncycastle</groupId>
-                <artifactId>bcpkix-jdk15on</artifactId>
-                <version>${bcpkix-jdk15.version}</version>
+                <artifactId>bcpkix-jdk18on</artifactId>
+                <version>${bcpkix-jdk18.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.bouncycastle</groupId>
@@ -995,8 +995,8 @@
 
         <log4j.version>1.2.13</log4j.version>
 
-        <bcprov-jdk15.version>1.60.0.wso2v1</bcprov-jdk15.version>
-        <bcpkix-jdk15.version>1.60.0.wso2v1</bcpkix-jdk15.version>
+        <bcprov-jdk18.version>1.77.0.wso2v1</bcprov-jdk18.version>
+        <bcpkix-jdk18.version>1.77.0.wso2v2</bcpkix-jdk18.version>
         <bc-fips.version>1.0.2.4</bc-fips.version>
         <bcpkix-fips.version>1.0.7</bcpkix-fips.version>
 
@@ -1041,7 +1041,7 @@
         <project.scm.id>my-scm-server</project.scm.id>
         <apache.felix.scr.ds.annotations.version>1.2.4</apache.felix.scr.ds.annotations.version>
         <maven.scr.plugin.version>1.26.0</maven.scr.plugin.version>
-        <pax.logging.api.version>1.10.1</pax.logging.api.version>
+        <pax.logging.api.version>2.2.1-wso2v2</pax.logging.api.version>
     </properties>
 
     <repositories>
