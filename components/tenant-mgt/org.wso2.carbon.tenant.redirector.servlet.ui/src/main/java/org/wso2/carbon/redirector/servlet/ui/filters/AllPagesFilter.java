@@ -20,6 +20,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.stratos.common.constants.StratosConstants;
 import org.wso2.carbon.redirector.servlet.ui.clients.RedirectorServletServiceClient;
+import org.wso2.carbon.ui.CarbonUIUtil;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -147,7 +148,7 @@ public class AllPagesFilter implements Filter {
                     "/carbon/".equals(path) || "/carbon/admin".equals(path) ||
                     "/carbon/admin/".equals(path)) {
                 // we have to redirect the root to the login page directly
-                path = contextPath + "/carbon/admin/login.jsp";             
+                path = CarbonUIUtil.resolveAdminConsoleBaseURL(contextPath, "/carbon/admin/login.jsp", request);
             	((HttpServletResponse) servletResponse).sendRedirect(path);
                 return;
             }
