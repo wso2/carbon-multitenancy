@@ -25,6 +25,7 @@ import org.wso2.carbon.CarbonException;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.theme.mgt.ui.clients.ThemeMgtServiceClient;
 import org.wso2.carbon.ui.CarbonUIMessage;
+import org.wso2.carbon.ui.CarbonUIUtil;
 import org.wso2.carbon.ui.transports.fileupload.AbstractFileUploadExecutor;
 import org.wso2.carbon.utils.FileItemData;
 import org.wso2.carbon.utils.ServerConstants;
@@ -80,8 +81,8 @@ public class AddThemeResourceProcessor extends AbstractFileUploadExecutor {
             log.error(msg);
 
             CarbonUIMessage.sendCarbonUIMessage(msg, CarbonUIMessage.ERROR, request);
-            response.sendRedirect(
-                    "../" + webContext + "/admin/error.jsp");
+            response.sendRedirect(CarbonUIUtil.resolveAdminConsoleBaseURL("",
+                    "../" + webContext + "/admin/error.jsp", request));
 
             return false;
         }
@@ -145,8 +146,8 @@ public class AddThemeResourceProcessor extends AbstractFileUploadExecutor {
                 log.error(msg);
 
                 CarbonUIMessage.sendCarbonUIMessage(msg, CarbonUIMessage.ERROR, request);
-                response.sendRedirect(
-                        "../" + webContext + "/admin/error.jsp");
+                response.sendRedirect(CarbonUIUtil.resolveAdminConsoleBaseURL("",
+                        "../" + webContext + "/admin/error.jsp", request));
 
                 return false;
             }
@@ -163,15 +164,16 @@ public class AddThemeResourceProcessor extends AbstractFileUploadExecutor {
             String redirectTo = request.getParameter("redirectto");
             if ("theme_mgt".equals(redirectTo)) {
                 response.setHeader("Cache-Control", "no-cache, must-revalidate");
-                response.sendRedirect("../" + webContext +
-                        "/tenant-theme/theme_mgt.jsp?logoChanged=true&redirectWith=" + redirectWith);
+                response.sendRedirect(CarbonUIUtil.resolveAdminConsoleBaseURL("", "../" + webContext +
+                        "/tenant-theme/theme_mgt.jsp?logoChanged=true&redirectWith=" + redirectWith, request));
             }else if ("logo_mgt".equals(redirectTo)) {
                 response.setHeader("Cache-Control", "no-cache, must-revalidate");
-                response.sendRedirect("../" + webContext +
-                        "/tenant-theme/logo_mgt.jsp?logoChanged=true&redirectWith=" + redirectWith);
+                response.sendRedirect(CarbonUIUtil.resolveAdminConsoleBaseURL("", "../" + webContext +
+                        "/tenant-theme/logo_mgt.jsp?logoChanged=true&redirectWith=" + redirectWith, request));
             }
             else {
-                response.sendRedirect("../" + webContext + "/tenant-theme/theme_advanced.jsp?path=" + parentPath);
+                response.sendRedirect(CarbonUIUtil.resolveAdminConsoleBaseURL("",
+                        "../" + webContext + "/tenant-theme/theme_advanced.jsp?path=" + parentPath, request));
             }
             return true;
 
@@ -181,8 +183,8 @@ public class AddThemeResourceProcessor extends AbstractFileUploadExecutor {
             log.error(msg + " " + e.getMessage());
 
             CarbonUIMessage.sendCarbonUIMessage(msg, CarbonUIMessage.ERROR, request);
-            response.sendRedirect(
-                    "../" + webContext + "/admin/error.jsp");
+            response.sendRedirect(CarbonUIUtil.resolveAdminConsoleBaseURL("",
+                    "../" + webContext + "/admin/error.jsp", request));
 
             return false;
         }

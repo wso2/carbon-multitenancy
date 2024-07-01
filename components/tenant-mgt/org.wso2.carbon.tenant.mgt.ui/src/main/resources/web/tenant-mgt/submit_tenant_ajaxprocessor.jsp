@@ -19,6 +19,7 @@
 <%@ page import="org.wso2.carbon.stratos.common.util.CommonUtil" %>
 <%@ page import="org.wso2.carbon.tenant.mgt.ui.utils.TenantMgtUtil" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
+<%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <script type="text/javascript" src="../admin/js/jquery.js"></script>
 <script type="text/javascript" src="../admin/js/jquery.form.js"></script>
@@ -70,13 +71,15 @@
 
      // if the request is for creating a new tenant and if th domain name is available. add the tenant
             TenantMgtUtil.addTenantConfigBean(request,config,session);
-              response.sendRedirect("../tenant-mgt/view_tenants.jsp?region=region3&item=govern_view_tenants_menu&"+paramvalue);
+              response.sendRedirect(CarbonUIUtil.resolveAdminConsoleBaseURL("",
+                "../tenant-mgt/view_tenants.jsp?region=region3&item=govern_view_tenants_menu&" + paramvalue, request));
      }else if (tenantId !=null){
      //if the tenant id is given, it is a request to update.hence update the tenant info
             TenantMgtUtil.updateTenantConfigBean(request,config,session);
             isUpdating = true;
             paramvalue = "addTenant=SuccessUpdate";
-          response.sendRedirect("../tenant-mgt/view_tenants.jsp?region=region3&item=govern_view_tenants_menu&"+paramvalue);
+          response.sendRedirect(CarbonUIUtil.resolveAdminConsoleBaseURL("",
+                "../tenant-mgt/view_tenants.jsp?region=region3&item=govern_view_tenants_menu&" + paramvalue, request));
         }
 
     } catch (Exception e) {

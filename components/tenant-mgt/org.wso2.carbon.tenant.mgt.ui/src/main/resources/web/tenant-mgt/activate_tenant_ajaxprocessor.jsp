@@ -17,6 +17,7 @@
  -->
 <%@ page import="org.wso2.carbon.tenant.mgt.ui.clients.TenantServiceClient" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
+<%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <script type="text/javascript" src="../admin/js/jquery.js"></script>
 <script type="text/javascript" src="../admin/js/jquery.form.js"></script>
@@ -50,7 +51,7 @@
             serviceClient.deactivateTenant(tenantDomain);
         }
 
-        response.sendRedirect("../tenant-mgt/view_tenants.jsp");
+        response.sendRedirect(CarbonUIUtil.resolveAdminConsoleBaseURL("", "../tenant-mgt/view_tenants.jsp", request));
 
     } catch (Exception e) {
         e.printStackTrace();
