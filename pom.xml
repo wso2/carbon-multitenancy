@@ -899,7 +899,7 @@
 
     <properties>
         <!-- Carbon kernel version-->
-        <carbon.kernel.version>4.9.26</carbon.kernel.version>
+        <carbon.kernel.version>4.9.27-alpha</carbon.kernel.version>
         <carbon.kernel.feature.version>${carbon.kernel.version}</carbon.kernel.feature.version>
         <carbon.kernel.imp.pkg.version>[4.5.0, 5.0.0)</carbon.kernel.imp.pkg.version>
         <carbon.kernel.registry.imp.pkg.version>[1.0.1, 2.0.0)</carbon.kernel.registry.imp.pkg.version>
@@ -995,9 +995,9 @@
 
         <log4j.version>1.2.13</log4j.version>
 
-        <bcprov-jdk18.version>1.77.0.wso2v1</bcprov-jdk18.version>
-        <bcpkix-jdk18.version>1.77.0.wso2v2</bcpkix-jdk18.version>
-        <bc-fips.version>1.0.2.4</bc-fips.version>
+        <bcprov-jdk18.version>1.78.1.wso2v1</bcprov-jdk18.version>
+        <bcpkix-jdk18.version>1.78.1.wso2v1</bcpkix-jdk18.version>
+        <bc-fips.version>1.0.2.5</bc-fips.version>
         <bcpkix-fips.version>1.0.7</bcpkix-fips.version>
 
         <org.bouncycastle.imp.pkg.version.range>[1.0.0,2.0.0)</org.bouncycastle.imp.pkg.version.range>
