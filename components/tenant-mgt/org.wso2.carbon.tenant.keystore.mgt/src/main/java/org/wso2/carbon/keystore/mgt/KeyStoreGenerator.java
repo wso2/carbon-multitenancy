@@ -112,7 +112,7 @@ public class KeyStoreGenerator {
     public void generateKeyStore() throws KeyStoreMgtException {
         try {
             password = generatePassword();
-            KeyStore keyStore = KeyStore.getInstance(KeystoreUtils.getKeyStoreFileType(tenantDomain));
+            KeyStore keyStore = KeystoreUtils.getKeystoreInstance(KeystoreUtils.getKeyStoreFileType(tenantDomain));
             keyStore.load(null, password.toCharArray());
             X509Certificate pubCert = generateKeyPair(keyStore);
             persistKeyStore(keyStore, pubCert);
@@ -131,7 +131,7 @@ public class KeyStoreGenerator {
     public void generateTrustStore(String trustStoreName) throws KeyStoreMgtException {
         try {
             password = generatePassword();
-            KeyStore keyStore = KeyStore.getInstance(KeystoreUtils.getTrustStoreFileType());
+            KeyStore keyStore = KeystoreUtils.getKeystoreInstance(KeystoreUtils.getTrustStoreFileType());
             keyStore.load(null, password.toCharArray());
             persistTrustStore(keyStore, trustStoreName);
         } catch (Exception e) {
