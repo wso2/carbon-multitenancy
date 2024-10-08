@@ -177,7 +177,7 @@ public class KeyStoreGenerator {
             KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
             // Common Name and alias for the generated certificate
-            String commonName = "CN=" + tenantDomain + ", OU=None, O=None L=None, C=None";
+            String commonName = "CN=" + tenantDomain + ", OU=None, O=None, L=None, C=None";
 
             //generate certificates
             X500Name distinguishedName = new X500Name(commonName);
