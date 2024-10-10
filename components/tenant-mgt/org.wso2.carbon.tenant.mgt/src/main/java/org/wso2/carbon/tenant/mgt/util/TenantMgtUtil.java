@@ -348,6 +348,46 @@ public class TenantMgtUtil {
         return tenant;
     }
 
+    public static void updateTenantPassword(TenantInfoBean tenantInfoBean, String adminPassword) throws Exception {
+
+        if (StringUtils.isBlank(adminPassword)) {
+            return;
+        }
+        UserStoreManager userStoreManager;
+        try {
+            userStoreManager = getUserStoreManager(tenantInfoBean.getTenantId());
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            String msg = "Error in getting the user store manager for tenant, tenant domain: " +
+                    tenantInfoBean.getTenantDomain() + ".";
+            if (log.isDebugEnabled()) {
+                log.debug(msg, e);
+            }
+            throw new Exception(msg, e);
+        }
+        if (!userStoreManager.isReadOnly()) {
+            try {
+                userStoreManager.updateCredentialByAdmin(tenantInfoBean.getAdmin(), adminPassword);
+            } catch (UserStoreException e) {
+                String msg = String.format("Error in changing the tenant admin password for tenant domain: %s. %s",
+                        tenantInfoBean.getTenantDomain(), e.getMessage());
+                if (log.isDebugEnabled()) {
+                    log.debug(msg, e);
+                }
+                throw new UserStoreException(msg, e);
+            }
+        } else {
+            // Password should be empty since no password update done.
+            tenantInfoBean.setAdminPassword("");
+        }
+    }
+
+    private static UserStoreManager getUserStoreManager(int tenantId) throws
+            org.wso2.carbon.user.api.UserStoreException {
+
+        return (UserStoreManager) TenantMgtServiceComponent.getRealmService().getTenantUserRealm(tenantId)
+                .getUserStoreManager();
+    }
+
     /**
      * @param tenantDomain domain name of the tenant.
      * @throws Exception if there is an exception during the tenant deletion.
@@ -408,8 +448,7 @@ public class TenantMgtUtil {
         // If the admin user uuid is not in the tenant object, we need to get it from user store.
         String adminUsername = tenant.getAdminName();
         try {
-            UserStoreManager userStoreManager = (UserStoreManager) TenantMgtServiceComponent.getRealmService().
-                    getTenantUserRealm(tenant.getId()).getUserStoreManager();
+            UserStoreManager userStoreManager = getUserStoreManager(tenant.getId());
             adminUserUuid = ((AbstractUserStoreManager) userStoreManager).getUserIDFromUserName(adminUsername);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             throw new TenantManagementServerException(String.format(
@@ -497,9 +536,7 @@ public class TenantMgtUtil {
             }
 
             // Can be extended to store other user information.
-            UserStoreManager userStoreManager =
-                    (UserStoreManager) TenantMgtServiceComponent.getRealmService().
-                            getTenantUserRealm(tenant.getId()).getUserStoreManager();
+            UserStoreManager userStoreManager = getUserStoreManager(tenant.getId());
             if (!userStoreManager.isReadOnly()) {
                 userStoreManager.setUserClaimValues(tenant.getAdminName(), claimsMap,
                         UserCoreConstants.DEFAULT_PROFILE);
@@ -523,9 +560,7 @@ public class TenantMgtUtil {
             }
 
             // Can be extended to store other user information.
-            UserStoreManager userStoreManager =
-                    (UserStoreManager) TenantMgtServiceComponent.getRealmService().
-                            getTenantUserRealm(tenant.getId()).getUserStoreManager();
+            UserStoreManager userStoreManager = getUserStoreManager(tenant.getId());
             if (!userStoreManager.isReadOnly()) {
                 userStoreManager.setUserClaimValues(tenant.getAdminName(), claimsMap,
                         UserCoreConstants.DEFAULT_PROFILE);

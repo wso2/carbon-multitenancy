@@ -85,6 +85,14 @@ public interface TenantMgtService {
     User getOwner(String tenantUniqueIdentifier) throws TenantMgtException;
 
     /**
+     * Update the owner of the tenant.
+     *
+     * @param tenant tenant information.
+     * @throws TenantMgtException if owner update fails.
+     */
+    void updateOwner(Tenant tenant) throws TenantMgtException;
+
+    /**
      * Activate a deactivated tenant, by the super tenant.
      *
      * @param tenantUniqueIdentifier tenant uuid.
