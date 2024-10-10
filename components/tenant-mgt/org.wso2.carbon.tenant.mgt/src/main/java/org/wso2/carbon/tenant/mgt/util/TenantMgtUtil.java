@@ -368,10 +368,12 @@ public class TenantMgtUtil {
             try {
                 userStoreManager.updateCredentialByAdmin(tenantInfoBean.getAdmin(), adminPassword);
             } catch (UserStoreException e) {
-                String msg = String.format("Error in changing the tenant admin password, tenant domain: %s. %s for: %s",
-                        tenantInfoBean.getTenantDomain(), e.getMessage(), tenantInfoBean.getAdmin());
-                log.error(msg, e);
-                throw new Exception(msg, e);
+                String msg = String.format("Error in changing the tenant admin password for tenant domain: %s. %s",
+                        tenantInfoBean.getTenantDomain(), e.getMessage());
+                if (log.isDebugEnabled()) {
+                    log.debug(msg, e);
+                }
+                throw new UserStoreException(msg, e);
             }
         } else {
             // Password should be empty since no password update done.
