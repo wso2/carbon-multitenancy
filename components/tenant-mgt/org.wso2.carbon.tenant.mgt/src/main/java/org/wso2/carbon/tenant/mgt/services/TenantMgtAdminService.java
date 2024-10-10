@@ -32,9 +32,7 @@ import org.wso2.carbon.tenant.mgt.beans.PaginatedTenantInfoBean;
 import org.wso2.carbon.tenant.mgt.core.TenantPersistor;
 import org.wso2.carbon.tenant.mgt.internal.TenantMgtServiceComponent;
 import org.wso2.carbon.tenant.mgt.util.TenantMgtUtil;
-import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
-import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.tenant.Tenant;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.DataPaginator;
@@ -392,13 +390,8 @@ public class TenantMgtAdminService extends AbstractAdmin {
      * @throws Exception UserStoreException
      */
     public void updateTenant(TenantInfoBean tenantInfoBean) throws Exception {
+
         TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
-        UserStoreManager userStoreManager;
-
-        // filling the non-set admin and admin password first
-        UserRegistry configSystemRegistry = TenantMgtServiceComponent.getConfigSystemRegistry(
-                tenantInfoBean.getTenantId());
-
         String tenantDomain = tenantInfoBean.getTenantDomain();
 
         int tenantId;
@@ -468,37 +461,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
                 tenant.setEmail(tenantInfoBean.getEmail());
             }
 
-            UserRealm userRealm = configSystemRegistry.getUserRealm();
-            try {
-                userStoreManager = userRealm.getUserStoreManager();
-            } catch (UserStoreException e) {
-                String msg = "Error in getting the user store manager for tenant, tenant domain: " +
-                        tenantDomain + ".";
-                log.error(msg, e);
-                throw new Exception(msg, e);
-            }
-
-            boolean updatePassword = false;
-            if (StringUtils.isNotBlank(tenantInfoBean.getAdminPassword())) {
-                updatePassword = true;
-            }
-            if (!userStoreManager.isReadOnly() && updatePassword) {
-                // now we will update the tenant admin with the admin given
-                // password.
-                try {
-                    userStoreManager.updateCredentialByAdmin(tenantInfoBean.getAdmin(),
-                            tenantInfoBean.getAdminPassword());
-                } catch (UserStoreException e) {
-                    String msg = "Error in changing the tenant admin password, tenant domain: " +
-                            tenantInfoBean.getTenantDomain() + ". " + e.getMessage() + " for: " +
-                            tenantInfoBean.getAdmin();
-                    log.error(msg, e);
-                    throw new Exception(msg, e);
-                }
-            } else {
-                //Password should be empty since no password update done
-                tenantInfoBean.setAdminPassword("");
-            }
+            TenantMgtUtil.updateTenantPassword(tenantInfoBean, tenantInfoBean.getAdminPassword());
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
