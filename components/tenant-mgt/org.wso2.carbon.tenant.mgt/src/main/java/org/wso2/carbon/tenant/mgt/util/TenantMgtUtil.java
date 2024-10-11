@@ -50,6 +50,7 @@ import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.api.TenantMgtConfiguration;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
+import org.wso2.carbon.user.core.UserStoreClientException;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
@@ -76,6 +77,7 @@ import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMess
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_EMPTY_EXTENSION;
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_ILLEGAL_CHARACTERS_IN_DOMAIN;
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_INVALID_DOMAIN;
+import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_PARTIALLY_CREATED_OR_UPDATED;
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_TENANT_DOES_NOT_MATCH_REGEX_PATTERN;
 
 /**
@@ -566,6 +568,10 @@ public class TenantMgtUtil {
                         UserCoreConstants.DEFAULT_PROFILE);
             }
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            if (e instanceof UserStoreClientException) {
+                throw new TenantManagementClientException(ERROR_CODE_PARTIALLY_CREATED_OR_UPDATED.getCode(),
+                        ERROR_CODE_PARTIALLY_CREATED_OR_UPDATED.getMessage(), e);
+            }
             String msg = "Error in adding claims to the user.";
             throw new TenantManagementServerException(msg, e);
         }

@@ -387,12 +387,16 @@ public class TenantMgtImpl implements TenantMgtService {
         TenantInfoBean tenantInfoBean;
         try {
             addClaimsToUserStore(tenant, false);
+            addAdditionalClaimsToUserStore(tenant);
 
             tenantInfoBean = initializeTenantInfoBean(tenantId, tenant);
             TenantMgtUtil.updateTenantPassword(tenantInfoBean, tenant.getAdminPassword());
         } catch (Exception e) {
             if (e instanceof org.wso2.carbon.user.api.UserStoreException) {
                 throw new TenantManagementClientException(null, e.getMessage());
+            }
+            if (e instanceof TenantManagementClientException) {
+                throw (TenantManagementClientException) e;
             }
             String msg = "Error in updating the tenant owner %s." + tenantDomain;
             throw new TenantManagementServerException(msg, e);
@@ -438,6 +442,9 @@ public class TenantMgtImpl implements TenantMgtService {
 
     private void addAdditionalClaimsToUserStore(Tenant tenant) throws Exception {
 
+        if (tenant.getClaimsMap() == null || tenant.getClaimsMap().isEmpty()) {
+            return;
+        }
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
