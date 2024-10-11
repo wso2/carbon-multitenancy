@@ -386,11 +386,12 @@ public class TenantMgtImpl implements TenantMgtService {
 
         TenantInfoBean tenantInfoBean;
         try {
-            addClaimsToUserStore(tenant, false);
-            addAdditionalClaimsToUserStore(tenant);
-
+            // Validate and update the tenant password before updating the tenant owner.
             tenantInfoBean = initializeTenantInfoBean(tenantId, tenant);
             TenantMgtUtil.updateTenantPassword(tenantInfoBean, tenant.getAdminPassword());
+
+            addClaimsToUserStore(tenant, false);
+            addAdditionalClaimsToUserStore(tenant);
         } catch (Exception e) {
             if (e instanceof org.wso2.carbon.user.api.UserStoreException) {
                 throw new TenantManagementClientException(null, e.getMessage());
