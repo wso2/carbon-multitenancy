@@ -126,7 +126,7 @@ public class TenantMgtImpl implements TenantMgtService {
             TenantMgtUtil.clearTenantAdminCreationOperation();
         }
         log.info("Added the tenant '" + tenantDomain + " [" + tenantId + "]' by '" +
-                maskOrUnmaskContent(PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername()) + "'");
+                applyLogMaskingIfEnabled(PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername()) + "'");
         TenantMgtUtil.prepareStringToShowThemeMgtPage(tenant.getId(), tenant.getTenantUniqueID());
 
         return tenant.getTenantUniqueID();
@@ -223,7 +223,7 @@ public class TenantMgtImpl implements TenantMgtService {
         }
 
         log.info("Activated the tenant '" + tenantDomain + " [" + tenantId + "]' by '" +
-                maskOrUnmaskContent(PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername()) + "'");
+                applyLogMaskingIfEnabled(PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername()) + "'");
     }
 
     @Override
@@ -242,7 +242,7 @@ public class TenantMgtImpl implements TenantMgtService {
             // Notify tenant activation to all listeners.
             TenantMgtUtil.triggerTenantActivation(tenantId);
             log.info(String.format("Tenant with id: %s and domain: %s activated by %s", tenantId, tenantDomain,
-                    maskOrUnmaskContent(PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername())));
+                    applyLogMaskingIfEnabled(PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername())));
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             throw new TenantManagementServerException(String.format("Error while retrieving or deactivating the " +
                     "tenant with id: %s", tenantId), e);
@@ -267,7 +267,8 @@ public class TenantMgtImpl implements TenantMgtService {
                 tenantManager.deactivateTenant(tenantUniqueID);
                 TenantMgtUtil.unloadTenantConfigurations(tenantDomain, tenantId);
                 log.info("Deactivated the tenant '" + tenantDomain + " [" + tenantId + "]' by '" +
-                        maskOrUnmaskContent(PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername()) + "'");
+                        applyLogMaskingIfEnabled(PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername()) +
+                        "'");
             } else {
                 throw new TenantManagementClientException(ERROR_CODE_RESOURCE_NOT_FOUND.getCode(),
                         String.format(ERROR_CODE_RESOURCE_NOT_FOUND.getMessage(), tenantUniqueID));
@@ -298,7 +299,7 @@ public class TenantMgtImpl implements TenantMgtService {
             tenantManager.deactivateTenant(tenantId);
             TenantMgtUtil.unloadTenantConfigurations(tenantDomain, tenantId);
             log.info(String.format("Tenant with id: %s and domain: %s deactivated by %s", tenantId, tenantDomain,
-                    maskOrUnmaskContent(PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername())));
+                    applyLogMaskingIfEnabled(PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername())));
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             throw new TenantManagementServerException(String.format("Error while retrieving or deactivating the " +
                     "tenant with id: %s", tenantId), e);
@@ -308,7 +309,7 @@ public class TenantMgtImpl implements TenantMgtService {
         }
     }
 
-    private String maskOrUnmaskContent(String content) {
+    private String applyLogMaskingIfEnabled(String content) {
 
         return LoggerUtils.isLogMaskingEnable ? LoggerUtils.getMaskedContent(content) : content;
     }
@@ -392,13 +393,9 @@ public class TenantMgtImpl implements TenantMgtService {
 
             addClaimsToUserStore(tenant, false);
             addAdditionalClaimsToUserStore(tenant);
+        } catch (TenantManagementClientException e) {
+            throw e;
         } catch (Exception e) {
-            if (e instanceof org.wso2.carbon.user.api.UserStoreException) {
-                throw new TenantManagementClientException(null, e.getMessage());
-            }
-            if (e instanceof TenantManagementClientException) {
-                throw (TenantManagementClientException) e;
-            }
             String msg = "Error in updating the tenant owner %s." + tenantDomain;
             throw new TenantManagementServerException(msg, e);
         }
@@ -414,7 +411,7 @@ public class TenantMgtImpl implements TenantMgtService {
         notifyTenantUpdate(tenantInfoBean);
 
         log.info("Updated the tenant '" + tenantDomain + " [" + tenantId + "]' by '" +
-                maskOrUnmaskContent(PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername()) + "'");
+                applyLogMaskingIfEnabled(PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername()) + "'");
     }
 
     private void createTenant(Tenant tenant) throws Exception {
@@ -441,7 +438,7 @@ public class TenantMgtImpl implements TenantMgtService {
         }
     }
 
-    private void addAdditionalClaimsToUserStore(Tenant tenant) throws Exception {
+    private void addAdditionalClaimsToUserStore(Tenant tenant) throws TenantMgtException {
 
         if (tenant.getClaimsMap() == null || tenant.getClaimsMap().isEmpty()) {
             return;
