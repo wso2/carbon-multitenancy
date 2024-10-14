@@ -387,25 +387,22 @@ public class TenantMgtUtil {
     }
 
     private static UserStoreManager getUserStoreManager(int tenantId) throws
-            org.wso2.carbon.user.api.UserStoreException {
+            org.wso2.carbon.user.api.UserStoreException, TenantManagementServerException {
 
-    RealmService realmService = TenantMgtServiceComponent.getRealmService();
-    if (realmService == null) {
-        throw new org.wso2.carbon.user.api.UserStoreException("RealmService is null");
+        RealmService realmService = TenantMgtServiceComponent.getRealmService();
+        if (realmService == null) {
+            throw new TenantManagementServerException("Unable to retrieve RealmService.");
+        }
+        org.wso2.carbon.user.api.UserRealm userRealm = realmService.getTenantUserRealm(tenantId);
+        if (userRealm == null) {
+            throw new TenantManagementServerException("UserRealm is null for tenantId: " + tenantId);
+        }
+        org.wso2.carbon.user.api.UserStoreManager userStoreManager = userRealm.getUserStoreManager();
+        if (userStoreManager == null) {
+            throw new TenantManagementServerException("UserStoreManager is null for tenantId: " + tenantId);
+        }
+        return (UserStoreManager) userStoreManager;
     }
-
-    org.wso2.carbon.user.api.UserRealm userRealm = realmService.getTenantUserRealm(tenantId);
-    if (userRealm == null) {
-        throw new org.wso2.carbon.user.api.UserStoreException("UserRealm is null for tenantId: " + tenantId);
-    }
-
-    org.wso2.carbon.user.api.UserStoreManager userStoreManager = userRealm.getUserStoreManager();
-    if (userStoreManager == null) {
-        throw new org.wso2.carbon.user.api.UserStoreException("UserStoreManager is null for tenantId: " + tenantId);
-    }
-
-    return (UserStoreManager) userStoreManager;
-}
 
     /**
      * @param tenantDomain domain name of the tenant.
