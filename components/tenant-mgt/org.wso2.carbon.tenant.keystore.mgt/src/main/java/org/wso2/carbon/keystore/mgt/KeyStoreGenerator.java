@@ -21,6 +21,11 @@ import org.apache.axiom.om.util.UUIDGenerator;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.core.RegistryResources;
 import org.wso2.carbon.core.util.CryptoUtil;
@@ -34,15 +39,6 @@ import org.wso2.carbon.security.keystore.KeyStoreAdmin;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ServerConstants;
 import org.wso2.carbon.utils.security.KeystoreUtils;
-import sun.security.x509.AlgorithmId;
-import sun.security.x509.CertificateAlgorithmId;
-import sun.security.x509.CertificateSerialNumber;
-import sun.security.x509.CertificateValidity;
-import sun.security.x509.CertificateVersion;
-import sun.security.x509.CertificateX509Key;
-import sun.security.x509.X509CertImpl;
-import sun.security.x509.X509CertInfo;
-import sun.security.x509.X500Name;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
@@ -112,7 +108,7 @@ public class KeyStoreGenerator {
     public void generateKeyStore() throws KeyStoreMgtException {
         try {
             password = generatePassword();
-            KeyStore keyStore = KeyStore.getInstance(KeystoreUtils.getKeyStoreFileType(tenantDomain));
+            KeyStore keyStore = KeystoreUtils.getKeystoreInstance(KeystoreUtils.getKeyStoreFileType(tenantDomain));
             keyStore.load(null, password.toCharArray());
             X509Certificate pubCert = generateKeyPair(keyStore);
             persistKeyStore(keyStore, pubCert);
@@ -131,7 +127,7 @@ public class KeyStoreGenerator {
     public void generateTrustStore(String trustStoreName) throws KeyStoreMgtException {
         try {
             password = generatePassword();
-            KeyStore keyStore = KeyStore.getInstance(KeystoreUtils.getTrustStoreFileType());
+            KeyStore keyStore = KeystoreUtils.getKeystoreInstance(KeystoreUtils.getTrustStoreFileType());
             keyStore.load(null, password.toCharArray());
             persistTrustStore(keyStore, trustStoreName);
         } catch (Exception e) {
@@ -181,31 +177,32 @@ public class KeyStoreGenerator {
             KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
             // Common Name and alias for the generated certificate
-            String commonName = "CN=" + tenantDomain + ", OU=None, O=None L=None, C=None";
+            String commonName = "CN=" + tenantDomain + ", OU=None, O=None, L=None, C=None";
 
             //generate certificates
             X500Name distinguishedName = new X500Name(commonName);
-            X509CertInfo x509CertInfo = new X509CertInfo();
 
             Date notBefore = new Date(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 30);
             Date notAfter = new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 365 * 10));
 
-            CertificateValidity interval = new CertificateValidity(notBefore, notAfter);
+            SubjectPublicKeyInfo subPubKeyInfo = SubjectPublicKeyInfo.getInstance(keyPair.getPublic().getEncoded());
             BigInteger serialNumber = BigInteger.valueOf(new SecureRandom().nextInt());
 
-            x509CertInfo.set(X509CertInfo.VALIDITY, interval);
-            x509CertInfo.set(X509CertInfo.SERIAL_NUMBER, new CertificateSerialNumber(serialNumber));
-            x509CertInfo.set(X509CertInfo.SUBJECT, distinguishedName);
-            x509CertInfo.set(X509CertInfo.ISSUER, distinguishedName);
-            x509CertInfo.set(X509CertInfo.KEY, new CertificateX509Key(keyPair.getPublic()));
-            x509CertInfo.set(X509CertInfo.VERSION, new CertificateVersion(CertificateVersion.V3));
+            X509v3CertificateBuilder certificateBuilder = new X509v3CertificateBuilder(
+                    distinguishedName,
+                    serialNumber,
+                    notBefore,
+                    notAfter,
+                    distinguishedName,
+                    subPubKeyInfo
+            );
 
             String algorithmName = getSignatureAlgorithm();
-            AlgorithmId signatureAlgoId = AlgorithmId.get(algorithmName);
-            x509CertInfo.set(X509CertInfo.ALGORITHM_ID, new CertificateAlgorithmId(signatureAlgoId));
+            JcaContentSignerBuilder signerBuilder =
+                    new JcaContentSignerBuilder(algorithmName).setProvider(getJCEProvider());
             PrivateKey privateKey = keyPair.getPrivate();
-            X509CertImpl x509Cert = new X509CertImpl(x509CertInfo);
-            x509Cert.sign(privateKey, algorithmName, getJCEProvider());
+            X509Certificate x509Cert = new JcaX509CertificateConverter().setProvider(getJCEProvider())
+                    .getCertificate(certificateBuilder.build(signerBuilder.build(privateKey)));
 
             //add private key to KS
             keyStore.setKeyEntry(tenantDomain, keyPair.getPrivate(), password.toCharArray(),
