@@ -380,9 +380,6 @@ public class TenantMgtUtil {
                     }
                     throw new TenantManagementClientException(null, msg);
                 }
-            } else {
-                // Password should be empty since no password update done.
-                tenantInfoBean.setAdminPassword("");
             }
         } catch (UserStoreException e) {
             throw new TenantManagementServerException("Error in updating the tenant admin password.", e);
