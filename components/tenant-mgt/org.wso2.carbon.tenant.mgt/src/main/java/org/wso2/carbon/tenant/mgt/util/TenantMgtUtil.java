@@ -50,11 +50,13 @@ import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.api.TenantMgtConfiguration;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
+import org.wso2.carbon.user.core.UserStoreClientException;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.config.multitenancy.MultiTenantRealmConfigBuilder;
 import org.wso2.carbon.user.core.jdbc.JDBCRealmConstants;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.Tenant;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -76,6 +78,7 @@ import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMess
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_EMPTY_EXTENSION;
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_ILLEGAL_CHARACTERS_IN_DOMAIN;
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_INVALID_DOMAIN;
+import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_PARTIALLY_CREATED_OR_UPDATED;
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_TENANT_DOES_NOT_MATCH_REGEX_PATTERN;
 
 /**
@@ -348,6 +351,59 @@ public class TenantMgtUtil {
         return tenant;
     }
 
+    public static void updateTenantPassword(TenantInfoBean tenantInfoBean, String adminPassword)
+            throws TenantMgtException {
+
+        if (StringUtils.isBlank(adminPassword)) {
+            return;
+        }
+        UserStoreManager userStoreManager;
+        try {
+            userStoreManager = getUserStoreManager(tenantInfoBean.getTenantId());
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            String msg = "Error in getting the user store manager for tenant, tenant domain: " +
+                    tenantInfoBean.getTenantDomain() + ".";
+            if (log.isDebugEnabled()) {
+                log.debug(msg, e);
+            }
+            throw new TenantManagementServerException(msg, e);
+        }
+        try {
+            if (!userStoreManager.isReadOnly()) {
+                try {
+                    userStoreManager.updateCredentialByAdmin(tenantInfoBean.getAdmin(), adminPassword);
+                } catch (UserStoreException e) {
+                    String msg = String.format("Error in changing the tenant admin password for tenant domain: %s. %s",
+                            tenantInfoBean.getTenantDomain(), e.getMessage());
+                    if (log.isDebugEnabled()) {
+                        log.debug(msg, e);
+                    }
+                    throw new TenantManagementClientException(null, msg);
+                }
+            }
+        } catch (UserStoreException e) {
+            throw new TenantManagementServerException("Error in updating the tenant admin password.", e);
+        }
+    }
+
+    private static UserStoreManager getUserStoreManager(int tenantId) throws
+            org.wso2.carbon.user.api.UserStoreException, TenantManagementServerException {
+
+        RealmService realmService = TenantMgtServiceComponent.getRealmService();
+        if (realmService == null) {
+            throw new TenantManagementServerException("Unable to retrieve RealmService.");
+        }
+        org.wso2.carbon.user.api.UserRealm userRealm = realmService.getTenantUserRealm(tenantId);
+        if (userRealm == null) {
+            throw new TenantManagementServerException("UserRealm is null for tenantId: " + tenantId);
+        }
+        org.wso2.carbon.user.api.UserStoreManager userStoreManager = userRealm.getUserStoreManager();
+        if (userStoreManager == null) {
+            throw new TenantManagementServerException("UserStoreManager is null for tenantId: " + tenantId);
+        }
+        return (UserStoreManager) userStoreManager;
+    }
+
     /**
      * @param tenantDomain domain name of the tenant.
      * @throws Exception if there is an exception during the tenant deletion.
@@ -408,8 +464,7 @@ public class TenantMgtUtil {
         // If the admin user uuid is not in the tenant object, we need to get it from user store.
         String adminUsername = tenant.getAdminName();
         try {
-            UserStoreManager userStoreManager = (UserStoreManager) TenantMgtServiceComponent.getRealmService().
-                    getTenantUserRealm(tenant.getId()).getUserStoreManager();
+            UserStoreManager userStoreManager = getUserStoreManager(tenant.getId());
             adminUserUuid = ((AbstractUserStoreManager) userStoreManager).getUserIDFromUserName(adminUsername);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             throw new TenantManagementServerException(String.format(
@@ -497,9 +552,7 @@ public class TenantMgtUtil {
             }
 
             // Can be extended to store other user information.
-            UserStoreManager userStoreManager =
-                    (UserStoreManager) TenantMgtServiceComponent.getRealmService().
-                            getTenantUserRealm(tenant.getId()).getUserStoreManager();
+            UserStoreManager userStoreManager = getUserStoreManager(tenant.getId());
             if (!userStoreManager.isReadOnly()) {
                 userStoreManager.setUserClaimValues(tenant.getAdminName(), claimsMap,
                         UserCoreConstants.DEFAULT_PROFILE);
@@ -511,7 +564,7 @@ public class TenantMgtUtil {
         }
     }
 
-    public static void addAdditionalClaimsToUserStoreManager(Tenant tenant) throws Exception {
+    public static void addAdditionalClaimsToUserStoreManager(Tenant tenant) throws TenantMgtException {
 
         try {
             Map<String, String> claimsMap = new HashMap<String, String>();
@@ -523,13 +576,14 @@ public class TenantMgtUtil {
             }
 
             // Can be extended to store other user information.
-            UserStoreManager userStoreManager =
-                    (UserStoreManager) TenantMgtServiceComponent.getRealmService().
-                            getTenantUserRealm(tenant.getId()).getUserStoreManager();
+            UserStoreManager userStoreManager = getUserStoreManager(tenant.getId());
             if (!userStoreManager.isReadOnly()) {
                 userStoreManager.setUserClaimValues(tenant.getAdminName(), claimsMap,
                         UserCoreConstants.DEFAULT_PROFILE);
             }
+        } catch (UserStoreClientException e) {
+            throw new TenantManagementClientException(ERROR_CODE_PARTIALLY_CREATED_OR_UPDATED.getCode(),
+                    ERROR_CODE_PARTIALLY_CREATED_OR_UPDATED.getMessage(), e);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Error in adding claims to the user.";
             throw new TenantManagementServerException(msg, e);
