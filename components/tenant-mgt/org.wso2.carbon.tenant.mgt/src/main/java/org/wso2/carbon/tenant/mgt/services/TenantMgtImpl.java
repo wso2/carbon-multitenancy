@@ -41,6 +41,7 @@ import org.wso2.carbon.user.api.TenantMgtConfiguration;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.common.User;
 import org.wso2.carbon.user.core.config.multitenancy.MultiTenantRealmConfigBuilder;
+import org.wso2.carbon.user.core.model.ExpressionOperation;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.Tenant;
 import org.wso2.carbon.user.core.tenant.TenantManager;
@@ -52,9 +53,12 @@ import java.util.Date;
 
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_DOMAIN_NOT_FOUND;
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_INVALID_EMAIL;
+import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_INVALID_FILTER_FORMAT;
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_INVALID_OFFSET;
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_RESOURCE_NOT_FOUND;
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_TENANT_DELETION_NOT_ENABLED;
+import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_UNSUPPORTED_FILTER_ATTRIBUTE;
+import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_UNSUPPORTED_FILTER_OPERATION_FOR_ATTRIBUTE;
 import static org.wso2.carbon.tenant.mgt.util.TenantMgtUtil.initializeTenantInfoBean;
 
 /**
@@ -70,6 +74,7 @@ public class TenantMgtImpl implements TenantMgtService {
     public static final String TENANT_ADMIN_ASK_PASSWORD_CLAIM =
             "http://wso2.org/claims/identity/tenantAdminAskPassword";
     public static final String INVITE_VIA_EMAIL = "invite-via-email";
+    private static final String SPACE_SEPARATOR = " ";
 
     public String addTenant(Tenant tenant) throws TenantMgtException {
 
@@ -604,7 +609,7 @@ public class TenantMgtImpl implements TenantMgtService {
         result.setOffSet(validateOffset(offset));
         result.setSortOrder(validateSortOrder(sortOrder));
         result.setSortBy(validateSortBy(sortBy));
-        result.setFilter(filter);
+        result.setFilter(validateFilter(filter));
     }
 
     /**
@@ -636,6 +641,39 @@ public class TenantMgtImpl implements TenantMgtService {
                 break;
         }
         return sortBy;
+    }
+
+    private String validateFilter(String filter) throws TenantManagementClientException {
+
+        if (StringUtils.isNotBlank(filter)) {
+            String[] filterArgs = filter.split(SPACE_SEPARATOR);
+            if (filterArgs.length != 3) {
+                throw new TenantManagementClientException(ERROR_CODE_INVALID_FILTER_FORMAT.getCode(),
+                        ERROR_CODE_INVALID_FILTER_FORMAT.getMessage());
+            }
+
+            String filterAttribute = filterArgs[0];
+            String operation = filterArgs[1];
+            String attributeValue = filterArgs[2];
+
+            if (StringUtils.equalsIgnoreCase(filterAttribute, DOMAIN_NAME)) {
+                TenantMgtUtil.validateIllegalCharactersInDomain(attributeValue);
+                if (!StringUtils.equalsIgnoreCase(operation, ExpressionOperation.SW.toString())
+                        && !StringUtils.equalsIgnoreCase(operation, ExpressionOperation.EW.toString())
+                        && !StringUtils.equalsIgnoreCase(operation, ExpressionOperation.EQ.toString())
+                        && !StringUtils.equalsIgnoreCase(operation, ExpressionOperation.CO.toString())) {
+                    throw new TenantManagementClientException(
+                            ERROR_CODE_UNSUPPORTED_FILTER_OPERATION_FOR_ATTRIBUTE.getCode(),
+                            String.format(ERROR_CODE_UNSUPPORTED_FILTER_OPERATION_FOR_ATTRIBUTE.getMessage(),
+                                    filterAttribute));
+                }
+            } else {
+                throw new TenantManagementClientException(
+                        ERROR_CODE_UNSUPPORTED_FILTER_ATTRIBUTE.getCode(),
+                        String.format(ERROR_CODE_UNSUPPORTED_FILTER_ATTRIBUTE.getMessage(), filterAttribute));
+            }
+        }
+        return filter;
     }
 
     /**

@@ -259,6 +259,17 @@ public class TenantMgtUtil {
             throw new TenantManagementClientException(ERROR_CODE_INVALID_DOMAIN);
         }
         // Check tenant domain contains any illegal characters.
+        validateIllegalCharactersInDomain(domainName);
+    }
+
+    /**
+     * Check whether the given domain name contains any illegal characters.
+     *
+     * @param domainName    tenant domain name.
+     * @throws TenantManagementClientException  if the domain name contains illegal characters.
+     */
+    public static void validateIllegalCharactersInDomain(String domainName) throws TenantManagementClientException {
+
         if (domainName.matches(ILLEGAL_CHARACTERS_FOR_TENANT_DOMAIN)) {
             throw new TenantManagementClientException(ERROR_CODE_ILLEGAL_CHARACTERS_IN_DOMAIN.getCode(),
                     String.format(ERROR_CODE_ILLEGAL_CHARACTERS_IN_DOMAIN.getMessage(), domainName));
