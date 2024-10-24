@@ -665,7 +665,7 @@ public class TenantMgtImpl implements TenantMgtService {
                     throw new TenantManagementClientException(
                             ERROR_CODE_UNSUPPORTED_FILTER_OPERATION_FOR_ATTRIBUTE.getCode(),
                             String.format(ERROR_CODE_UNSUPPORTED_FILTER_OPERATION_FOR_ATTRIBUTE.getMessage(),
-                                    attributeValue));
+                                    filterAttribute));
                 }
             } else {
                 throw new TenantManagementClientException(
