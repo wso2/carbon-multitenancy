@@ -86,7 +86,6 @@ import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMess
  */
 public class TenantMgtUtil {
 
-    public static final String DOMAIN_NAME = "domainName";
     private static final Log log = LogFactory.getLog(TenantMgtUtil.class);
     private static final String ILLEGAL_CHARACTERS_FOR_TENANT_DOMAIN = ".*[^a-z0-9\\._\\-].*";
     private static final String DOT = ".";

@@ -656,7 +656,7 @@ public class TenantMgtImpl implements TenantMgtService {
             String operation = filterArgs[1];
             String attributeValue = filterArgs[2];
 
-            if (StringUtils.equalsIgnoreCase(filterAttribute, TenantMgtUtil.DOMAIN_NAME)) {
+            if (StringUtils.equalsIgnoreCase(filterAttribute, DOMAIN_NAME)) {
                 TenantMgtUtil.validateIllegalCharactersInDomain(attributeValue);
                 if (!StringUtils.equalsIgnoreCase(operation, ExpressionOperation.SW.toString())
                         && !StringUtils.equalsIgnoreCase(operation, ExpressionOperation.EW.toString())
