@@ -226,6 +226,7 @@ public class KeyStoreGenerator {
      */
     private void persistKeyStore(KeyStore keyStore, X509Certificate PKCertificate)
             throws KeyStoreMgtException {
+
         try {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             keyStore.store(outputStream, password.toCharArray());
@@ -237,26 +238,7 @@ public class KeyStoreGenerator {
             KeyStoreAdmin keystoreAdmin = new KeyStoreAdmin(tenantId, govRegistry);
             keystoreAdmin.addKeyStore(outputStream.toByteArray(), keyStoreName,
                                       password, " ", KeystoreUtils.getKeyStoreFileType(tenantDomain), password);
-
-            //Create the pub. key resource
-            Resource pubKeyResource = govRegistry.newResource();
-            pubKeyResource.setContent(PKCertificate.getEncoded());
-            pubKeyResource.addProperty(SecurityConstants.PROP_TENANT_PUB_KEY_FILE_NAME_APPENDER,
-                                       generatePubKeyFileNameAppender());
-
-            govRegistry.put(RegistryResources.SecurityManagement.TENANT_PUBKEY_RESOURCE, pubKeyResource);
-
-            //associate the public key with the keystore
-            govRegistry.addAssociation(RegistryResources.SecurityManagement.KEY_STORES + "/" + keyStoreName,
-                                       RegistryResources.SecurityManagement.TENANT_PUBKEY_RESOURCE,
-                                       SecurityConstants.ASSOCIATION_TENANT_KS_PUB_KEY);
-
-        } catch (RegistryException e) {
-            String msg = "Error when writing the keystore/pub.cert to registry";
-            log.error(msg, e);
-            throw new KeyStoreMgtException(msg, e);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             String msg = "Error when processing keystore/pub. cert to be stored in registry";
             log.error(msg, e);
             throw new KeyStoreMgtException(msg, e);
