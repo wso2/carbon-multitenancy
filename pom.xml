@@ -922,7 +922,7 @@
 
         <!-- Carbon Identity version-->
         <carbon.identity.version>5.25.305</carbon.identity.version>
-        <carbon.identity.um.ws.api.version>5.3.3</carbon.identity.um.ws.api.version>
+        <carbon.identity.um.ws.api.version>5.8.5</carbon.identity.um.ws.api.version>
         <identity.authenticator.saml2.sso.import.feature.version>5.4.4</identity.authenticator.saml2.sso.import.feature.version>
         <carbon.identity.imp.pkg.version>[5.14.0, 8.0.0)</carbon.identity.imp.pkg.version>
 
