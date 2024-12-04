@@ -18,7 +18,7 @@
     <parent>
         <groupId>org.wso2.carbon.multitenancy</groupId>
         <artifactId>tenant-mgt-parent</artifactId>
-        <version>4.11.31</version>
+        <version>4.11.32-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
