@@ -108,7 +108,7 @@ public class KeyStoreGenerator {
     public void generateKeyStore() throws KeyStoreMgtException {
         try {
             password = generatePassword();
-            KeyStore keyStore = KeystoreUtils.getKeystoreInstance(KeystoreUtils.getKeyStoreFileType(tenantDomain));
+            KeyStore keyStore = KeystoreUtils.getKeystoreInstance(KeystoreUtils.StoreFileType.defaultFileType());
             keyStore.load(null, password.toCharArray());
             X509Certificate pubCert = generateKeyPair(keyStore);
             persistKeyStore(keyStore, pubCert);
@@ -146,7 +146,7 @@ public class KeyStoreGenerator {
      */
     public boolean isKeyStoreExists(int tenantId) throws KeyStoreMgtException{
 
-        String keyStoreName = KeystoreUtils.getKeyStoreFileLocation(tenantDomain);
+        String keyStoreName = generateKSNameFromDomainName();
         boolean isKeyStoreExists = false;
         try {
             isKeyStoreExists = govRegistry.resourceExists(RegistryResources.SecurityManagement.KEY_STORES + "/" + keyStoreName);
@@ -237,7 +237,7 @@ public class KeyStoreGenerator {
             // Use the keystore using the keystore admin
             KeyStoreAdmin keystoreAdmin = new KeyStoreAdmin(tenantId, govRegistry);
             keystoreAdmin.addKeyStore(outputStream.toByteArray(), keyStoreName,
-                                      password, " ", KeystoreUtils.getKeyStoreFileType(tenantDomain), password);
+                                      password, " ", KeystoreUtils.StoreFileType.defaultFileType(), password);
         } catch (Exception e) {
             String msg = "Error when processing keystore/pub. cert to be stored in registry";
             log.error(msg, e);
