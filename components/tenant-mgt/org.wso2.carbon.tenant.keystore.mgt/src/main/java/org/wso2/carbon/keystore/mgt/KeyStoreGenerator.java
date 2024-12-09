@@ -64,19 +64,13 @@ public class KeyStoreGenerator {
     private static final String SIGNING_ALG = "Tenant.SigningAlgorithm";
 
     // Supported signature algorithms for public certificate generation.
-    private static final String DSA_SHA1 = "SHA1withDSA";
-    private static final String ECDSA_SHA1 = "SHA1withECDSA";
-    private static final String ECDSA_SHA256 = "SHA256withECDSA";
-    private static final String ECDSA_SHA384 = "SHA384withECDSA";
-    private static final String ECDSA_SHA512 = "SHA512withECDSA";
     private static final String RSA_MD5 = "MD5withRSA";
     private static final String RSA_SHA1 = "SHA1withRSA";
     private static final String RSA_SHA256 = "SHA256withRSA";
     private static final String RSA_SHA384 = "SHA384withRSA";
     private static final String RSA_SHA512 = "SHA512withRSA";
     private static final String[] signatureAlgorithms = new String[]{
-            DSA_SHA1, ECDSA_SHA1, ECDSA_SHA256, ECDSA_SHA384, ECDSA_SHA512, RSA_MD5, RSA_SHA1, RSA_SHA256,
-            RSA_SHA384, RSA_SHA512
+            RSA_MD5, RSA_SHA1, RSA_SHA256, RSA_SHA384, RSA_SHA512
     };
 
 
@@ -168,8 +162,7 @@ public class KeyStoreGenerator {
         try {
             CryptoUtil.getDefaultCryptoUtil();
             //generate key pair
-            KeyPairGenerator keyPairGenerator = null;
-            keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
             keyPairGenerator.initialize(2048);
             KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
