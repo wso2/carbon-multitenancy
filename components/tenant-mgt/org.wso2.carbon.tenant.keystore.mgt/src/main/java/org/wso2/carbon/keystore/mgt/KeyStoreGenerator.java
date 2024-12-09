@@ -64,19 +64,13 @@ public class KeyStoreGenerator {
     private static final String SIGNING_ALG = "Tenant.SigningAlgorithm";
 
     // Supported signature algorithms for public certificate generation.
-    private static final String DSA_SHA1 = "SHA1withDSA";
-    private static final String ECDSA_SHA1 = "SHA1withECDSA";
-    private static final String ECDSA_SHA256 = "SHA256withECDSA";
-    private static final String ECDSA_SHA384 = "SHA384withECDSA";
-    private static final String ECDSA_SHA512 = "SHA512withECDSA";
     private static final String RSA_MD5 = "MD5withRSA";
     private static final String RSA_SHA1 = "SHA1withRSA";
     private static final String RSA_SHA256 = "SHA256withRSA";
     private static final String RSA_SHA384 = "SHA384withRSA";
     private static final String RSA_SHA512 = "SHA512withRSA";
     private static final String[] signatureAlgorithms = new String[]{
-            DSA_SHA1, ECDSA_SHA1, ECDSA_SHA256, ECDSA_SHA384, ECDSA_SHA512, RSA_MD5, RSA_SHA1, RSA_SHA256,
-            RSA_SHA384, RSA_SHA512
+            RSA_MD5, RSA_SHA1, RSA_SHA256, RSA_SHA384, RSA_SHA512
     };
 
 
@@ -168,12 +162,8 @@ public class KeyStoreGenerator {
         try {
             CryptoUtil.getDefaultCryptoUtil();
             //generate key pair
-            String keyGenerationAlgorithm = getKeyGenerationAlgorithm();
-            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(keyGenerationAlgorithm);
-            int keySize = getKeySize(keyGenerationAlgorithm);
-            if (keySize != 0) {
-                keyPairGenerator.initialize(keySize);
-            }
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+            keyPairGenerator.initialize(2048);
             KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
             // Common Name and alias for the generated certificate
@@ -334,31 +324,4 @@ public class KeyStoreGenerator {
         }
         return RSA_MD5;
     }
-
-    private static String getKeyGenerationAlgorithm() {
-
-        String signatureAlgorithm = getSignatureAlgorithm();
-        // If the algorithm naming format is {digest}with{encryption}, we need to extract the encryption part.
-        int withIndex = signatureAlgorithm.indexOf("with");
-        if (withIndex != -1 && withIndex + 4 < signatureAlgorithm.length()) {
-            return signatureAlgorithm.substring(withIndex + 4);
-        } else {
-            // The algorithm name is same as the encryption algorithm.
-            // This need to be updated if more algorithms are supported.
-            return signatureAlgorithm;
-        }
-    }
-
-    private static int getKeySize(String algorithm) {
-
-        // Initialize the key size according to the FIPS standard.
-        // This need to be updated if more algorithms are supported.
-        if ("ECDSA".equalsIgnoreCase(algorithm)) {
-            return 384;
-        } else if ("RSA".equalsIgnoreCase(algorithm) || "DSA".equalsIgnoreCase(algorithm)) {
-            return 2048;
-        }
-        return 0;
-    }
-
 }
