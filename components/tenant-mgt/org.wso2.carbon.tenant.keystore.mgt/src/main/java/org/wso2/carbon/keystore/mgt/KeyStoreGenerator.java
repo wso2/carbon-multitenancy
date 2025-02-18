@@ -225,7 +225,7 @@ public class KeyStoreGenerator {
 
             String keyStoreName = generateKSNameFromDomainName();
             // Use the keystore using the keystore admin
-            KeyStoreAdmin keystoreAdmin = new KeyStoreAdmin(tenantId, govRegistry);
+            KeyStoreAdmin keystoreAdmin = new KeyStoreAdmin(tenantId);
             keystoreAdmin.addKeyStore(outputStream.toByteArray(), keyStoreName,
                                       password, " ", KeystoreUtils.StoreFileType.defaultFileType(), password);
         } catch (Exception e) {
@@ -248,7 +248,7 @@ public class KeyStoreGenerator {
             outputStream.flush();
             outputStream.close();
 
-            KeyStoreAdmin keystoreAdmin = new KeyStoreAdmin(tenantId, govRegistry);
+            KeyStoreAdmin keystoreAdmin = new KeyStoreAdmin(tenantId);
             keystoreAdmin.addTrustStore(outputStream.toByteArray(), trustStoreName, password, " ",
                     KeystoreUtils.getTrustStoreFileType());
         } catch (Exception e) {
