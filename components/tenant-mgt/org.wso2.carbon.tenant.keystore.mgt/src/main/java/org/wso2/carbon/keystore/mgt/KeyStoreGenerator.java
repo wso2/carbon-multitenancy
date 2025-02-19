@@ -27,14 +27,8 @@ import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.core.RegistryResources;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.keystore.mgt.util.RealmServiceHolder;
-import org.wso2.carbon.keystore.mgt.util.RegistryServiceHolder;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.security.SecurityConstants;
 import org.wso2.carbon.security.keystore.KeyStoreAdmin;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ServerConstants;
@@ -57,7 +51,6 @@ import java.util.Date;
 public class KeyStoreGenerator {
 
     private static Log log = LogFactory.getLog(KeyStoreGenerator.class);
-    private UserRegistry govRegistry;
     private int tenantId;
     private String tenantDomain;
     private String password;
@@ -76,21 +69,9 @@ public class KeyStoreGenerator {
 
 
     public KeyStoreGenerator(int  tenantId) throws KeyStoreMgtException {
-        try {
-            this.tenantId = tenantId;
-            this.tenantDomain = getTenantDomainName();
-            this.govRegistry = RegistryServiceHolder.getRegistryService().
-                    getGovernanceSystemRegistry(tenantId);
-            if(govRegistry == null){
-                log.error("Governance registry instance is null");
-                throw new KeyStoreMgtException("Governance registry instance is null");
-            }
-        } catch (RegistryException e) {
-            String errorMsg = "Error while obtaining the governance registry for tenant : " +
-                      tenantId;
-            log.error(errorMsg, e);
-            throw new KeyStoreMgtException(errorMsg, e);
-        }
+
+        this.tenantId = tenantId;
+        this.tenantDomain = getTenantDomainName();
     }
 
 
@@ -141,14 +122,18 @@ public class KeyStoreGenerator {
     public boolean isKeyStoreExists(int tenantId) throws KeyStoreMgtException{
 
         String keyStoreName = generateKSNameFromDomainName();
-        boolean isKeyStoreExists = false;
         try {
-            isKeyStoreExists = govRegistry.resourceExists(RegistryResources.SecurityManagement.KEY_STORES + "/" + keyStoreName);
-        } catch (RegistryException e) {
-            String msg = "Error while checking the existance of keystore.  ";
-            log.error(msg + e.getMessage());
+            KeyStoreAdmin keystoreAdmin = new KeyStoreAdmin(tenantId);
+            KeyStore keyStore = keystoreAdmin.getKeyStore(keyStoreName);
+            if (keyStore != null) {
+                return true;
+            }
+        } catch (Exception e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Error while checking the existence of keystore.", e);
+            }
         }
-        return isKeyStoreExists;
+        return false;
     }
 
     /**
@@ -225,7 +210,7 @@ public class KeyStoreGenerator {
 
             String keyStoreName = generateKSNameFromDomainName();
             // Use the keystore using the keystore admin
-            KeyStoreAdmin keystoreAdmin = new KeyStoreAdmin(tenantId, govRegistry);
+            KeyStoreAdmin keystoreAdmin = new KeyStoreAdmin(tenantId);
             keystoreAdmin.addKeyStore(outputStream.toByteArray(), keyStoreName,
                                       password, " ", KeystoreUtils.StoreFileType.defaultFileType(), password);
         } catch (Exception e) {
@@ -248,7 +233,7 @@ public class KeyStoreGenerator {
             outputStream.flush();
             outputStream.close();
 
-            KeyStoreAdmin keystoreAdmin = new KeyStoreAdmin(tenantId, govRegistry);
+            KeyStoreAdmin keystoreAdmin = new KeyStoreAdmin(tenantId);
             keystoreAdmin.addTrustStore(outputStream.toByteArray(), trustStoreName, password, " ",
                     KeystoreUtils.getTrustStoreFileType());
         } catch (Exception e) {
