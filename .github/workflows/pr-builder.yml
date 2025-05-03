@@ -38,6 +38,3 @@ jobs:
             ${{ runner.os }}-
       - name: Build with Maven
         run: mvn clean install -U -B
-
-      - name: Generate coverage report
-        run: mvn test jacoco:report
