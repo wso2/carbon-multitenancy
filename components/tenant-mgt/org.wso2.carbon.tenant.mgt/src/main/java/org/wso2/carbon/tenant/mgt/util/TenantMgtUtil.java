@@ -526,10 +526,10 @@ public class TenantMgtUtil {
             bean.setTenantId(tenantId);
             bean.setEmail(tenant.getEmail());
 
-            String domain = tenant.getDomain();
-            String name = tenant.getName();
-            bean.setTenantDomain(domain);
-            bean.setName(StringUtils.isNotBlank(name) ? name : domain);
+            String tenantDomain = tenant.getDomain();
+            String tenantName = tenant.getName();
+            bean.setTenantDomain(tenantDomain);
+            bean.setName(StringUtils.isNotBlank(tenantName) ? tenantName : tenantDomain);
 
             /*gets the created date*/
             Calendar createdDate = Calendar.getInstance();
