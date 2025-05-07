@@ -12,7 +12,7 @@
     <groupId>org.wso2.carbon.multitenancy</groupId>
     <artifactId>carbon-multitenancy</artifactId>
     <packaging>pom</packaging>
-    <version>4.11.35-SNAPSHOT</version>
+    <version>4.11.37-SNAPSHOT</version>
     <name>WSO2 Carbon - Platform Aggregator Pom</name>
     <url>https://wso2.org</url>
 
@@ -922,7 +922,7 @@
 
         <!-- Carbon Identity version-->
         <carbon.identity.version>7.7.269</carbon.identity.version>
-        <carbon.identity.um.ws.api.version>5.8.7</carbon.identity.um.ws.api.version>
+        <carbon.identity.um.ws.api.version>5.8.9</carbon.identity.um.ws.api.version>
         <identity.authenticator.saml2.sso.import.feature.version>5.4.4</identity.authenticator.saml2.sso.import.feature.version>
         <carbon.identity.imp.pkg.version>[5.14.0, 8.0.0)</carbon.identity.imp.pkg.version>
 
