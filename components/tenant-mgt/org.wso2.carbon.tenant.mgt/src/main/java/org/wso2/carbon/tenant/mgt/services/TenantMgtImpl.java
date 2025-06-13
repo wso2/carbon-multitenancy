@@ -111,7 +111,7 @@ public class TenantMgtImpl implements TenantMgtService {
                 addClaimsToUserStore(tenant, true);
             }
 
-            TenantInfoBean tenantInfoBean = initializeTenantInfoBean(tenantId, tenant);
+            TenantInfoBean tenantInfoBean = buildTenantInfoBean(tenant);
             notifyTenantAddition(tenantInfoBean);
 
             // For the super tenant tenant creation, tenants are always activated as they are created.
