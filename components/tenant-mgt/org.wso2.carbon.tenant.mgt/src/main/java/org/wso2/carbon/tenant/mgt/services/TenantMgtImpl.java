@@ -62,7 +62,6 @@ import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMess
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_TENANT_DELETION_NOT_ENABLED;
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_UNSUPPORTED_FILTER_ATTRIBUTE;
 import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMessage.ERROR_CODE_UNSUPPORTED_FILTER_OPERATION_FOR_ATTRIBUTE;
-import static org.wso2.carbon.tenant.mgt.util.TenantMgtUtil.initializeTenantInfoBean;
 
 /**
  * Default implementation of {@link TenantMgtService} interface.
@@ -398,7 +397,7 @@ public class TenantMgtImpl implements TenantMgtService {
         TenantInfoBean tenantInfoBean;
         try {
             // Validate and update the tenant password before updating the tenant owner.
-            tenantInfoBean = initializeTenantInfoBean(tenantId, tenant);
+            tenantInfoBean = buildTenantInfoBean(tenant);
             TenantMgtUtil.updateTenantPassword(tenantInfoBean, tenant.getAdminPassword());
 
             addClaimsToUserStore(tenant, false);
