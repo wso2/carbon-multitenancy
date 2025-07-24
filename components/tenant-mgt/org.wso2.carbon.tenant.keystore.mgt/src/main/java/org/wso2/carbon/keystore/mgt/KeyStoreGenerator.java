@@ -161,7 +161,7 @@ public class KeyStoreGenerator {
             Date notAfter = new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 365 * 10));
 
             SubjectPublicKeyInfo subPubKeyInfo = SubjectPublicKeyInfo.getInstance(keyPair.getPublic().getEncoded());
-            BigInteger serialNumber = BigInteger.valueOf(new SecureRandom().nextInt());
+            BigInteger serialNumber = new BigInteger(32, new SecureRandom());
 
             X509v3CertificateBuilder certificateBuilder = new X509v3CertificateBuilder(
                     distinguishedName,
