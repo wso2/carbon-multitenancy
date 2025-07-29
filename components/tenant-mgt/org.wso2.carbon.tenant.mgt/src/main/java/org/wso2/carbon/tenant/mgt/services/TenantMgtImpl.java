@@ -776,9 +776,13 @@ public class TenantMgtImpl implements TenantMgtService {
 
     private static TenantInfoBean buildTenantInfoBean(Tenant tenant) {
 
+        String domain = tenant.getDomain();
+        String name = tenant.getName();
+
         TenantInfoBean bean = new TenantInfoBean();
         bean.setTenantId(tenant.getId());
-        bean.setTenantDomain(tenant.getDomain());
+        bean.setTenantDomain(domain);
+        bean.setName(StringUtils.isNotBlank(name) ? name : domain);
         bean.setEmail(tenant.getEmail());
         bean.setAdmin(tenant.getAdminName());
         bean.setFirstname(tenant.getAdminFirstName());
