@@ -35,6 +35,7 @@ import org.wso2.carbon.stratos.common.exception.StratosException;
 import org.wso2.carbon.stratos.common.exception.TenantManagementClientException;
 import org.wso2.carbon.stratos.common.exception.TenantManagementServerException;
 import org.wso2.carbon.stratos.common.exception.TenantMgtException;
+import org.wso2.carbon.stratos.common.util.ClaimsMgtUtil;
 import org.wso2.carbon.stratos.common.util.CommonUtil;
 import org.wso2.carbon.tenant.mgt.core.TenantPersistor;
 import org.wso2.carbon.tenant.mgt.internal.TenantMgtServiceComponent;
@@ -110,7 +111,7 @@ public class TenantMgtImpl implements TenantMgtService {
                 addClaimsToUserStore(tenant, true);
             }
 
-            TenantInfoBean tenantInfoBean = buildTenantInfoBean(tenant);
+            TenantInfoBean tenantInfoBean = createTenantInfoWithProperAdmin(tenant, tenantId);
             notifyTenantAddition(tenantInfoBean);
 
             // For the super tenant tenant creation, tenants are always activated as they are created.
@@ -397,7 +398,7 @@ public class TenantMgtImpl implements TenantMgtService {
         TenantInfoBean tenantInfoBean;
         try {
             // Validate and update the tenant password before updating the tenant owner.
-            tenantInfoBean = buildTenantInfoBean(tenant);
+            tenantInfoBean = createTenantInfoWithProperAdmin(tenant, tenantId);
             TenantMgtUtil.updateTenantPassword(tenantInfoBean, tenant.getAdminPassword());
 
             addClaimsToUserStore(tenant, false);
@@ -772,6 +773,20 @@ public class TenantMgtImpl implements TenantMgtService {
             throw new TenantManagementServerException("Error while getting the tenant: " + tenantUniqueID + " .", e);
         }
         return tenant;
+    }
+
+    private static TenantInfoBean createTenantInfoWithProperAdmin(Tenant tenant, int tenantId) throws Exception {
+
+        TenantInfoBean tenantInfoBean = buildTenantInfoBean(tenant);
+        if (tenant != null) {
+            try {
+                tenantInfoBean.setAdmin(ClaimsMgtUtil.getAdminUserNameFromTenantId(
+                        TenantMgtServiceComponent.getRealmService(), tenantId));
+            } catch (Exception e) {
+                throw new TenantManagementServerException("Error while getting admin username from tenant id.", e);
+            }
+        }
+        return tenantInfoBean;
     }
 
     private static TenantInfoBean buildTenantInfoBean(Tenant tenant) {
