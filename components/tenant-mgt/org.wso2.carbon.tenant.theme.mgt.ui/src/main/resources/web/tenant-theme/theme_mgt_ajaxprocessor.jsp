@@ -18,6 +18,7 @@
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
 <%@ page import="org.wso2.carbon.registry.common.ui.UIException" %>
 <%@ page import="org.wso2.carbon.theme.mgt.ui.clients.ThemeMgtServiceClient" %>
+<%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="java.util.UUID" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
@@ -38,11 +39,13 @@
                 CarbonConstants.THEME_URL_RANDOM_SUFFIX_SESSION_KEY, UUID.randomUUID().toString());        
         client.applyTheme(themeName, redirectWithStr);
         if (redirectWithStr.equals("")) {
-            response.sendRedirect("../tenant-theme/theme_mgt.jsp?updateTheme=Success&redirectWith=" + redirectWithStr);
+            response.sendRedirect(CarbonUIUtil.resolveAdminConsoleBaseURL("",
+             "../tenant-theme/theme_mgt.jsp?updateTheme=Success&redirectWith=" + redirectWithStr, request));
         } else {
-            response.sendRedirect("../admin/login.jsp");
+            response.sendRedirect(CarbonUIUtil.resolveAdminConsoleBaseURL("", "../admin/login.jsp", request));
         }
     } catch (UIException e) {
-        response.sendRedirect("../tenant-theme/theme_mgt.jsp?updateTheme=Failed&redirectWith=" + redirectWithStr);
+        response.sendRedirect(CarbonUIUtil.resolveAdminConsoleBaseURL("",
+            "../tenant-theme/theme_mgt.jsp?updateTheme=Failed&redirectWith=" + redirectWithStr, request));
     }
 %>
