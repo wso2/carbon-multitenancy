@@ -73,7 +73,7 @@
   "multi_tenancy.stratos.notification_email": "notification-email",
   "multi_tenancy.stratos.finance_notification_email": "finance-notification-email",
   "multi_tenancy.stratos.charge_on_registration": false,
-  "multi_tenancy.stratos.public_cloud_setup": true,
+  "multi_tenancy.stratos.public_cloud_setup": false,
   "multi_tenancy.stratos.paypal.url": "Paypal URL",
   "multi_tenancy.stratos.paypal.username": "username",
   "multi_tenancy.stratos.paypal.password": "password",
