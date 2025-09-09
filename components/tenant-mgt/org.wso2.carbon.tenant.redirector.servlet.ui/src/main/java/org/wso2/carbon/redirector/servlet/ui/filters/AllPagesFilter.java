@@ -149,6 +149,9 @@ public class AllPagesFilter implements Filter {
                     "/carbon/admin/".equals(path)) {
                 // we have to redirect the root to the login page directly
                 path = CarbonUIUtil.resolveAdminConsoleBaseURL(contextPath, "/carbon/admin/login.jsp", request);
+                if (log.isDebugEnabled()) {
+                    log.debug("Resolved the admin console base path to : " + path);
+                }
             	((HttpServletResponse) servletResponse).sendRedirect(path);
                 return;
             }
