@@ -1041,7 +1041,7 @@
         <project.scm.id>my-scm-server</project.scm.id>
         <apache.felix.scr.ds.annotations.version>1.2.4</apache.felix.scr.ds.annotations.version>
         <maven.scr.plugin.version>1.26.0</maven.scr.plugin.version>
-        <pax.logging.api.version>2.2.1-wso2v2</pax.logging.api.version>
+        <pax.logging.api.version>2.3.0-wso2v1</pax.logging.api.version>
     </properties>
 
     <repositories>
