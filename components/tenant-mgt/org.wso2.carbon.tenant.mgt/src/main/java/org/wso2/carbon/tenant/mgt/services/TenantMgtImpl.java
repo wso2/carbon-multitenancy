@@ -179,13 +179,12 @@ public class TenantMgtImpl implements TenantMgtService {
         TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
         Tenant tenant;
         try {
-            int tenantID = tenantManager.getTenantId(domain);
-            tenant = (Tenant) tenantManager.getTenant(tenantID);
+            tenant = (Tenant) tenantManager.getTenantByDomain(domain);
             if (tenant == null) {
                 throw new TenantManagementClientException(ERROR_CODE_DOMAIN_NOT_FOUND.getCode(),
                         String.format(ERROR_CODE_DOMAIN_NOT_FOUND.getMessage(), domain));
             }
-            String tenantName = tenantManager.getTenantNameByID(tenantID);
+            String tenantName = tenantManager.getTenantNameByID(tenant.getId());
             tenant.setName(StringUtils.isNotBlank(tenantName) ? tenantName : domain);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             throw new TenantManagementServerException("Error while getting the tenant - " + domain, e);
