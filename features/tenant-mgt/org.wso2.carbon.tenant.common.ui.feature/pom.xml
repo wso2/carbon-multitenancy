@@ -20,14 +20,14 @@
     <parent>
         <groupId>org.wso2.carbon.multitenancy</groupId>
         <artifactId>tenant-mgt-feature</artifactId>
-        <version>4.11.45</version>
+        <version>4.11.46-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.tenant.common.ui.feature</artifactId>
     <packaging>pom</packaging>
-    <version>4.11.45</version>
+    <version>4.11.46-SNAPSHOT</version>
     <name>WSO2 Stratos - Common UI Feature</name>
     <url>http://wso2.org</url>
     <description>This feature contains the bundles required for Front-end servlet functionality</description>
