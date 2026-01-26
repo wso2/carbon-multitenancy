@@ -1,12 +1,12 @@
 /*
- *  Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2005-2026, WSO2 LLC. (http://www.wso2.com).
  *
- *  WSO2 Inc. licenses this file to you under the Apache License,
- *  Version 2.0 (the "License"); you may not use this file except
- *  in compliance with the License.
- *  You may obtain a copy of the License at
+ * WSO2 LLC. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -20,49 +20,19 @@ package org.wso2.carbon.sso.redirector.ui.internal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
-
-import javax.servlet.Filter;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Dictionary;
-import java.util.Hashtable;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 
 @Component(
         name = "org.wso2.carbon.sso.redirector.ui",
         immediate = true)
 public class SSORedirectorServiceComponent {
 
-    private static Log log = LogFactory.getLog(SSORedirectorServiceComponent.class);
+    private static final Log log = LogFactory.getLog(SSORedirectorServiceComponent.class);
 
     @Activate
     protected void activate(ComponentContext ctxt) {
-        // register a servlet filter for SSO redirector page
-        HttpServlet redirectJSPRedirectorServlet = new HttpServlet() {
-
-            protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException,
-                    IOException {
-
-            }
-        };
-        Filter redirectPageFilter = new RedirectorJSPFilter();
-        Dictionary redirectorPageFilterAttrs = new Hashtable(2);
-        Dictionary redirectorPageFilterParams = new Hashtable(2);
-        redirectorPageFilterParams.put("url-pattern", "/carbon/sso-acs/redirect_ajaxprocessor.jsp");
-        redirectorPageFilterParams.put("associated-filter", redirectPageFilter);
-        redirectorPageFilterParams.put("servlet-attributes", redirectorPageFilterAttrs);
-        ctxt.getBundleContext().registerService(Servlet.class.getName(), redirectJSPRedirectorServlet,
-                redirectorPageFilterParams);
         log.debug("Stratos SSO Redirector bundle is activated..");
     }
 
