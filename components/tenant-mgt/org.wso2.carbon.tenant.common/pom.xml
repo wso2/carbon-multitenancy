@@ -52,6 +52,9 @@
                             org.osgi.service.component.*;version="${imp.package.version.osgi.services}",
                             *;resolution:=optional
                         </Import-Package>
+                        <Provide-Capability>
+                            osgi.service;objectClass=org.wso2.carbon.stratos.common.util.StratosConfiguration
+                        </Provide-Capability>
                     </instructions>
                 </configuration>
             </plugin>
@@ -75,10 +78,6 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.commons</groupId>
-            <artifactId>org.wso2.carbon.databridge.commons</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-lang.wso2</groupId>

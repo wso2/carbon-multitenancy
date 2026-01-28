@@ -43,26 +43,11 @@ import org.osgi.service.component.annotations.ReferencePolicy;
         immediate = true)
 public class SSORedirectorServiceComponent {
 
-    private static Log log = LogFactory.getLog(SSORedirectorServiceComponent.class);
+    private static final Log log = LogFactory.getLog(SSORedirectorServiceComponent.class);
 
     @Activate
     protected void activate(ComponentContext ctxt) {
         // register a servlet filter for SSO redirector page
-        HttpServlet redirectJSPRedirectorServlet = new HttpServlet() {
-
-            protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException,
-                    IOException {
-
-            }
-        };
-        Filter redirectPageFilter = new RedirectorJSPFilter();
-        Dictionary redirectorPageFilterAttrs = new Hashtable(2);
-        Dictionary redirectorPageFilterParams = new Hashtable(2);
-        redirectorPageFilterParams.put("url-pattern", "/carbon/sso-acs/redirect_ajaxprocessor.jsp");
-        redirectorPageFilterParams.put("associated-filter", redirectPageFilter);
-        redirectorPageFilterParams.put("servlet-attributes", redirectorPageFilterAttrs);
-        ctxt.getBundleContext().registerService(Servlet.class.getName(), redirectJSPRedirectorServlet,
-                redirectorPageFilterParams);
         log.debug("Stratos SSO Redirector bundle is activated..");
     }
 
