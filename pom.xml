@@ -995,8 +995,8 @@
 
         <log4j.version>1.2.13</log4j.version>
 
-        <bcprov-jdk18.version>1.81.0.wso2v1</bcprov-jdk18.version>
-        <bcpkix-jdk18.version>1.81.0.wso2v1</bcpkix-jdk18.version>
+        <bcprov-jdk18.version>1.83.0.wso2v1</bcprov-jdk18.version>
+        <bcpkix-jdk18.version>1.83.0.wso2v1</bcpkix-jdk18.version>
         <bc-fips.version>1.0.2.5</bc-fips.version>
         <bcpkix-fips.version>1.0.7</bcpkix-fips.version>
 
