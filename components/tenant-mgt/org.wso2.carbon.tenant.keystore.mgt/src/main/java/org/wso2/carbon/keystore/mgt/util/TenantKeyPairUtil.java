@@ -49,6 +49,7 @@ import java.util.Objects;
 import static org.wso2.carbon.core.util.CryptoUtil.getJCEProvider;
 import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.EC_CURVE;
 import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.EC_KEY_ALG;
+import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.ED_KEY_ALG;
 import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.RSA_KEY_ALG;
 
 /**
@@ -88,6 +89,9 @@ public class TenantKeyPairUtil {
             } else if (RSA_KEY_ALG.equals(keyType)) {
                 kpg = KeyPairGenerator.getInstance(RSA_KEY_ALG);
                 kpg.initialize(2048);
+            } else if (ED_KEY_ALG.equals(keyType)) {
+                kpg = KeyPairGenerator.getInstance(ED_KEY_ALG, getJCEProvider());
+                // Ed25519 doesn't need initialization parameters
             }
             keyPair = Objects.requireNonNull(kpg).generateKeyPair();
             X509CertImpl cert = generateCertificate(tenantDomain, keyPair, sigAlgId);

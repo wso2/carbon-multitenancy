@@ -42,6 +42,8 @@ import java.security.cert.X509Certificate;
 
 import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.EC_KEY_ALG;
 import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.EC_SHA256;
+import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.ED_KEY_ALG;
+import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.ED_SHA512;
 import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.RSA_KEY_ALG;
 import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.RSA_MD5;
 import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.RSA_SHA1;
@@ -51,6 +53,7 @@ import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.RSA_SHA51
 
 import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairUtil.addKeyEntry;
 import static org.wso2.carbon.utils.multitenancy.MultitenantConstants.TENANT_EC_KEY_SUFFIX;
+import static org.wso2.carbon.utils.multitenancy.MultitenantConstants.TENANT_ED_KEY_SUFFIX;
 
 /**
  * This class is used to generate a key store for a tenant and store it in the governance registry.
@@ -92,6 +95,9 @@ public class KeyStoreGenerator {
             // EC based key pair entry
             addKeyEntry(tenantDomain, password, keyStore, tenantDomain + TENANT_EC_KEY_SUFFIX,
                     EC_KEY_ALG, EC_SHA256);
+            // EdDSA based key pair entry
+            addKeyEntry(tenantDomain, password, keyStore, tenantDomain + TENANT_ED_KEY_SUFFIX,
+                    ED_KEY_ALG, ED_SHA512);
             persistKeyStore(keyStore, pubCertRSA);
         } catch (Exception e) {
             String msg = "Error while instantiating a keystore";
@@ -142,61 +148,7 @@ public class KeyStoreGenerator {
         return false;
     }
 
-    /**
-     * This method generates the keypair and stores it in the keystore
-     *
-     * @param keyStore A keystore instance
-     * @return Generated public key for the tenant
-     * @throws KeyStoreMgtException Error when generating key pair
-     */
-    private X509Certificate generateKeyPair(KeyStore keyStore) throws KeyStoreMgtException {
-        try {
-            CryptoUtil.getDefaultCryptoUtil();
-            //generate key pair
-            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-            keyPairGenerator.initialize(2048);
-            KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
-            // Common Name and alias for the generated certificate
-            String commonName = "CN=" + tenantDomain + ", OU=None, O=None, L=None, C=None";
-
-            //generate certificates
-            X500Name distinguishedName = new X500Name(commonName);
-
-            Date notBefore = new Date(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 30);
-            Date notAfter = new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 365 * 10));
-
-            SubjectPublicKeyInfo subPubKeyInfo = SubjectPublicKeyInfo.getInstance(keyPair.getPublic().getEncoded());
-            BigInteger serialNumber = new BigInteger(32, new SecureRandom());
-
-            X509v3CertificateBuilder certificateBuilder = new X509v3CertificateBuilder(
-                    distinguishedName,
-                    serialNumber,
-                    notBefore,
-                    notAfter,
-                    distinguishedName,
-                    subPubKeyInfo
-            );
-
-            String algorithmName = getSignatureAlgorithm();
-            JcaContentSignerBuilder signerBuilder =
-                    new JcaContentSignerBuilder(algorithmName).setProvider(getJCEProvider());
-            PrivateKey privateKey = keyPair.getPrivate();
-            X509Certificate x509Cert = new JcaX509CertificateConverter().setProvider(getJCEProvider())
-                    .getCertificate(certificateBuilder.build(signerBuilder.build(privateKey)));
-
-            //add private key to KS
-            keyStore.setKeyEntry(tenantDomain, keyPair.getPrivate(), password.toCharArray(),
-                    new java.security.cert.Certificate[]{x509Cert});
-            return x509Cert;
-        } catch (Exception ex) {
-            String msg = "Error while generating the certificate for tenant :" +
-                         tenantDomain + ".";
-            log.error(msg, ex);
-            throw new KeyStoreMgtException(msg, ex);
-        }
-
-    }
 
     /**
      * Persist the keystore in the gov.registry

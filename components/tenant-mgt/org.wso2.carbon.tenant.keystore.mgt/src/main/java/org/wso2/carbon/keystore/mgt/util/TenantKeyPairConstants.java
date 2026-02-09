@@ -27,6 +27,10 @@ public class TenantKeyPairConstants {
     public static final String EC_CURVE = "secp256r1";
     public static final String EC_SHA256 = "SHA256withECDSA";
 
+    // Constants required for EdDSA key pair generation
+    public static final String ED_KEY_ALG = "Ed25519";
+    public static final String ED_SHA512 = "Ed25519";
+
     // Supported signature algorithms for public certificate generation.
     public static final String RSA_MD5 = "MD5withRSA";
     public static final String RSA_SHA1 = "SHA1withRSA";
