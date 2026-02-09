@@ -36,13 +36,21 @@ import org.wso2.carbon.utils.security.KeystoreUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.KeyStore;
-import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
-import java.util.Date;
+
+import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.EC_KEY_ALG;
+import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.EC_SHA256;
+import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.RSA_KEY_ALG;
+import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.RSA_MD5;
+import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.RSA_SHA1;
+import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.RSA_SHA256;
+import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.RSA_SHA384;
+import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.RSA_SHA512;
+
+import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairUtil.addKeyEntry;
+import static org.wso2.carbon.utils.multitenancy.MultitenantConstants.TENANT_EC_KEY_SUFFIX;
 
 /**
  * This class is used to generate a key store for a tenant and store it in the governance registry.
@@ -54,19 +62,12 @@ public class KeyStoreGenerator {
     private int tenantId;
     private String tenantDomain;
     private String password;
+
     private static final String SIGNING_ALG = "Tenant.SigningAlgorithm";
 
-    // Supported signature algorithms for public certificate generation.
-    private static final String RSA_MD5 = "MD5withRSA";
-    private static final String RSA_SHA1 = "SHA1withRSA";
-    private static final String RSA_SHA256 = "SHA256withRSA";
-    private static final String RSA_SHA384 = "SHA384withRSA";
-    private static final String RSA_SHA512 = "SHA512withRSA";
     private static final String[] signatureAlgorithms = new String[]{
             RSA_MD5, RSA_SHA1, RSA_SHA256, RSA_SHA384, RSA_SHA512
     };
-
-
 
     public KeyStoreGenerator(int  tenantId) throws KeyStoreMgtException {
 
@@ -85,8 +86,13 @@ public class KeyStoreGenerator {
             password = generatePassword();
             KeyStore keyStore = KeystoreUtils.getKeystoreInstance(KeystoreUtils.StoreFileType.defaultFileType());
             keyStore.load(null, password.toCharArray());
-            X509Certificate pubCert = generateKeyPair(keyStore);
-            persistKeyStore(keyStore, pubCert);
+            // RSA based key pair entry
+            X509Certificate pubCertRSA =  addKeyEntry(tenantDomain, password, keyStore, tenantDomain,
+                    RSA_KEY_ALG, getSignatureAlgorithm());
+            // EC based key pair entry
+            addKeyEntry(tenantDomain, password, keyStore, tenantDomain + TENANT_EC_KEY_SUFFIX,
+                    EC_KEY_ALG, EC_SHA256);
+            persistKeyStore(keyStore, pubCertRSA);
         } catch (Exception e) {
             String msg = "Error while instantiating a keystore";
             log.error(msg, e);
