@@ -26,6 +26,10 @@
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 
 <%
+    if (!"post".equalsIgnoreCase(request.getMethod())) {
+        response.sendError(405);
+        return;
+    }
    try{
     String backendServerUrl = CarbonUIUtil.getServerURL(config.getServletContext(), session);
     String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
