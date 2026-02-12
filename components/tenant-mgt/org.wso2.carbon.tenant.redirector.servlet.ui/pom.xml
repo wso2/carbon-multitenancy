@@ -44,13 +44,14 @@
                             org.wso2.carbon.redirector.servlet.ui.*,
                             org.wso2.carbon.redirector.servlet.ui.internal.*,
                             org.wso2.carbon.redirector.servlet.ui.clients.*,
-                            org.wso2.carbon.redirector.servlet.ui.util.*,
+                            org.wso2.carbon.redirector.servlet.ui.servlets.*,
                         </Private-Package>
                         <Import-Package>
                             org.wso2.carbon.redirector.servlet.stub.*;
                             version="${carbon.multitenancy.imp.pkg.version}",
                             javax.servlet;version="${imp.pkg.version.javax.servlet}",
                             org.osgi.service.component.*;version="${imp.package.version.osgi.services}",
+                            org.osgi.service.http.whiteboard;version="[1.0.0,2.0.0)",
                             javax.servlet.http;version="${imp.pkg.version.javax.servlet}",
                             org.apache.lucene.*,
                             *;resolution:=optional
