@@ -4,6 +4,10 @@
 <%@ page import="org.json.JSONObject" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
+    if (!"post".equalsIgnoreCase(request.getMethod())) {
+        response.sendError(405);
+        return;
+    }
     String tenantDomain = request.getParameter("domain");
     boolean isDomainAvailable = CommonUtil.isDomainNameAvailable(tenantDomain);
     JSONObject jsonObject = new JSONObject();
