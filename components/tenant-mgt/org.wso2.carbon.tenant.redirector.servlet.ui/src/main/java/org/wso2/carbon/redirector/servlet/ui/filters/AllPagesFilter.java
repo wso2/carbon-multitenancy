@@ -1,28 +1,38 @@
 /*
- * Copyright (c) 2008, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2008, WSO2 LLC. (http://www.wso2.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * WSO2 LLC. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.wso2.carbon.redirector.servlet.ui.filters;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-import org.wso2.carbon.stratos.common.constants.StratosConstants;
 import org.wso2.carbon.redirector.servlet.ui.clients.RedirectorServletServiceClient;
+import org.wso2.carbon.stratos.common.constants.StratosConstants;
 import org.wso2.carbon.ui.CarbonUIUtil;
+import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import javax.servlet.*;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -32,7 +42,7 @@ import java.util.StringTokenizer;
 
 public class AllPagesFilter implements Filter {
     private static final Log log = LogFactory.getLog(AllPagesFilter.class);
-    private static Map<String, Boolean> tenantExistMap = new HashMap<String, Boolean>();
+    private static Map<String, Boolean> tenantExistMap = new HashMap<>();
 
     ServletContext context;
 
@@ -43,8 +53,10 @@ public class AllPagesFilter implements Filter {
     public void doFilter(ServletRequest servletRequest,
                          ServletResponse servletResponse, FilterChain filterChain) throws
             IOException, ServletException {
+
         if (!(servletRequest instanceof HttpServletRequest)) {
-            // no filtering
+            // Not an HTTP request, skip filtering
+            filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
         HttpServletRequest request = (HttpServletRequest) servletRequest;
@@ -126,12 +138,7 @@ public class AllPagesFilter implements Filter {
                 return;
             }
             request.setAttribute(MultitenantConstants.TENANT_DOMAIN, tenantDomain);
-//            if (path.indexOf("admin/login.jsp") >= 0) {
-//                // we are going to apply the login.jsp filter + tenant specif filter both in here
-//                path = path.replaceAll("admin/login.jsp",
-//                        "tenant-login/login_ajaxprocessor.jsp");
-//                request.setAttribute(StratosConstants.TENANT_SPECIFIC_URL_RESOLVED, "1");
-//            }
+
             if (path.indexOf("/admin/index.jsp") >= 0) {
                 // we are going to apply the login.jsp filter + tenant specific filter both in here
                 path = path.replaceAll("/admin/index.jsp", "/tenant-dashboard/index.jsp");
@@ -149,17 +156,55 @@ public class AllPagesFilter implements Filter {
                     "/carbon/admin/".equals(path)) {
                 // we have to redirect the root to the login page directly
                 path = CarbonUIUtil.resolveAdminConsoleBaseURL(contextPath, "/carbon/admin/login.jsp", request);
-            	((HttpServletResponse) servletResponse).sendRedirect(path);
+                ((HttpServletResponse) servletResponse).sendRedirect(path);
                 return;
             }
-            RequestDispatcher requestDispatcher =
-                    request.getRequestDispatcher(path);            
-            requestDispatcher.forward(request, servletResponse);
-            return;
+
+            RequestDispatcher requestDispatcher = null;
+            
+            // Strategy 1: Use request.getRequestDispatcher() - this works best when both 
+            // the filter and target servlet are in the same web application (even if filter 
+            // is registered via OSGi Whiteboard and servlet via web.xml)
+            requestDispatcher = request.getRequestDispatcher(path);
+            
+            // Strategy 2: Try ServletContext.getRequestDispatcher() as fallback
+            if (requestDispatcher == null) {
+                requestDispatcher = context.getRequestDispatcher(path);
+            }
+            
+            // Strategy 3: Try cross-context dispatch if enabled
+            if (requestDispatcher == null) {
+                // Try to get the root context where AxisServlet might be registered
+                ServletContext rootContext = context.getContext("/");
+                if (rootContext != null && rootContext != context) {
+                    requestDispatcher = rootContext.getRequestDispatcher(path);
+                    if (requestDispatcher != null) {
+                        log.debug("Using cross-context RequestDispatcher from root context for path: " + path);
+                    }
+                }
+            }
+            
+            if (requestDispatcher != null) {
+                requestDispatcher.forward(request, servletResponse);
+            } else {
+                log.error("RequestDispatcher is null for path: '" + path + 
+                         "'. This filter is registered via OSGi HTTP Whiteboard but the target " +
+                         "AxisServlet is registered via web.xml in a different servlet context. " +
+                         "Consider registering this filter in web.xml instead.");
+                
+                ((HttpServletResponse) servletResponse).sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,
+                    "Unable to forward tenant request to: " + path + 
+                    ". Cross-context dispatch not available.");
+            }
+        } else {
+            // Not a tenant URL, continue with normal processing
+            filterChain.doFilter(servletRequest, servletResponse);
         }
     }
 
     public void destroy() {
-        // nothing to destroy
+        if (log.isDebugEnabled()) {
+            log.debug("AllPagesFilter destroyed");
+        }
     }
 }

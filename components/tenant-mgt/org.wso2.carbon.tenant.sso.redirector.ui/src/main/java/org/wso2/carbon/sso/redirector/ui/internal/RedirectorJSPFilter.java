@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.sso.redirector.ui.internal;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -32,6 +35,12 @@ import java.io.IOException;
  * This class acts as a servlet filter which forwads the requests coming for sso-acs/redirect_ajaxprocessor.jsp
  * to stratos-auth/redirect_ajaxprocessor.jsp
  */
+@Component(
+        service = Filter.class,
+        property = {
+                HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN + "=/carbon/sso-acs/redirect_ajaxprocessor.jsp"
+        }
+)
 public class RedirectorJSPFilter implements Filter {
 
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,

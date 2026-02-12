@@ -21,6 +21,7 @@ package org.wso2.carbon.tenant.mgt.services;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.annotation.bundle.Capability;
 import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -67,6 +68,13 @@ import static org.wso2.carbon.stratos.common.constants.TenantConstants.ErrorMess
 /**
  * Default implementation of {@link TenantMgtService} interface.
  */
+@Capability(
+        namespace = "osgi.service",
+        attribute = {
+                "objectClass=org.wso2.carbon.tenant.mgt.services.TenantMgtService",
+                "service.scope=singleton"
+        }
+)
 public class TenantMgtImpl implements TenantMgtService {
 
     private static final Log log = LogFactory.getLog(TenantMgtImpl.class);
