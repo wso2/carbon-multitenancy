@@ -38,7 +38,9 @@ public class TenantRedirectorServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         // This servlet should never be reached because the filter forwards the request
-        LOG.debug("TenantRedirectorServlet.doGet() - This should not be reached as filter handles the request");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("TenantRedirectorServlet.doGet() - Received request for path: " + request.getRequestURI());
+        }
     }
 
     @Override

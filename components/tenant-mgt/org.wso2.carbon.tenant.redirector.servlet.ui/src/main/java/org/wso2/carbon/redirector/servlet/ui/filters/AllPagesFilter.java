@@ -45,6 +45,7 @@ public class AllPagesFilter implements Filter {
             IOException, ServletException {
         if (!(servletRequest instanceof HttpServletRequest)) {
             // Not an HTTP request, skip filtering
+            log.debug("Non-HTTP request received, skipping filter processing");
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
@@ -176,6 +177,9 @@ public class AllPagesFilter implements Filter {
             }
 
             if (requestDispatcher != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Forwarding tenant request to path: " + path);
+                }
                 requestDispatcher.forward(request, servletResponse);
             } else {
                 log.error("RequestDispatcher is null for path: '" + path +

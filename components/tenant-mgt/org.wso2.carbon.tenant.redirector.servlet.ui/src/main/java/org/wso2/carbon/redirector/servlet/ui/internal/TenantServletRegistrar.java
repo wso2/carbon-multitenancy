@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.redirector.servlet.ui.internal;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -40,6 +42,8 @@ import java.util.Hashtable;
 
 @Component(immediate = true)
 public class TenantServletRegistrar {
+
+    private static final Log LOG = LogFactory.getLog(TenantServletRegistrar.class);
 
     private ServiceRegistration<Servlet> servletReg;
     private ServiceRegistration<Filter> filterReg;
@@ -83,7 +87,7 @@ public class TenantServletRegistrar {
                     });
             tracker.open();
         } catch (InvalidSyntaxException e) {
-            // handle
+            LOG.error("Invalid filter syntax for ServletContextHelper: " + e.getMessage());
         }
     }
 
