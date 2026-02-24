@@ -40,8 +40,6 @@ import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 
-import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.EC_KEY_ALG;
-import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.EC_SHA256;
 import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.ED_KEY_ALG;
 import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.ED_SHA512;
 import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.RSA_KEY_ALG;
@@ -52,7 +50,6 @@ import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.RSA_SHA38
 import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.RSA_SHA512;
 
 import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairUtil.addKeyEntry;
-import static org.wso2.carbon.utils.multitenancy.MultitenantConstants.TENANT_EC_KEY_SUFFIX;
 import static org.wso2.carbon.utils.multitenancy.MultitenantConstants.TENANT_ED_KEY_SUFFIX;
 
 /**
@@ -92,9 +89,6 @@ public class KeyStoreGenerator {
             // RSA based key pair entry
             X509Certificate pubCertRSA =  addKeyEntry(tenantDomain, password, keyStore, tenantDomain,
                     RSA_KEY_ALG, getSignatureAlgorithm());
-            // EC based key pair entry
-            addKeyEntry(tenantDomain, password, keyStore, tenantDomain + TENANT_EC_KEY_SUFFIX,
-                    EC_KEY_ALG, EC_SHA256);
             // EdDSA based key pair entry
             addKeyEntry(tenantDomain, password, keyStore, tenantDomain + TENANT_ED_KEY_SUFFIX,
                     ED_KEY_ALG, ED_SHA512);

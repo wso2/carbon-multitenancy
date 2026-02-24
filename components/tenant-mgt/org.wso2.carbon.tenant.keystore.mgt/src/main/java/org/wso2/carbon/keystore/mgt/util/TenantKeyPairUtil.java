@@ -42,13 +42,10 @@ import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.security.spec.ECGenParameterSpec;
 import java.util.Date;
 import java.util.Objects;
 
 import static org.wso2.carbon.core.util.CryptoUtil.getJCEProvider;
-import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.EC_CURVE;
-import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.EC_KEY_ALG;
 import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.ED_KEY_ALG;
 import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.RSA_KEY_ALG;
 
@@ -83,10 +80,7 @@ public class TenantKeyPairUtil {
             KeyPairGenerator kpg = null;
             KeyPair keyPair;
 
-            if (EC_KEY_ALG.equals(keyType)) {
-                kpg = KeyPairGenerator.getInstance(EC_KEY_ALG, getJCEProvider());
-                kpg.initialize(new ECGenParameterSpec(EC_CURVE));
-            } else if (RSA_KEY_ALG.equals(keyType)) {
+            if (RSA_KEY_ALG.equals(keyType)) {
                 kpg = KeyPairGenerator.getInstance(RSA_KEY_ALG);
                 kpg.initialize(2048);
             } else if (ED_KEY_ALG.equals(keyType)) {

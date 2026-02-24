@@ -22,11 +22,6 @@ package org.wso2.carbon.keystore.mgt.util;
  */
 public class TenantKeyPairConstants {
 
-    // Constants required for EC key pair generation for existing tenants for backward compatibility
-    public static final String EC_KEY_ALG = "EC";
-    public static final String EC_CURVE = "secp256r1";
-    public static final String EC_SHA256 = "SHA256withECDSA";
-
     // Constants required for EdDSA key pair generation
     public static final String ED_KEY_ALG = "Ed25519";
     public static final String ED_SHA512 = "Ed25519";
