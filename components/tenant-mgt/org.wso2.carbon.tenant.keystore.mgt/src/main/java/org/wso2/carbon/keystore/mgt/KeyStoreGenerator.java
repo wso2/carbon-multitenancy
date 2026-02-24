@@ -48,9 +48,9 @@ import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.RSA_SHA1;
 import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.RSA_SHA256;
 import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.RSA_SHA384;
 import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.RSA_SHA512;
+import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.TENANT_ED_KEY_SUFFIX;
 
 import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairUtil.addKeyEntry;
-import static org.wso2.carbon.utils.multitenancy.MultitenantConstants.TENANT_ED_KEY_SUFFIX;
 
 /**
  * This class is used to generate a key store for a tenant and store it in the governance registry.

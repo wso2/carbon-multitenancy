@@ -19,18 +19,13 @@ package org.wso2.carbon.keystore.mgt.util;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.keystore.mgt.KeyStoreMgtException;
-import sun.security.x509.AlgorithmId;
-
-import sun.security.x509.CertificateAlgorithmId;
-import sun.security.x509.CertificateSerialNumber;
-import sun.security.x509.CertificateValidity;
-import sun.security.x509.CertificateVersion;
-import sun.security.x509.CertificateX509Key;
-import sun.security.x509.X509CertImpl;
-import sun.security.x509.X500Name;
-import sun.security.x509.X509CertInfo;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -38,6 +33,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -88,9 +84,8 @@ public class TenantKeyPairUtil {
                 // Ed25519 doesn't need initialization parameters
             }
             keyPair = Objects.requireNonNull(kpg).generateKeyPair();
-            X509CertImpl cert = generateCertificate(tenantDomain, keyPair, sigAlgId);
+            X509Certificate cert = generateCertificate(tenantDomain, keyPair, sigAlgId);
 
-            cert.sign(keyPair.getPrivate(), sigAlgId, getJCEProvider());
             // Add private key to Keystore
             keyStore.setKeyEntry(alias, keyPair.getPrivate(), ksPassword.toCharArray(),
                     new Certificate[] { cert });
@@ -103,29 +98,27 @@ public class TenantKeyPairUtil {
         }
     }
 
-    private static X509CertImpl generateCertificate(String tenantDomain, KeyPair keyPair, String algorithmId)
-            throws IOException, CertificateException, NoSuchAlgorithmException {
+    private static X509Certificate generateCertificate(String tenantDomain, KeyPair keyPair, String algorithmId)
+            throws Exception {
 
         String commonName = "CN=" + tenantDomain + ", OU=None, O=None, L=None, C=None";
         X500Name dn = new X500Name(commonName);
 
-        X509CertInfo info = new X509CertInfo();
-
         Date notBefore = new Date(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 30);
-        Date notAfter  = new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 365 * 10));
-
-        CertificateValidity interval = new CertificateValidity(notBefore, notAfter);
+        Date notAfter = new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 365 * 10));
         BigInteger serialNumber = BigInteger.valueOf(Math.abs(new SecureRandom().nextInt()));
 
-        info.set(X509CertInfo.VALIDITY, interval);
-        info.set(X509CertInfo.SERIAL_NUMBER, new CertificateSerialNumber(serialNumber));
-        info.set(X509CertInfo.SUBJECT, dn);
-        info.set(X509CertInfo.ISSUER, dn);
-        info.set(X509CertInfo.KEY, new CertificateX509Key(keyPair.getPublic()));
-        info.set(X509CertInfo.VERSION, new CertificateVersion(CertificateVersion.V3));
-        AlgorithmId signatureAlgoId = AlgorithmId.get(algorithmId);
-        info.set(X509CertInfo.ALGORITHM_ID, new CertificateAlgorithmId(signatureAlgoId));
+        PublicKey publicKey = keyPair.getPublic();
+        SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfo.getInstance(publicKey.getEncoded());
 
-        return new X509CertImpl(info);
+        X509v3CertificateBuilder certBuilder = new X509v3CertificateBuilder(
+                dn, serialNumber, notBefore, notAfter, dn, publicKeyInfo);
+
+        JcaContentSignerBuilder signerBuilder = new JcaContentSignerBuilder(algorithmId);
+        signerBuilder.setProvider(getJCEProvider());
+        
+        return new JcaX509CertificateConverter()
+                .setProvider(getJCEProvider())
+                .getCertificate(certBuilder.build(signerBuilder.build(keyPair.getPrivate())));
     }
 }
