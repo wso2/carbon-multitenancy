@@ -81,10 +81,11 @@ public class TenantKeyPairUtil {
                 kpg.initialize(2048);
             } else if (ED_KEY_ALG.equals(keyType)) {
                 kpg = KeyPairGenerator.getInstance(ED_KEY_ALG, getJCEProvider());
-                // Ed25519 doesn't need initialization parameters
+            } else {
+                throw new IllegalArgumentException("Unsupported key type: " + keyType);
             }
             
-            keyPair = Objects.requireNonNull(kpg).generateKeyPair();
+            keyPair = kpg.generateKeyPair();
             X509Certificate cert = generateCertificate(tenantDomain, keyPair, sigAlgId);
 
             // Add private key to Keystore
