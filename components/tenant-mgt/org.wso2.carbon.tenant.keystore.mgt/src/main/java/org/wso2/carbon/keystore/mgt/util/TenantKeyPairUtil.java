@@ -106,7 +106,7 @@ public class TenantKeyPairUtil {
 
         Date notBefore = new Date(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 30);
         Date notAfter = new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 365 * 10));
-        BigInteger serialNumber = BigInteger.valueOf(Math.abs(new SecureRandom().nextInt()));
+        BigInteger serialNumber = new BigInteger(32, new SecureRandom());
 
         PublicKey publicKey = keyPair.getPublic();
         SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfo.getInstance(publicKey.getEncoded());
