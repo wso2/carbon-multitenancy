@@ -74,7 +74,17 @@ public class TenantKeyPairUtil {
         try {
             CryptoUtil.getDefaultCryptoUtil();
             KeyPairGenerator kpg = null;
-            KeyPair keyPair = kpg.generateKeyPair();
+            KeyPair keyPair;
+
+            if (RSA_KEY_ALG.equals(keyType)) {
+                kpg = KeyPairGenerator.getInstance(RSA_KEY_ALG);
+                kpg.initialize(2048);
+            } else if (ED_KEY_ALG.equals(keyType)) {
+                kpg = KeyPairGenerator.getInstance(ED_KEY_ALG, getJCEProvider());
+                // Ed25519 doesn't need initialization parameters
+            }
+            
+            keyPair = Objects.requireNonNull(kpg).generateKeyPair();
             X509Certificate cert = generateCertificate(tenantDomain, keyPair, sigAlgId);
 
             // Add private key to Keystore

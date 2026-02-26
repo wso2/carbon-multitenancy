@@ -62,7 +62,7 @@ public class KeyStoreGenerator {
     private String password;
 
     private static final String SIGNING_ALG = "Tenant.SigningAlgorithm";
-    private static final String TENANT_ED_KEY_SUFFIX = "_ed";
+    private static final String TENANT_EDDSA_KEY_SUFFIX = "_ed";
 
     private static final String[] signatureAlgorithms = new String[]{
             RSA_MD5, RSA_SHA1, RSA_SHA256, RSA_SHA384, RSA_SHA512
