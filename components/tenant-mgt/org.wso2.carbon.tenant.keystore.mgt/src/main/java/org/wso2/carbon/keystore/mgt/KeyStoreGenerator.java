@@ -89,7 +89,7 @@ public class KeyStoreGenerator {
             X509Certificate pubCertRSA =  addKeyEntry(tenantDomain, password, keyStore, tenantDomain,
                     RSA_KEY_ALG, getSignatureAlgorithm());
             // EdDSA based key pair entry
-            addKeyEntry(tenantDomain, password, keyStore, tenantDomain + TENANT_ED_KEY_SUFFIX,
+            addKeyEntry(tenantDomain, password, keyStore, tenantDomain + TENANT_EDDSA_KEY_SUFFIX,
                     ED_KEY_ALG, ED_KEY_ALG);
             persistKeyStore(keyStore, pubCertRSA);
         } catch (Exception e) {
