@@ -41,14 +41,12 @@ import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 
 import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.ED_KEY_ALG;
-import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.ED_SHA512;
 import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.RSA_KEY_ALG;
 import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.RSA_MD5;
 import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.RSA_SHA1;
 import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.RSA_SHA256;
 import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.RSA_SHA384;
 import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.RSA_SHA512;
-import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.TENANT_ED_KEY_SUFFIX;
 
 import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairUtil.addKeyEntry;
 
@@ -64,6 +62,7 @@ public class KeyStoreGenerator {
     private String password;
 
     private static final String SIGNING_ALG = "Tenant.SigningAlgorithm";
+    private static final String TENANT_ED_KEY_SUFFIX = "_ed";
 
     private static final String[] signatureAlgorithms = new String[]{
             RSA_MD5, RSA_SHA1, RSA_SHA256, RSA_SHA384, RSA_SHA512
@@ -91,7 +90,7 @@ public class KeyStoreGenerator {
                     RSA_KEY_ALG, getSignatureAlgorithm());
             // EdDSA based key pair entry
             addKeyEntry(tenantDomain, password, keyStore, tenantDomain + TENANT_ED_KEY_SUFFIX,
-                    ED_KEY_ALG, ED_SHA512);
+                    ED_KEY_ALG, ED_KEY_ALG);
             persistKeyStore(keyStore, pubCertRSA);
         } catch (Exception e) {
             String msg = "Error while instantiating a keystore";
