@@ -24,7 +24,6 @@ public class TenantKeyPairConstants {
 
     // Constants required for EdDSA key pair generation
     public static final String ED_KEY_ALG = "Ed25519";
-    public static final String ED_SHA512 = "Ed25519";
 
     // Tenant key suffix for EdDSA keys
     public static final String TENANT_ED_KEY_SUFFIX = "_ed";
