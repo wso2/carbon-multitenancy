@@ -28,6 +28,7 @@ import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.core.util.CryptoUtil;
+import org.wso2.carbon.core.util.KeyStoreUtil;
 import org.wso2.carbon.keystore.mgt.util.RealmServiceHolder;
 import org.wso2.carbon.security.keystore.KeyStoreAdmin;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -62,7 +63,6 @@ public class KeyStoreGenerator {
     private String password;
 
     private static final String SIGNING_ALG = "Tenant.SigningAlgorithm";
-    private static final String TENANT_EDDSA_KEY_SUFFIX = "_ed";
 
     private static final String[] signatureAlgorithms = new String[]{
             RSA_MD5, RSA_SHA1, RSA_SHA256, RSA_SHA384, RSA_SHA512
@@ -89,7 +89,7 @@ public class KeyStoreGenerator {
             X509Certificate pubCertRSA =  addKeyEntry(tenantDomain, password, keyStore, tenantDomain,
                     RSA_KEY_ALG, getSignatureAlgorithm());
             // EdDSA based key pair entry
-            addKeyEntry(tenantDomain, password, keyStore, tenantDomain + TENANT_EDDSA_KEY_SUFFIX,
+            addKeyEntry(tenantDomain, password, keyStore, KeyStoreUtil.getTenantEdKeyAlias(tenantDomain),
                     ED_KEY_ALG, ED_KEY_ALG);
             persistKeyStore(keyStore, pubCertRSA);
         } catch (Exception e) {
