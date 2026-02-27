@@ -84,7 +84,7 @@ public class TenantKeyPairUtil {
                 throw new IllegalArgumentException("Unsupported key type: " + keyType);
             }
             
-            keyPair = kpg.generateKeyPair();
+            KeyPair keyPair = kpg.generateKeyPair();
             X509Certificate cert = generateCertificate(tenantDomain, keyPair, sigAlgId);
 
             // Add private key to Keystore
