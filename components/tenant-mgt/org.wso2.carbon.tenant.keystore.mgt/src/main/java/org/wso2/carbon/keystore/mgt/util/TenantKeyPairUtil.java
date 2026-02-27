@@ -73,7 +73,6 @@ public class TenantKeyPairUtil {
         try {
             CryptoUtil.getDefaultCryptoUtil();
             KeyPairGenerator kpg = null;
-            KeyPair keyPair;
 
             if (RSA_KEY_ALG.equals(keyType)) {
                 kpg = KeyPairGenerator.getInstance(RSA_KEY_ALG);
