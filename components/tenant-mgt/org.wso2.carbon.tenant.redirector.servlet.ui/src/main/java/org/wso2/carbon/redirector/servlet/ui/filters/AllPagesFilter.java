@@ -89,7 +89,9 @@ public class AllPagesFilter implements Filter {
             boolean tenantExists = true;
             boolean tenantActive = true;
 
-            if (tenantExistMap.get(tenantDomain) == null) {
+            if (CarbonUtils.disableAdminServices()) {
+                tenantExists = false;
+            } else if (tenantExistMap.get(tenantDomain) == null) {
                 // we have to call the service :(
                 RedirectorServletServiceClient client;
                 try {
