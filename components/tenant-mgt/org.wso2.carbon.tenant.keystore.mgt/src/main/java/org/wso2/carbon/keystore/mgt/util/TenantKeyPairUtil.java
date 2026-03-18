@@ -71,6 +71,11 @@ public class TenantKeyPairUtil {
                                               String alias, String keyType, String sigAlgId)
             throws KeyStoreMgtException {
 
+        if(LOG.isDebugEnabled()){
+            LOG.info("Adding key entry for tenant: " + tenantDomain + " with alias: " + alias
+                    + " and key type: " + keyType);
+        }
+
         try {
             CryptoUtil.getDefaultCryptoUtil();
             KeyPairGenerator kpg;
@@ -86,7 +91,6 @@ public class TenantKeyPairUtil {
             }
             KeyPair keyPair = Objects.requireNonNull(kpg).generateKeyPair();
             X509Certificate cert = generateCertificate(tenantDomain, keyPair, sigAlgId);
-            // Add private key to Keystore
             keyStore.setKeyEntry(alias, keyPair.getPrivate(), ksPassword.toCharArray(),
                     new Certificate[]{cert});
             return cert;
