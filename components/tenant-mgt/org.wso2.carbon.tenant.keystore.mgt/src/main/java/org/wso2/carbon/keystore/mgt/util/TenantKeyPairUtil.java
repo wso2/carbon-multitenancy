@@ -72,7 +72,7 @@ public class TenantKeyPairUtil {
             throws KeyStoreMgtException {
 
         if(LOG.isDebugEnabled()){
-            LOG.info("Adding key entry for tenant: " + tenantDomain + " with alias: " + alias
+            LOG.debug("Adding key entry for tenant: " + tenantDomain + " with alias: " + alias
                     + " and key type: " + keyType);
         }
 
