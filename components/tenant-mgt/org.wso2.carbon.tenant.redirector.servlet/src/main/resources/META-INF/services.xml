@@ -23,6 +23,7 @@
         <parameter name="ServiceClass" locked="false">
             org.wso2.carbon.redirector.servlet.services.RedirectorServletService
         </parameter>
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/login</parameter>
     </service>
     <parameter name="hiddenService" locked="true">true</parameter>
 </serviceGroup>
