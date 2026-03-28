@@ -18,34 +18,34 @@
 package org.wso2.carbon.keystore.mgt;
 
 import org.apache.axiom.om.util.UUIDGenerator;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.cert.X509v3CertificateBuilder;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
-import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.keystore.mgt.util.RealmServiceHolder;
 import org.wso2.carbon.security.keystore.KeyStoreAdmin;
 import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.utils.ServerConstants;
 import org.wso2.carbon.utils.security.KeystoreUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.KeyStore;
-import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
-import java.util.Date;
+
+import static org.wso2.carbon.core.util.KeyStoreUtil.getTenantKeyAlias;
+import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.EC_KEY_ALG;
+import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.EC_SHA256;
+import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.RSA_KEY_ALG;
+import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.RSA_MD5;
+import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.RSA_SHA1;
+import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.RSA_SHA256;
+import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.RSA_SHA384;
+import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairConstants.RSA_SHA512;
+
+import static org.wso2.carbon.keystore.mgt.util.TenantKeyPairUtil.addKeyEntry;
 
 /**
- * This class is used to generate a key store for a tenant and store it in the governance registry.
+ * This class is used to generate a key store for a tenant.
  * This class also provides APIs for idp-mgt component to generate a trust store with a given name.
  */
 public class KeyStoreGenerator {
@@ -56,24 +56,15 @@ public class KeyStoreGenerator {
     private String password;
     private static final String SIGNING_ALG = "Tenant.SigningAlgorithm";
 
-    // Supported signature algorithms for public certificate generation.
-    private static final String RSA_MD5 = "MD5withRSA";
-    private static final String RSA_SHA1 = "SHA1withRSA";
-    private static final String RSA_SHA256 = "SHA256withRSA";
-    private static final String RSA_SHA384 = "SHA384withRSA";
-    private static final String RSA_SHA512 = "SHA512withRSA";
     private static final String[] signatureAlgorithms = new String[]{
             RSA_MD5, RSA_SHA1, RSA_SHA256, RSA_SHA384, RSA_SHA512
     };
-
-
 
     public KeyStoreGenerator(int  tenantId) throws KeyStoreMgtException {
 
         this.tenantId = tenantId;
         this.tenantDomain = getTenantDomainName();
     }
-
 
     /**
      * This method first generates the keystore, then persist it in the gov.registry of that tenant
@@ -85,8 +76,13 @@ public class KeyStoreGenerator {
             password = generatePassword();
             KeyStore keyStore = KeystoreUtils.getKeystoreInstance(KeystoreUtils.StoreFileType.defaultFileType());
             keyStore.load(null, password.toCharArray());
-            X509Certificate pubCert = generateKeyPair(keyStore);
-            persistKeyStore(keyStore, pubCert);
+            // RSA based key pair entry
+            X509Certificate pubCertRSA =  addKeyEntry(tenantDomain, password, keyStore, tenantDomain,
+                    RSA_KEY_ALG, getSignatureAlgorithm());
+            // EC based key pair entry
+            addKeyEntry(tenantDomain, password, keyStore, getTenantKeyAlias(tenantDomain, EC_KEY_ALG),
+                    EC_KEY_ALG, EC_SHA256);
+            persistKeyStore(keyStore, pubCertRSA);
         } catch (Exception e) {
             String msg = "Error while instantiating a keystore";
             log.error(msg, e);
@@ -134,62 +130,6 @@ public class KeyStoreGenerator {
             }
         }
         return false;
-    }
-
-    /**
-     * This method generates the keypair and stores it in the keystore
-     *
-     * @param keyStore A keystore instance
-     * @return Generated public key for the tenant
-     * @throws KeyStoreMgtException Error when generating key pair
-     */
-    private X509Certificate generateKeyPair(KeyStore keyStore) throws KeyStoreMgtException {
-        try {
-            CryptoUtil.getDefaultCryptoUtil();
-            //generate key pair
-            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-            keyPairGenerator.initialize(2048);
-            KeyPair keyPair = keyPairGenerator.generateKeyPair();
-
-            // Common Name and alias for the generated certificate
-            String commonName = "CN=" + tenantDomain + ", OU=None, O=None, L=None, C=None";
-
-            //generate certificates
-            X500Name distinguishedName = new X500Name(commonName);
-
-            Date notBefore = new Date(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 30);
-            Date notAfter = new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 365 * 10));
-
-            SubjectPublicKeyInfo subPubKeyInfo = SubjectPublicKeyInfo.getInstance(keyPair.getPublic().getEncoded());
-            BigInteger serialNumber = new BigInteger(32, new SecureRandom());
-
-            X509v3CertificateBuilder certificateBuilder = new X509v3CertificateBuilder(
-                    distinguishedName,
-                    serialNumber,
-                    notBefore,
-                    notAfter,
-                    distinguishedName,
-                    subPubKeyInfo
-            );
-
-            String algorithmName = getSignatureAlgorithm();
-            JcaContentSignerBuilder signerBuilder =
-                    new JcaContentSignerBuilder(algorithmName).setProvider(getJCEProvider());
-            PrivateKey privateKey = keyPair.getPrivate();
-            X509Certificate x509Cert = new JcaX509CertificateConverter().setProvider(getJCEProvider())
-                    .getCertificate(certificateBuilder.build(signerBuilder.build(privateKey)));
-
-            //add private key to KS
-            keyStore.setKeyEntry(tenantDomain, keyPair.getPrivate(), password.toCharArray(),
-                    new java.security.cert.Certificate[]{x509Cert});
-            return x509Cert;
-        } catch (Exception ex) {
-            String msg = "Error while generating the certificate for tenant :" +
-                         tenantDomain + ".";
-            log.error(msg, ex);
-            throw new KeyStoreMgtException(msg, ex);
-        }
-
     }
 
     /**
@@ -289,16 +229,7 @@ public class KeyStoreGenerator {
         }
     }
 
-    private static String getJCEProvider() {
-
-        String provider = ServerConfiguration.getInstance().getFirstProperty(ServerConstants.JCE_PROVIDER);
-        if (!StringUtils.isBlank(provider)) {
-            return provider;
-        }
-        return ServerConstants.JCE_PROVIDER_BC;
-    }
-
-    private static String getSignatureAlgorithm() {
+    private String getSignatureAlgorithm() {
 
         String algorithm = ServerConfiguration.getInstance().getFirstProperty(SIGNING_ALG);
         // Find in a list of supported signature algorithms.
