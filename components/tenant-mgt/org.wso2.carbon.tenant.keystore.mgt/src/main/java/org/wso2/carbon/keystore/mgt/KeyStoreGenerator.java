@@ -83,8 +83,7 @@ public class KeyStoreGenerator {
             X509Certificate pubCertRSA = addKeyEntry(tenantDomain, password, keyStore, tenantDomain,
                     RSA_KEY_ALG, getSignatureAlgorithm());
             // EC P-256 based key pair entry
-            addKeyEntry(tenantDomain, password, keyStore, KeyStoreUtil.getTenantEdKeyAlias(tenantDomain),
-                    EC_KEY_ALG, EC_SHA256);
+            addKeyEntry(tenantDomain, password, keyStore, KeyStoreUtil.getTenantECKeyAlias(tenantDomain),                    EC_KEY_ALG, EC_SHA256);
             persistKeyStore(keyStore, pubCertRSA);
         } catch (Exception e) {
             String msg = "Error while instantiating a keystore";
