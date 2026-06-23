@@ -27,6 +27,7 @@
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="java.util.Calendar" %>
 <%@ page import="java.util.Date" %>
+<%@ page import="org.owasp.encoder.Encode" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
@@ -174,9 +175,8 @@
                             if (tenantInfo == null) {
                                 continue;
                             }
-                            String tenantDomain = TenantMgtUtil.removeHtmlElements(
-                                    tenantInfo.getTenantDomain());
-                            String email = TenantMgtUtil.removeHtmlElements(tenantInfo.getEmail());
+                            String tenantDomain = Encode.forHtml(tenantInfo.getTenantDomain());
+                            String email = Encode.forHtml(tenantInfo.getEmail());
                             boolean isActive = tenantInfo.getActive();
                             Calendar createdDateCal = tenantInfo.getCreatedDate();
                             Date createdDate = new Date(createdDateCal.getTimeInMillis());
@@ -207,7 +207,7 @@
                         </form>
                     </td>
                     <td style="padding-left:5px;padding-top:3px;text-align:left;"><a
-                            href="add_tenant.jsp?domain=<%=tenantInfo.getTenantDomain()%>">Edit</a>
+                            href="add_tenant.jsp?domain=<%=Encode.forUriComponent(tenantInfo.getTenantDomain())%>">Edit</a>
                     </td>
                 </tr>
                 <% }
