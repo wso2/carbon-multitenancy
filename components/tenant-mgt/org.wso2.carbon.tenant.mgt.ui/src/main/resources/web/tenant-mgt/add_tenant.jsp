@@ -245,14 +245,14 @@ String domainName = request.getParameter("domain");
                                 class="required">*</span></td>
                         <td colspan="2"><input type="text" name="admin-firstname"
                                                id="admin-firstname" style="width:400px"
-                                               value="<%=firstname%>"/></td>
+                                               value="<%=Encode.forHtml(firstname)%>"/></td>
                     </tr>
                     <tr>
                         <td><fmt:message key="admin.lastname"/><span
                                 class="required">*</span></td>
                         <td colspan="2"><input type="text" name="admin-lastname"
                                                id="admin-lastname" style="width:400px"
-                                               value="<%=lastname%>"/></td>
+                                               value="<%=Encode.forHtml(lastname)%>"/></td>
                     </tr>
 
 
@@ -263,7 +263,7 @@ String domainName = request.getParameter("domain");
                         <%}%>
                         <td colspan="2"><input <%if (isUpdating) {%>
                                 readonly="true" <%}%> type="text" name="admin"
-                                id="admin" style="width:400px" value="<%=admin%>"
+                                id="admin" style="width:400px" value="<%=Encode.forHtml(admin)%>"
                                 onchange="isDomainNameAvailable();"/><span
                                 id="adminValue"></span></td>
                     </tr>
@@ -299,7 +299,7 @@ String domainName = request.getParameter("domain");
                                 class="required">*</span></td>
                         <td colspan="2"><input type="text" name="admin-email"
                                                id="admin-email" style="width:400px"
-                                               value="<%=email%>"/></td>
+                                               value="<%=Encode.forHtml(email)%>"/></td>
                     </tr>
                     <% } %>
                     </tbody>
