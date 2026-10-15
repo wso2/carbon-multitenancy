@@ -26,6 +26,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.core.util.KeyStoreManager;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.keystore.mgt.util.RealmServiceHolder;
 import org.wso2.carbon.keystore.mgt.util.TenantKeyPairUtil;
@@ -50,14 +51,17 @@ import java.util.concurrent.TimeUnit;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
@@ -265,6 +269,35 @@ public class KeyStoreGeneratorTest {
 
         assertEquals(keyStore.getCertificate(TENANT_EC_KEY_ALIAS), certificate);
         assertECKeyEntry(keyStore, password, now);
+    }
+
+    @Test
+    public void testAddECKeyEntryIfAbsent() throws Exception {
+
+        String password = "password";
+        String keyStoreName = "wso2-com.p12";
+        KeyStore keyStore = KeystoreUtils.getKeystoreInstance("PKCS12");
+        keyStore.load(null, password.toCharArray());
+        KeyStoreManager keyStoreManager = mock(KeyStoreManager.class);
+        when(keyStoreManager.getKeyStore(keyStoreName)).thenReturn(keyStore);
+        when(keyStoreManager.getPrivateKeyPassword(keyStoreName)).thenReturn(password.toCharArray());
+        long now = System.currentTimeMillis();
+
+        try (MockedStatic<KeyStoreManager> keyStoreManagerStatic = mockStatic(KeyStoreManager.class);
+             MockedStatic<KeystoreUtils> keystoreUtils = mockStatic(KeystoreUtils.class, CALLS_REAL_METHODS)) {
+            keyStoreManagerStatic.when(() -> KeyStoreManager.getInstance(TENANT_ID)).thenReturn(keyStoreManager);
+            keystoreUtils.when(() -> KeystoreUtils.getKeyStoreFileLocation(TENANT_DOMAIN)).thenReturn(keyStoreName);
+
+            assertTrue(TenantKeyPairUtil.addECKeyEntryIfAbsent(TENANT_ID, TENANT_DOMAIN),
+                    "EC key entry should be added when it is missing.");
+            assertECKeyEntry(keyStore, password, now);
+            verify(keyStoreManager, times(1)).updateKeyStore(keyStoreName, keyStore);
+
+            // The EC key entry already exists, so the keystore must not be changed again.
+            assertFalse(TenantKeyPairUtil.addECKeyEntryIfAbsent(TENANT_ID, TENANT_DOMAIN),
+                    "EC key entry should not be added when it already exists.");
+            verify(keyStoreManager, times(1)).updateKeyStore(keyStoreName, keyStore);
+        }
     }
 
     private void assertECKeyEntry(KeyStore keyStore, String password, long generatedAt) throws Exception {

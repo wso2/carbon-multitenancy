@@ -28,9 +28,11 @@ import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.core.util.CryptoUtil;
+import org.wso2.carbon.core.util.KeyStoreManager;
 import org.wso2.carbon.core.util.KeyStoreUtil;
 import org.wso2.carbon.keystore.mgt.KeyStoreMgtException;
 import org.wso2.carbon.utils.ServerConstants;
+import org.wso2.carbon.utils.security.KeystoreUtils;
 
 import java.math.BigInteger;
 import java.security.KeyPair;
@@ -86,6 +88,40 @@ public class TenantKeyPairUtil {
             return certificate;
         } catch (Exception e) {
             throw new KeyStoreMgtException("Error while generating the EC key pair for tenant: " + tenantDomain, e);
+        }
+    }
+
+    /**
+     * Add the EC key entry to the keystore of an existing tenant if it is not already present, and persist the
+     * keystore. This is used for tenants created before the EC key pair was generated at tenant creation.
+     *
+     * @param tenantId     Tenant ID.
+     * @param tenantDomain Tenant domain.
+     * @return True if the EC key entry was added, false if it already existed.
+     * @throws KeyStoreMgtException Error when loading, updating or persisting the tenant keystore.
+     */
+    public static synchronized boolean addECKeyEntryIfAbsent(int tenantId, String tenantDomain)
+            throws KeyStoreMgtException {
+
+        try {
+            String keyStoreName = KeystoreUtils.getKeyStoreFileLocation(tenantDomain);
+            KeyStoreManager keyStoreManager = KeyStoreManager.getInstance(tenantId);
+            KeyStore keyStore = keyStoreManager.getKeyStore(keyStoreName);
+            String alias = KeyStoreUtil.getTenantECKeyAlias(tenantDomain);
+            if (keyStore.isKeyEntry(alias)) {
+                return false;
+            }
+            addECKeyEntry(keyStore, tenantDomain, String.valueOf(keyStoreManager.getPrivateKeyPassword(keyStoreName)));
+            keyStoreManager.updateKeyStore(keyStoreName, keyStore);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Added EC key entry with alias: " + alias + " to the keystore of tenant: " + tenantDomain);
+            }
+            return true;
+        } catch (KeyStoreMgtException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new KeyStoreMgtException("Error while adding the EC key pair to the keystore of tenant: " +
+                    tenantDomain, e);
         }
     }
 
