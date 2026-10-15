@@ -43,7 +43,7 @@ public class KeystoreTenantMgtListener implements TenantMgtListener {
             	ksGenerator.generateKeyStore();
             }            
         } catch (KeyStoreMgtException e) {
-            String message = "Error when generating the keystore";
+            String message = "Error when generating the keystore: " + e.getMessage();
             log.error(message, e);
             throw new StratosException(message, e);
         }

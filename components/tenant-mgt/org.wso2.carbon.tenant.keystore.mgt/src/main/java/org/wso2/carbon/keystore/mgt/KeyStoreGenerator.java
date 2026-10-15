@@ -26,6 +26,7 @@ import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.wso2.carbon.CarbonException;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.keystore.mgt.util.RealmServiceHolder;
@@ -76,16 +77,29 @@ public class KeyStoreGenerator {
 
 
     /**
-     * This method first generates the keystore, then persist it in the gov.registry of that tenant
+     * This method first generates the keystore, then persist it in the gov.registry of that tenant.
+     * The key algorithm and key size come from {@code [keystore.tenant] key_algorithm} and
+     * {@code [keystore.tenant] key_size}. They apply only to keystores generated after they are set.
      *
-     * @throws KeyStoreMgtException Error when generating or storing the keystore
+     * @throws KeyStoreMgtException Error when generating or storing the keystore, or when the configured key
+     *                              algorithm or key size is invalid
      */
     public void generateKeyStore() throws KeyStoreMgtException {
+
+        // Resolve the key configuration first, so that an invalid value fails before any keystore is created.
+        String keyAlgorithm;
+        int keySize;
+        try {
+            keyAlgorithm = KeystoreUtils.getTenantKeyAlgorithm();
+            keySize = KeystoreUtils.getTenantKeySize();
+        } catch (CarbonException e) {
+            throw new KeyStoreMgtException(e.getMessage(), e);
+        }
         try {
             password = generatePassword();
             KeyStore keyStore = KeystoreUtils.getKeystoreInstance(KeystoreUtils.StoreFileType.defaultFileType());
             keyStore.load(null, password.toCharArray());
-            X509Certificate pubCert = generateKeyPair(keyStore);
+            X509Certificate pubCert = generateKeyPair(keyStore, keyAlgorithm, keySize);
             persistKeyStore(keyStore, pubCert);
         } catch (Exception e) {
             String msg = "Error while instantiating a keystore";
@@ -140,15 +154,18 @@ public class KeyStoreGenerator {
      * This method generates the keypair and stores it in the keystore
      *
      * @param keyStore A keystore instance
+     * @param keyAlgorithm Key algorithm of the key pair
+     * @param keySize Key size of the key pair in bits
      * @return Generated public key for the tenant
      * @throws KeyStoreMgtException Error when generating key pair
      */
-    private X509Certificate generateKeyPair(KeyStore keyStore) throws KeyStoreMgtException {
+    private X509Certificate generateKeyPair(KeyStore keyStore, String keyAlgorithm, int keySize)
+            throws KeyStoreMgtException {
         try {
             CryptoUtil.getDefaultCryptoUtil();
             //generate key pair
-            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-            keyPairGenerator.initialize(2048);
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(keyAlgorithm);
+            keyPairGenerator.initialize(keySize);
             KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
             // Common Name and alias for the generated certificate
