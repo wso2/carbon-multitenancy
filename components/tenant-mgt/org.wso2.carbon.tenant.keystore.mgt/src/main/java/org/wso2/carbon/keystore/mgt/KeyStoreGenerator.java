@@ -21,7 +21,6 @@ import org.apache.axiom.om.util.UUIDGenerator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonException;
-import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.keystore.mgt.util.RealmServiceHolder;
 import org.wso2.carbon.keystore.mgt.util.TenantKeyPairUtil;
@@ -47,18 +46,6 @@ public class KeyStoreGenerator {
     private int tenantId;
     private String tenantDomain;
     private String password;
-    private static final String SIGNING_ALG = "Tenant.SigningAlgorithm";
-
-    // Supported signature algorithms for public certificate generation.
-    private static final String RSA_MD5 = "MD5withRSA";
-    private static final String RSA_SHA1 = "SHA1withRSA";
-    private static final String RSA_SHA256 = "SHA256withRSA";
-    private static final String RSA_SHA384 = "SHA384withRSA";
-    private static final String RSA_SHA512 = "SHA512withRSA";
-    private static final String[] signatureAlgorithms = new String[]{
-            RSA_MD5, RSA_SHA1, RSA_SHA256, RSA_SHA384, RSA_SHA512
-    };
-
 
 
     public KeyStoreGenerator(int  tenantId) throws KeyStoreMgtException {
@@ -163,7 +150,7 @@ public class KeyStoreGenerator {
             KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
             X509Certificate x509Cert = TenantKeyPairUtil.generateSelfSignedCertificate(tenantDomain, keyPair,
-                    getSignatureAlgorithm());
+                    TenantKeyPairUtil.getSignatureAlgorithm());
 
             //add private key to KS
             keyStore.setKeyEntry(tenantDomain, keyPair.getPrivate(), password.toCharArray(),
@@ -273,17 +260,5 @@ public class KeyStoreGenerator {
             log.error(msg, e);
             throw new KeyStoreMgtException(msg, e);
         }
-    }
-
-    private static String getSignatureAlgorithm() {
-
-        String algorithm = ServerConfiguration.getInstance().getFirstProperty(SIGNING_ALG);
-        // Find in a list of supported signature algorithms.
-        for (String supportedAlgorithm : signatureAlgorithms) {
-            if (supportedAlgorithm.equalsIgnoreCase(algorithm)) {
-                return supportedAlgorithm;
-            }
-        }
-        return RSA_MD5;
     }
 }

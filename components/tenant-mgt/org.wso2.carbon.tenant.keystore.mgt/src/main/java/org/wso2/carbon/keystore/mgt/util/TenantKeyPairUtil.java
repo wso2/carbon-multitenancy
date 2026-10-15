@@ -53,6 +53,18 @@ public class TenantKeyPairUtil {
     public static final String EC_CURVE = "secp256r1";
     public static final String EC_SIGNATURE_ALGORITHM = "SHA256withECDSA";
 
+    private static final String SIGNING_ALG = "Tenant.SigningAlgorithm";
+
+    // Supported signature algorithms for the RSA public certificate generation.
+    private static final String RSA_MD5 = "MD5withRSA";
+    private static final String RSA_SHA1 = "SHA1withRSA";
+    private static final String RSA_SHA256 = "SHA256withRSA";
+    private static final String RSA_SHA384 = "SHA384withRSA";
+    private static final String RSA_SHA512 = "SHA512withRSA";
+    private static final String[] SIGNATURE_ALGORITHMS = new String[]{
+            RSA_MD5, RSA_SHA1, RSA_SHA256, RSA_SHA384, RSA_SHA512
+    };
+
     private TenantKeyPairUtil() {
 
     }
@@ -113,6 +125,24 @@ public class TenantKeyPairUtil {
                 new JcaContentSignerBuilder(signatureAlgorithm).setProvider(getJCEProvider());
         return new JcaX509CertificateConverter().setProvider(getJCEProvider())
                 .getCertificate(certificateBuilder.build(signerBuilder.build(keyPair.getPrivate())));
+    }
+
+    /**
+     * Get the signature algorithm for the tenant RSA certificate from the {@code Tenant.SigningAlgorithm}
+     * configuration. Falls back to {@code MD5withRSA} when the configured value is not supported.
+     *
+     * @return Signature algorithm for the tenant RSA certificate.
+     */
+    public static String getSignatureAlgorithm() {
+
+        String algorithm = ServerConfiguration.getInstance().getFirstProperty(SIGNING_ALG);
+        // Find in a list of supported signature algorithms.
+        for (String supportedAlgorithm : SIGNATURE_ALGORITHMS) {
+            if (supportedAlgorithm.equalsIgnoreCase(algorithm)) {
+                return supportedAlgorithm;
+            }
+        }
+        return RSA_MD5;
     }
 
     private static String getJCEProvider() {
