@@ -18,21 +18,15 @@
 package org.wso2.carbon.keystore.mgt;
 
 import org.apache.axiom.om.util.UUIDGenerator;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.cert.X509v3CertificateBuilder;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
-import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.wso2.carbon.CarbonException;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.keystore.mgt.util.RealmServiceHolder;
+import org.wso2.carbon.keystore.mgt.util.TenantKeyPairUtil;
 import org.wso2.carbon.security.keystore.KeyStoreAdmin;
 import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.utils.ServerConstants;
 import org.wso2.carbon.utils.security.KeystoreUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -40,10 +34,8 @@ import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
-import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
-import java.util.Date;
 
 /**
  * This class is used to generate a key store for a tenant and store it in the governance registry.
@@ -100,6 +92,8 @@ public class KeyStoreGenerator {
             KeyStore keyStore = KeystoreUtils.getKeystoreInstance(KeystoreUtils.StoreFileType.defaultFileType());
             keyStore.load(null, password.toCharArray());
             X509Certificate pubCert = generateKeyPair(keyStore, keyAlgorithm, keySize);
+            // EC key pair used for EC based JWT signing and ECDH-ES based encryption.
+            TenantKeyPairUtil.addECKeyEntry(keyStore, tenantDomain, password);
             persistKeyStore(keyStore, pubCert);
         } catch (Exception e) {
             String msg = "Error while instantiating a keystore";
@@ -168,33 +162,8 @@ public class KeyStoreGenerator {
             keyPairGenerator.initialize(keySize);
             KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
-            // Common Name and alias for the generated certificate
-            String commonName = "CN=" + tenantDomain + ", OU=None, O=None, L=None";
-
-            //generate certificates
-            X500Name distinguishedName = new X500Name(commonName);
-
-            Date notBefore = new Date(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 30);
-            Date notAfter = new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 365 * 10));
-
-            SubjectPublicKeyInfo subPubKeyInfo = SubjectPublicKeyInfo.getInstance(keyPair.getPublic().getEncoded());
-            BigInteger serialNumber = new BigInteger(32, new SecureRandom());
-
-            X509v3CertificateBuilder certificateBuilder = new X509v3CertificateBuilder(
-                    distinguishedName,
-                    serialNumber,
-                    notBefore,
-                    notAfter,
-                    distinguishedName,
-                    subPubKeyInfo
-            );
-
-            String algorithmName = getSignatureAlgorithm();
-            JcaContentSignerBuilder signerBuilder =
-                    new JcaContentSignerBuilder(algorithmName).setProvider(getJCEProvider());
-            PrivateKey privateKey = keyPair.getPrivate();
-            X509Certificate x509Cert = new JcaX509CertificateConverter().setProvider(getJCEProvider())
-                    .getCertificate(certificateBuilder.build(signerBuilder.build(privateKey)));
+            X509Certificate x509Cert = TenantKeyPairUtil.generateSelfSignedCertificate(tenantDomain, keyPair,
+                    getSignatureAlgorithm());
 
             //add private key to KS
             keyStore.setKeyEntry(tenantDomain, keyPair.getPrivate(), password.toCharArray(),
@@ -304,15 +273,6 @@ public class KeyStoreGenerator {
             log.error(msg, e);
             throw new KeyStoreMgtException(msg, e);
         }
-    }
-
-    private static String getJCEProvider() {
-
-        String provider = ServerConfiguration.getInstance().getFirstProperty(ServerConstants.JCE_PROVIDER);
-        if (!StringUtils.isBlank(provider)) {
-            return provider;
-        }
-        return ServerConstants.JCE_PROVIDER_BC;
     }
 
     private static String getSignatureAlgorithm() {
