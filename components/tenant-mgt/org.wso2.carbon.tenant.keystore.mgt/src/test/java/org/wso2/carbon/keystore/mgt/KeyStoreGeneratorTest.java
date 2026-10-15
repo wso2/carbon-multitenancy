@@ -26,8 +26,10 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.core.util.KeyStoreManager;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.keystore.mgt.util.RealmServiceHolder;
+import org.wso2.carbon.keystore.mgt.util.TenantKeyPairUtil;
 import org.wso2.carbon.security.keystore.KeyStoreAdmin;
 import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
 import org.wso2.carbon.stratos.common.exception.StratosException;
@@ -40,6 +42,8 @@ import java.io.ByteArrayInputStream;
 import java.security.KeyStore;
 import java.security.Security;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.List;
@@ -47,14 +51,17 @@ import java.util.concurrent.TimeUnit;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
@@ -66,6 +73,7 @@ public class KeyStoreGeneratorTest {
 
     private static final int TENANT_ID = 1;
     private static final String TENANT_DOMAIN = "wso2.com";
+    private static final String TENANT_EC_KEY_ALIAS = "wso2.com_ec";
     private static final String KEY_ALGORITHM_CONFIG = "Security.TenantKeyStore.KeyAlgorithm";
     private static final String KEY_SIZE_CONFIG = "Security.TenantKeyStore.KeySize";
     private static final String KEYSTORE_TYPE_CONFIG = "Security.TenantKeyStore.Type";
@@ -234,6 +242,74 @@ public class KeyStoreGeneratorTest {
         assertTrue(expectedAlgorithm.equalsIgnoreCase(certificate.getSigAlgName()),
                 "Expected " + expectedAlgorithm + " but was " + certificate.getSigAlgName());
         certificate.verify(certificate.getPublicKey());
+    }
+
+    @Test
+    public void testECKeyEntryGenerated() throws Exception {
+
+        long now = System.currentTimeMillis();
+        new KeyStoreGenerator(TENANT_ID).generateKeyStore();
+
+        KeyStore keyStore = loadPersistedKeyStore();
+        assertTrue(keyStore.isKeyEntry(TENANT_DOMAIN), "RSA key entry should be generated.");
+        assertEquals(keyStore.getCertificate(TENANT_DOMAIN).getPublicKey().getAlgorithm(), "RSA");
+        assertTrue(keyStore.isKeyEntry(TENANT_EC_KEY_ALIAS), "EC key entry should be generated.");
+        assertECKeyEntry(keyStore, persistedKeyStore.password, now);
+    }
+
+    @Test
+    public void testAddECKeyEntryToExistingKeyStore() throws Exception {
+
+        String password = "password";
+        KeyStore keyStore = KeystoreUtils.getKeystoreInstance("PKCS12");
+        keyStore.load(null, password.toCharArray());
+        long now = System.currentTimeMillis();
+
+        X509Certificate certificate = TenantKeyPairUtil.addECKeyEntry(keyStore, TENANT_DOMAIN, password);
+
+        assertEquals(keyStore.getCertificate(TENANT_EC_KEY_ALIAS), certificate);
+        assertECKeyEntry(keyStore, password, now);
+    }
+
+    @Test
+    public void testAddECKeyEntryIfAbsent() throws Exception {
+
+        String password = "password";
+        String keyStoreName = "wso2-com.p12";
+        KeyStore keyStore = KeystoreUtils.getKeystoreInstance("PKCS12");
+        keyStore.load(null, password.toCharArray());
+        KeyStoreManager keyStoreManager = mock(KeyStoreManager.class);
+        when(keyStoreManager.getKeyStore(keyStoreName)).thenReturn(keyStore);
+        when(keyStoreManager.getPrivateKeyPassword(keyStoreName)).thenReturn(password.toCharArray());
+        long now = System.currentTimeMillis();
+
+        try (MockedStatic<KeyStoreManager> keyStoreManagerStatic = mockStatic(KeyStoreManager.class);
+             MockedStatic<KeystoreUtils> keystoreUtils = mockStatic(KeystoreUtils.class, CALLS_REAL_METHODS)) {
+            keyStoreManagerStatic.when(() -> KeyStoreManager.getInstance(TENANT_ID)).thenReturn(keyStoreManager);
+            keystoreUtils.when(() -> KeystoreUtils.getKeyStoreFileLocation(TENANT_DOMAIN)).thenReturn(keyStoreName);
+
+            assertTrue(TenantKeyPairUtil.addECKeyEntryIfAbsent(TENANT_ID, TENANT_DOMAIN),
+                    "EC key entry should be added when it is missing.");
+            assertECKeyEntry(keyStore, password, now);
+            verify(keyStoreManager, times(1)).updateKeyStore(keyStoreName, keyStore);
+
+            // The EC key entry already exists, so the keystore must not be changed again.
+            assertFalse(TenantKeyPairUtil.addECKeyEntryIfAbsent(TENANT_ID, TENANT_DOMAIN),
+                    "EC key entry should not be added when it already exists.");
+            verify(keyStoreManager, times(1)).updateKeyStore(keyStoreName, keyStore);
+        }
+    }
+
+    private void assertECKeyEntry(KeyStore keyStore, String password, long generatedAt) throws Exception {
+
+        X509Certificate certificate = (X509Certificate) keyStore.getCertificate(TENANT_EC_KEY_ALIAS);
+        ECPublicKey publicKey = (ECPublicKey) certificate.getPublicKey();
+        ECPrivateKey privateKey = (ECPrivateKey) keyStore.getKey(TENANT_EC_KEY_ALIAS, password.toCharArray());
+        assertEquals(publicKey.getParams().getCurve().getField().getFieldSize(), 256);
+        assertEquals(privateKey.getParams().getCurve(), publicKey.getParams().getCurve());
+        assertTrue("SHA256withECDSA".equalsIgnoreCase(certificate.getSigAlgName()),
+                "Expected SHA256withECDSA but was " + certificate.getSigAlgName());
+        assertSelfSignedCertificate(certificate, generatedAt);
     }
 
     private void assertSelfSignedCertificate(X509Certificate certificate, long generatedAt) throws Exception {
